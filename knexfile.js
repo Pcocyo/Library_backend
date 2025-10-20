@@ -1,0 +1,36 @@
+import Env from './dist/Config/config.js'
+
+const envInstance = Env.getInstance();
+const DB_URL = envInstance.getDB_URL();
+
+
+const common = {
+    client: 'pg',
+    migrations: {
+        directory: './db/migrations',
+    },
+    seeds: {
+        directory: './db/seeds'
+    }
+}
+
+export const development = {
+    ...common,
+    connection: {
+        host: DB_URL.host,
+        port: DB_URL.port,
+        database: DB_URL.name,
+        user: DB_URL.user,
+        password: DB_URL.password
+    }
+}
+export const test = {
+    ...common,
+    connection: {
+        host: DB_URL.host,
+        port: DB_URL.port,
+        database: DB_URL.name,
+        user: DB_URL.user,
+        password: DB_URL.password
+    }
+}

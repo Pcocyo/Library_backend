@@ -1,0 +1,39 @@
+import type { Request, Response, Application } from "express";
+import { DevApp } from "./App/DevApp.js";
+import Env from "../Config/config.js";
+import prisma from "../prismaClient.js";
+import { UserRouter } from "../Router/UserRouter.js";
+
+export class Server {
+    private app: Application;
+    private static instance: Server | null;
+    private envInstance: Env = Env.getInstance();
+    private userRouter = new UserRouter(prisma);
+
+    private constructor() {
+        this.app = DevApp.getInstance().getApp();
+        this.routes();
+    }
+
+    private routes(): void {
+        this.app.get("/", (req: Request, res: Response) => { res.json({ message: "success" }) });
+        this.app.use("/user", this.userRouter.getRouter());
+    }
+
+    public start(): void {
+        this.app.listen(this.envInstance.getPORT(), () => {
+            console.log(`listening on port ${this.envInstance.getPORT()}`);
+        });
+    }
+
+    public static getInstance(): Server {
+        if (!Server.instance) {
+            Server.instance = new Server();
+            return Server.instance;
+        }
+        else {
+            return Server.instance;
+        }
+    }
+}
+
