@@ -1,6 +1,7 @@
 import dotenv from 'dotenv';
-dotenv.config();
+import jwt from 'jsonwebtoken';
 
+dotenv.config();
 class Env {
     private PORT: Number;
     private JWTOKEN: String;
@@ -39,6 +40,10 @@ class Env {
     }
     public getJWTOKEN(): String {
         return this.JWTOKEN;
+    }
+    public generateJwtToken(): String {
+
+
     }
 }
 export default Env;

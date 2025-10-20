@@ -25,4 +25,13 @@ describe("Env Test", () => {
     it("should return jwttoken", () => {
         expect(instance.getJWTOKEN()).not.toBeNull();
     })
+
+    it("should generate jwt token when generateJwtToken() called", () => {
+        const user = {
+            email: "dummyUser@gmail.com",
+            role: "GUEST"
+        }
+        const jwtToken: String = instance.generateJwtToken(user);
+        expect(jwtToken).not.toBe(null);
+    })
 })
