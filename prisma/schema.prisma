@@ -1,0 +1,28 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model knex_migrations {
+  id             Int       @id @default(autoincrement())
+  name           String?   @db.VarChar(255)
+  batch          Int?
+  migration_time DateTime? @db.Timestamptz(6)
+}
+
+model knex_migrations_lock {
+  index     Int  @id @default(autoincrement())
+  is_locked Int?
+}
+
+model users {
+  user_id    String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  email      String   @unique(map: "users_email_unique") @db.VarChar(255)
+  password   String   @db.VarChar(255)
+  role       String   @default("GUEST") @db.VarChar(255)
+  created_at DateTime @default(dbgenerated("CURRENT_TIMESTAMP(6)")) @db.Timestamptz(6)
+}
