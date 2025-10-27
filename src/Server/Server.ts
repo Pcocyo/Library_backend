@@ -1,14 +1,13 @@
 import type { Request, Response, Application } from "express";
 import { DevApp } from "./App/DevApp.js";
 import Env from "../Config/config.js";
-import prisma from "../prismaClient.js";
 import { UserRouter } from "../Router/UserRouter.js";
 
 export class Server {
     private app: Application;
     private static instance: Server | null;
     private envInstance: Env = Env.getInstance();
-    private userRouter = new UserRouter(prisma);
+    private userRouter = new UserRouter();
 
     private constructor() {
         this.app = DevApp.getInstance().getApp();

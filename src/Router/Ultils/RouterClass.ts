@@ -1,11 +1,12 @@
 import type { PrismaClient } from "@prisma/client/extension";
 import { Router } from "express";
+import prisma from "../../prismaClient.js";
 
 export abstract class RouterClass {
     protected router: Router;
     protected prisma: PrismaClient;
 
-    public constructor(prisma: PrismaClient) {
+    public constructor() {
         this.prisma = prisma;
         this.router = Router();
     }
@@ -13,5 +14,4 @@ export abstract class RouterClass {
         return this.router;
     }
     protected abstract initializeRoutes(): void;
-
 }

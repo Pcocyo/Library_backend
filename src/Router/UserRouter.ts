@@ -1,16 +1,14 @@
 import { RouterClass } from "./Ultils/RouterClass.js";
-import { PrismaClient } from "@prisma/client/extension";
 import type { Request, Response } from "express";
 
-
 export class UserRouter extends RouterClass {
-    public constructor(prisma: PrismaClient) {
-        super(prisma);
-        this.initializeRoutes();
+
+    public constructor() {
+      super();
+      this.initializeRoutes();
     }
 
     protected initializeRoutes() {
-        this.router.get('/', (req: Request, res: Response) => { res.json({ message: "userRouter" }) });
         this.router.post('/create', (req: Request, res: Response) => this.createUser(req, res));
     }
 

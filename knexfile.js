@@ -19,7 +19,7 @@ export const development = {
     connection: {
         host: DB_URL.host,
         port: DB_URL.port,
-        database: DB_URL.name,
+        database: DB_URL.databaseName,
         user: DB_URL.user,
         password: DB_URL.password
     }
@@ -29,7 +29,7 @@ export const test = {
     connection: {
         host: DB_URL.host,
         port: DB_URL.port,
-        database: DB_URL.name,
+        database: DB_URL.databaseName,
         user: DB_URL.user,
         password: DB_URL.password
     }
