@@ -1,6 +1,7 @@
 import { Server } from "../../dist/Server/Server"
 import request from 'supertest';
 import { UserRouter } from "../../dist/Router/UserRouter"
+
 describe("Server class test", () => {
     let instance: Server;
     let app: any;
