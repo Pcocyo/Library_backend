@@ -1,14 +1,21 @@
 import dotenv from "dotenv";
 import jwt from "jsonwebtoken";
+import bcrypt from "bcrypt";
+import { hashSync } from "bcrypt";
+
 import User, { UserRole } from "../../src/Controller/User/User.ts";
 import type { UserJwtPayloadInterface } from "./config.interface.ts";
 
 dotenv.config();
+
 class Env {
     private PORT: Number;
     private JWT_SECRET: string;
     private DB_URL;
     private static instance: Env | null = null;
+    private static __Bcrypt_Config = {
+        salt: 10,
+    };
 
     private constructor() {
         this.PORT = parseInt(process.env.Port || "3000");
@@ -59,6 +66,22 @@ class Env {
             this.JWT_SECRET,
         ) as UserJwtPayloadInterface;
         return userPayload;
+    }
+
+    // bcrypt logic
+
+    public async getGenerateBcrypt(strPassword: string): Promise<string> {
+       const bcryptStr :string = await bcrypt.hash(strPassword, Env.__Bcrypt_Config.salt)
+       return bcryptStr
+    }
+
+    public async getValidatePassword(
+        strPassword: string,
+        hashPassword: string,
+    ): Promise<boolean> {
+
+        const isValid :boolean = await bcrypt.compare(strPassword,hashPassword)
+        return isValid
     }
 }
 export default Env;
