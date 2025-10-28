@@ -1,6 +1,6 @@
 import type { PrismaClient } from "@prisma/client/extension";
 import { Router } from "express";
-import prisma from "../../prismaClient.js";
+import prisma from "../../prismaClient.ts";
 
 export abstract class RouterClass {
     protected router: Router;

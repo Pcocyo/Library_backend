@@ -1,12 +1,11 @@
 import type { Request, Response, Application } from "express";
 import { DevApp } from "./App/DevApp.js";
-import Env from "../Config/config.js";
-import { UserRouter } from "../Router/UserRouter.js";
+import Env from "../Config/config.ts";
+import { UserRouter } from "../Router/UserRouter.ts";
 
 export class Server {
     private app: Application;
     private static instance: Server | null;
-    private envInstance: Env = Env.getInstance();
     private userRouter = new UserRouter();
 
     private constructor() {
@@ -20,8 +19,8 @@ export class Server {
     }
 
     public start(): void {
-        this.app.listen(this.envInstance.getPORT(), () => {
-            console.log(`listening on port ${this.envInstance.getPORT()}`);
+        this.app.listen(Env.getPORT(), () => {
+            console.log(`listening on port ${Env.getPORT()}`);
         });
     }
 

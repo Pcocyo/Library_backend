@@ -1,8 +1,5 @@
 import Env from './dist/Config/config.js'
-
-const envInstance = Env.getInstance();
-const DB_URL = envInstance.getDB_URL();
-
+const DB_URL = Env.getDB_URL();
 
 const common = {
     client: 'pg',

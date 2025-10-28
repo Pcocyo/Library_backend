@@ -1,4 +1,4 @@
-import { RouterClass } from "./Ultils/RouterClass.js";
+import { RouterClass } from "./Ultils/RouterClass.ts";
 import type { Request, Response } from "express";
 
 export class UserRouter extends RouterClass {
