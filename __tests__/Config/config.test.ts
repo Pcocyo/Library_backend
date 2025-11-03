@@ -1,15 +1,12 @@
 import Env from "../../src/Config/config";
-
 import User from "../../src/Controller/User/User";
 import { UserRole } from "../../src/Controller/User/User";
-
 import type { UserJwtPayloadInterface } from "../../src/Config/config.interface";
 
 import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
 
 describe("Env Test", () => {
-
     afterAll(() => {
         (Env as any).instance = null;
     });
@@ -20,9 +17,7 @@ describe("Env Test", () => {
 
     it("should return db url", () => {
         let field = ["host", "port", "user", "password", "name"];
-        field.forEach((key) =>
-            expect(Env.getDB_URL()[key]).not.toBeNull(),
-        );
+        field.forEach((key) => expect(Env.getDB_URL()[key]).not.toBeNull());
     });
 
     //jwttoken not yet configured
@@ -31,16 +26,19 @@ describe("Env Test", () => {
     });
 
     it("should generate jwt token when generateJwtToken() called", () => {
-        const dummyEmail = "dummyEmai";
+        const dummyId = "dummyId";
+        const dummyEmail = "dummyEmail";
         const dummyPassword = "dummyPassword";
-        const dummyRole = UserRole.GUEST;
+        const dummyRole = "GUEST";
         const dummyDate = new Date();
-        const dummyUser: User = new User(
+        const dummyUser: User = User.tests__createTestUser(
+            dummyId,
             dummyEmail,
             dummyPassword,
-            dummyRole,
+            UserRole[dummyRole as keyof typeof UserRole],
             dummyDate,
         );
+
         const jwtToken: string = Env.getGenerateJwtToken(dummyUser);
         const decode = jwt.verify(
             jwtToken,
@@ -65,16 +63,16 @@ describe("Env Test", () => {
     });
 
     // Bcrypt test
-    
-    it("Should generate Bcrypt string correctly",async ()=>{
+
+    it("Should generate Bcrypt string correctly", async () => {
         const dummyPassword = "dummyPassword";
         const bcryprStr = await Env.getGenerateBcrypt(dummyPassword);
-        expect(bcrypt.compare(dummyPassword,bcryprStr)).toBeTruthy();
-    })
+        expect(bcrypt.compare(dummyPassword, bcryprStr)).toBeTruthy();
+    });
 
-    it("Should generate Bcrypt string correctly",async ()=>{ 
+    it("Should generate Bcrypt string correctly", async () => {
         const dummyPassword = "dummyPassword";
-        const bcryprStr = await bcrypt.hash(dummyPassword,10);
-        expect(Env.getValidatePassword(dummyPassword,bcryprStr)).toBeTruthy();
-    })
+        const bcryprStr = await bcrypt.hash(dummyPassword, 10);
+        expect(Env.getValidatePassword(dummyPassword, bcryprStr)).toBeTruthy();
+    });
 });

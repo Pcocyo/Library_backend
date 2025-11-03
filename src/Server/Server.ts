@@ -1,5 +1,5 @@
 import type { Request, Response, Application } from "express";
-import { DevApp } from "./App/DevApp.js";
+import { DevApp } from "./App/DevApp.ts";
 import Env from "../Config/config.ts";
 import { UserRouter } from "../Router/UserRouter.ts";
 
