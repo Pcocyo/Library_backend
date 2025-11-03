@@ -1,48 +1,219 @@
-import User from "../../../src/Controller/User/User";
+import User from "../../../src/Controller/User/User.ts";
 import { UserRole } from "../../../src/Controller/User/User";
+import prisma from "../../../src/prismaClient";
+import { Prisma } from "@prisma/client";
+import { resolve } from "path";
 
-describe("User class test",()=>{
-    const dummyEmail:string = "dummyEmail";
-    const dummyPassword:string = "dummyPassword";
-    const dummyRole:UserRole = UserRole.GUEST;
-    const dummyDate:Date = new Date();
-    let dummyUser:User;
+describe("User class test", () => {
+    const dummyId = "dummyId";
+    const dummyEmail: string = "dummyEmail";
+    const dummyPassword: string = "dummyPassword";
+    const dummyRole: UserRole = UserRole.GUEST;
+    const dummyDate: Date = new Date();
+    let dummyUser: User;
 
-    beforeEach(()=>{
-       dummyUser  = new User(dummyEmail,dummyPassword,dummyRole,dummyDate);
-    })
+    beforeEach(() => {
+        dummyUser = User.tests__createTestUser(
+            dummyId,
+            dummyEmail,
+            dummyPassword,
+            dummyRole,
+            dummyDate,
+        );
+    });
 
-    it("Generate correct user email",()=>{
+    it("Generate correct user email", () => {
         expect(dummyUser.getEmail()).toBe(dummyEmail);
-    })
+    });
 
-    it("Generate correct user password",()=>{
+    it("Generate correct user password", () => {
         expect(dummyUser.getPassword()).toBe(dummyPassword);
-    })
-    
-    it("Generate correct user role",()=>{
+    });
+
+    it("Generate correct user role", () => {
         expect(dummyUser.getUserRole()).toBe(dummyRole);
-    })
+    });
 
-    it("Generate correct user data data",()=>{
+    it("Generate correct user data data", () => {
         expect(dummyUser.getCreatedAt()).toBe(dummyDate);
-    })
+    });
 
-    it("set correct user data email",()=>{
-        const newEmail:string = "newDummyEmail";
-        dummyUser.setEmail(newEmail);
-        expect(dummyUser.getEmail()).toBe(newEmail);
-    })
-    
-    it("set correct user data password",()=>{
-        const newPassword:string = "newDummyPassword";
-        dummyUser.setPassword(newPassword);
-        expect(dummyUser.getPassword()).toBe(newPassword);
-    })
+});
 
-    it("set correct user data role",()=>{
-        const newRole:UserRole = UserRole.MEMBER;
-        dummyUser.setRole(newRole);
-        expect(dummyUser.getUserRole()).toBe(newRole);
-    })
-})
+describe("database test suite", () => {
+    const dummyEmail = "dummyEmail";
+    const dummyPassword = "dummyPassword";
+    const dummyRole = null;
+    let newUser: User;
+    let dummyDbUser: User;
+
+    beforeEach(async () => {
+        try {
+            dummyDbUser = await User.tests__createDbTestUser({
+                email: dummyEmail,
+                password: dummyPassword,
+                role: dummyRole,
+            });
+        } catch (error) {
+            await prisma.users.delete({
+                where: {
+                    user_id: dummyDbUser.getId(),
+                },
+            });
+            console.log(error);
+            throw error;
+        }
+    });
+
+    afterEach(async () => {
+        try {
+            await prisma.users.delete({
+                where: {
+                    user_id: dummyDbUser.getId(),
+                },
+            });
+        } catch (error) {
+            console.log(error);
+            throw error;
+        }
+    });
+    it("creates a user in DB with email, password, role, ID, and creation date", async () => {
+        try {
+            newUser = await User.createNewUser({
+                email: "dummyEmail2",
+                password: dummyPassword,
+                role: dummyRole,
+            });
+
+            let dbUser = prisma.users.findUnique({
+                where: {
+                    email: "dummyEmail2",
+                },
+            });
+            expect(dbUser).not.toBeNull();
+            expect(newUser.getEmail()).toEqual("dummyEmail2");
+            expect(newUser.getId()).not.toBeNull();
+            expect(newUser.getPassword()).toEqual(dummyPassword);
+            expect(newUser.getUserRole()).toEqual(UserRole.GUEST);
+            expect(newUser.getCreatedAt()).not.toBeNull();
+
+            await prisma.users.delete({
+                where: {
+                    email: "dummyEmail2",
+                },
+            });
+        } catch (e) {
+            await prisma.users.delete({
+                where: {
+                    email: "dummyEmail2",
+                },
+            });
+            console.log(e);
+            throw e;
+        }
+    });
+
+    it("Throw an error when duplicate user input existed", async () => {
+        let errorUser: User;
+        try {
+
+            expect(async()=>{
+            errorUser = await User.createNewUser({
+                email: dummyDbUser.getEmail(),
+                password: dummyDbUser.getPassword(),
+                role: dummyDbUser.getUserRole(),
+                });
+            }).rejects.toThrow()
+
+        } catch (error) {
+            expect(
+                error instanceof Prisma.PrismaClientKnownRequestError,
+            ).toBeTruthy();
+        }
+    });
+
+    it("Return a User domain model when getUserEmail() function called", async () => {
+        try {
+            let userGot: User = await User.getUserByEmail({
+                email: dummyDbUser.getEmail(),
+            });
+            expect(userGot).not.toBeNull();
+            expect(userGot).toBeInstanceOf(User);
+        } catch (error) {
+            console.log(error);
+        }
+    });
+
+    it("Return an error when getUserEmail() not found a user", async () => {
+        let userGot: User;
+        try {
+            expect(async ()=>{
+                userGot = await User.getUserByEmail({
+                    email: "invalidEmail",
+                });
+                expect(userGot).toBeNull();
+            }).rejects.toThrow();
+        } catch (error) {
+            console.log(error);
+        }
+    });
+
+    it("Delete a user when deleteUser() method called", async () => {
+        try{
+            let newDummyUser = await prisma.users.create({data:{
+                email:"dummyUser2",
+                password: "dummyUserPassword",
+            }})
+            expect(
+                User.deleteUser({id:newDummyUser.user_id,email:newDummyUser.email})
+            ).resolves.not.toThrow();
+        }catch(error){
+            console.log(error);
+        }
+    });
+
+    it("Throw error when deleteUser() method called with invalid data", async () => {
+        try{
+             expect(
+                await User.deleteUser({id:"Unexist id",email:"Unexist email"})
+            ).resolves.toThrow();
+        }catch(error){
+        }
+    });
+
+    it("Update user email when setUser() object method called",async () => {
+        const newDummyUserEmail:string ="newDummyUserEmail"
+        try{
+            //expect to work
+            await dummyDbUser.setEmail(newDummyUserEmail)
+            expect(dummyDbUser.getEmail()).toEqual(newDummyUserEmail)
+            await expect(dummyDbUser.setEmail("changeUserEmail")).resolves.not.toThrow()
+        }catch(error){
+            console.log(error);
+        }
+    });
+
+    it("Update user role when setRole() object instance method called",async () => {
+        const newUserRole:UserRole = UserRole.MEMBER
+        try{
+            //expect to work
+            await dummyDbUser.setRole(newUserRole)
+            expect(dummyDbUser.getUserRole()).toEqual(newUserRole);
+            await expect(dummyDbUser.setRole(UserRole.LIBRARIAN)).resolves.not.toThrow()
+        }catch(error){
+            console.log(error);
+        }
+    });
+
+    it("Update user password when setRole() object instance method called",async () => {
+        const newDummyPassword:string = "newDummyPassword"
+        try{
+            //expect to work
+            await dummyDbUser.setPassword(newDummyPassword)
+            expect(dummyDbUser.getPassword()).toEqual(newDummyPassword);
+            await expect(dummyDbUser.setPassword("newDummyPassword2")).resolves.not.toThrow()
+        }catch(error){
+            console.log(error);
+        }
+    });
+});

@@ -1,7 +1,8 @@
 import { RouterClass } from "./Ultils/RouterClass.ts";
 import type { Request, Response } from "express";
-
+import User from "../Controller/User/User.ts";
 export class UserRouter extends RouterClass {
+
     public constructor() {
         super();
         this.initializeRoutes();
@@ -18,14 +19,9 @@ export class UserRouter extends RouterClass {
 
     private async createUser(req: Request, res: Response) {
         const { email, password } = req.body;
+        User.createNewUser({email:email,password:password})
         try {
-            const newUser = await this.prisma.users.create({
-                data: {
-                    email: email,
-                    password: password,
-                },
-            });
-            res.status(200).json(newUser);
+            res.json({email,password,message:"Holder"})
         } catch (err: any) {
             res.status(400).json(err.message);
         }

@@ -4,7 +4,7 @@ import bcrypt from "bcrypt";
 import User from "../Controller/User/User.ts";
 import type { UserJwtPayloadInterface } from "./config.interface.ts";
 
-dotenv.config();
+dotenv.config({quiet:true});
 
 class Env {
     private static PORT: Number = parseInt(process.env.Port || "3000");;
