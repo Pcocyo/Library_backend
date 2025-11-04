@@ -38,7 +38,6 @@ describe("Env Test", () => {
             UserRole[dummyRole as keyof typeof UserRole],
             dummyDate,
         );
-
         const jwtToken: string = Env.getGenerateJwtToken(dummyUser);
         const decode = jwt.verify(
             jwtToken,
@@ -47,19 +46,25 @@ describe("Env Test", () => {
         expect(jwtToken).not.toBe(null);
         expect(decode.userEmail).toBe(dummyEmail);
         expect(decode.userRole).toBe(dummyRole);
+        expect(decode).toHaveProperty("userId");
+        expect(decode.userId).not.toBeNull();
     });
 
     it("should validate jwt correctly", () => {
         const dummyEmail = "dummyEmai";
         const dummyRole = UserRole.GUEST;
+        const dummyId = "dummyId";
         const dummyUserSign: UserJwtPayloadInterface = {
             userEmail: dummyEmail,
             userRole: dummyRole,
+            userId: dummyId,
         };
         const jwtToken: string = jwt.sign(dummyUserSign, Env.getJWTOKEN());
         const jwtDecode = Env.getValidateToken(jwtToken);
         expect(jwtDecode.userEmail).toBe(dummyEmail);
         expect(jwtDecode.userRole).toBe(dummyRole);
+        expect(jwtDecode).toHaveProperty("userId");
+        expect(jwtDecode.userId).not.toBeNull();
     });
 
     // Bcrypt test

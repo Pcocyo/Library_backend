@@ -1,4 +1,5 @@
 import { UserRole } from "./User.ts"
+
 export interface UserRegisterInterface {
     email:string,
     password: string,

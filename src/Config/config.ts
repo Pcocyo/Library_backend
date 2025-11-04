@@ -35,7 +35,7 @@ class Env {
 
     public static getGenerateJwtToken(user: User): string {
         const newToken = jwt.sign(
-            { userEmail: user.getEmail(), userRole: user.getUserRole() },
+            { userEmail: user.getEmail(), userRole: user.getUserRole() ,userId: user.getId()},
             Env.JWT_SECRET,
             { expiresIn: "1h" },
         );
