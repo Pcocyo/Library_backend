@@ -56,41 +56,51 @@ export default class User {
     }
 
     // set basic user data
-    public async setEmail(newEmail: string) {
-        try{
+    public async setEmail(newEmail: string | null) {
+      if(newEmail){
+         try{
             await prisma.users.update({
                where:{user_id:this.userId},
                data:{email:newEmail},
             })
-        }catch(error){
-           throw error; 
-        }
+         }catch(error){
+            throw error; 
+         }
 
-        this.email = newEmail;
+         this.email = newEmail;
+      }
+      return;
+
     }
 
-    public async setPassword(newPassword:string) {
-        try{
+    public async setPassword(newPassword:string | null) {
+      if(newPassword){
+         try{
             await prisma.users.update({
                where:{user_id:this.userId},
                data:{password:newPassword},
             })
-        }catch(error){
-           throw error; 
-        }
-        this.password = newPassword;
+         }catch(error){
+            throw error; 
+         }
+         this.password = newPassword;
+      }
+      return
     }
 
-    public async setRole(newRole: UserRole) {
-        try {
-           await prisma.users.update({
-                where:{user_id:this.userId},
-                data:{role:String(newRole)}
+    public async setRole(newRole: UserRole | null) {
+      if (newRole != null){
+         try {
+            await prisma.users.update({
+               where:{user_id:this.userId},
+               data:{role:String(newRole)}
             }) 
-        } catch (error) {
-           throw(error);
-        }
-        this.role = newRole;
+         } catch (error) {
+            throw(error);
+         }
+         this.role = newRole;
+      }
+      return
     }
 
     public static async createNewUser(

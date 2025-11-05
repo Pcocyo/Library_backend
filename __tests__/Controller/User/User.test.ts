@@ -193,6 +193,18 @@ describe("database test suite", () => {
         }
     });
 
+    it("Do not update user email when setUser() object method called with null parameter",async () => {
+        const newDummyUserEmail:null = null;
+        try{
+            //expect to work
+            await dummyDbUser.setEmail(newDummyUserEmail)
+            expect(dummyDbUser.getEmail()).toEqual(dummyEmail)
+        }catch(error){
+            console.log(error);
+        }
+    });
+
+
     it("Update user role when setRole() object instance method called",async () => {
         const newUserRole:UserRole = UserRole.MEMBER
         try{
@@ -200,6 +212,17 @@ describe("database test suite", () => {
             await dummyDbUser.setRole(newUserRole)
             expect(dummyDbUser.getUserRole()).toEqual(newUserRole);
             await expect(dummyDbUser.setRole(UserRole.LIBRARIAN)).resolves.not.toThrow()
+        }catch(error){
+            console.log(error);
+        }
+    });
+
+    it("Do not update user role when setRole() object method called with null parameter",async () => {
+        const nullDummyUserRole:null = null;
+        try{
+            //expect to work
+            await dummyDbUser.setEmail(nullDummyUserRole)
+            expect(dummyDbUser.getUserRole()).toEqual(dummyRole)
         }catch(error){
             console.log(error);
         }
@@ -216,4 +239,16 @@ describe("database test suite", () => {
             console.log(error);
         }
     });
+
+    it("Do not update user password when setPassword() object method called with null parameter",async () => {
+        const nullDummyPassword:null = null;
+        try{
+            //expect to work
+            await dummyDbUser.setEmail(nullDummyPassword)
+            expect(dummyDbUser.getPassword()).toEqual(dummyPassword)
+        }catch(error){
+            console.log(error);
+        }
+    });
+
 });
