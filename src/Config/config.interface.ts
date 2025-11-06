@@ -1,4 +1,4 @@
-import { UserRole } from "../Controller/User/User.ts";
+import { UserRole } from "../Controller/User/User.js";
 import type { JwtPayload } from "jsonwebtoken";
 
 export interface UserJwtPayloadInterface extends JwtPayload {

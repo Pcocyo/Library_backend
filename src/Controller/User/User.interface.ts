@@ -1,4 +1,4 @@
-import { UserRole } from "./User.ts"
+import { UserRole } from "./User.js"
 
 export interface UserRegisterInterface {
     email:string,

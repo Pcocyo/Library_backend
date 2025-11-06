@@ -1,7 +1,8 @@
-import { RouterClass } from "./Ultils/RouterClass.ts";
+import { RouterClass } from "./Ultils/RouterClass.js";
 import type { Request, Response } from "express";
-import User from "../Controller/User/User.ts";
-import Env from "../Config/config.ts";
+import User, { UserRole } from "../Controller/User/User.js";
+import Env from "../Config/config.js";
+
 export class UserRouter extends RouterClass {
     public constructor() {
         super();
@@ -12,10 +13,51 @@ export class UserRouter extends RouterClass {
         this.router.get("/", (req: Request, res: Response) => {
             res.json({ message: "userRouter" });
         });
+
         this.router.post("/create", (req: Request, res: Response) =>
             this.createUser(req, res),
         );
+
+        this.router.get("/getUser", (req: Request, res: Response) => {
+            this.getUser(req, res);
+        });
+
+        this.router.post("/login", (req: Request, res: Response) => {
+            this.login(req, res);
+        });
+
+        this.router.delete("/delete", (req: Request, res: Response) => {
+            this.deleteUser(req, res);
+        });
+
+        this.router.put("/update", (req: Request, res: Response) => {
+            this.updateUser(req, res);
+        });
     }
+    private async updateUser(req:Request,res:Response){
+      try{
+         const {requestToken, updateData} = req.body;
+         
+         const userToken = Env.getValidateToken(requestToken);
+         const userInstance = await User.getUserByEmail({email: userToken.userEmail});
+         if(updateData.email) this.validateEmail(updateData.email);
+         if(updateData.password) this.validatePassword(updateData.password);
+         if(updateData.role){
+            if(!UserRole[updateData.role as keyof typeof UserRole]){
+               throw new Error("Role inserted was invalid");
+            }
+         }
+         await userInstance.setEmail(updateData.email)
+         await userInstance.setPassword(updateData.password)
+         await userInstance.setRole(updateData.role)
+         let newToken = Env.getGenerateJwtToken(userInstance);
+         res.send({token: newToken});
+      }catch(err: any){
+         res.status(400).send({
+            error:err.message
+         });
+      }
+   }
 
     private async createUser(req: Request, res: Response) {
         try {
@@ -23,19 +65,76 @@ export class UserRouter extends RouterClass {
             this.validateEmail(email);
             this.validatePassword(password);
             let cryptedPass: string = await Env.getGenerateBcrypt(password);
-            let user = await User.createNewUser({
-            email: String(email),
-            password: String(cryptedPass),
-            role: null,
-        });
-            const jwtToken = Env.getGenerateJwtToken(user);
-            res.json(
-                {
-                    token : jwtToken 
-                }
-            );
+            let user: User = await User.createNewUser({
+                email: String(email),
+                password: String(cryptedPass),
+                role: null,
+            });
+            const token = Env.getGenerateJwtToken(user);
+            res.json({
+                token: token,
+            });
         } catch (err: any) {
-            res.status(400).json(err.message);
+            res.status(400).json({
+                error: err.message,
+            });
+        }
+    }
+
+    private async login(req: Request, res: Response) {
+        try {
+            const { email, password } = req.body;
+            this.validateEmail(email);
+            this.validatePassword(password);
+            const user = await User.getUserByEmail({ email: email });
+            const correctPassword = await Env.getValidatePassword(
+                password,
+                user.getPassword(),
+            );
+
+            if (!correctPassword) {
+                throw new Error("Incorrect password");
+            }
+            const token = Env.getGenerateJwtToken(user);
+            res.send({
+                token: token,
+            });
+        } catch (err: any) {
+            res.status(400).send({ error: err.message });
+        }
+    }
+    private async getUser(req: Request, res: Response) {
+        try {
+            const { email, requestToken } = req.body;
+            if (!requestToken) {
+                throw new Error("invalid request (token not included)");
+            }
+            this.validateEmail(email);
+            Env.getValidateToken(requestToken);
+            const user: User = await User.getUserByEmail({ email: email });
+            res.send({ token: Env.getGenerateJwtToken(user) });
+        } catch (err: any) {
+            res.status(400).send({
+                error: err.message,
+            });
+        }
+    }
+
+    private async deleteUser(req: Request, res: Response) {
+        try {
+            const { requestToken } = req.body;
+            if (!requestToken) {
+                throw new Error("invalid request (token not included)");
+            }
+            const user = Env.getValidateToken(requestToken);
+            await User.deleteUser({ id: user.userId, email: user.userEmail });
+            res.send({
+                message: `User ${user.userEmail} deleted`,
+            });
+        } catch (err: any) {
+            res.status(400).send({
+                error: err.message,
+            });
         }
     }
 
@@ -50,9 +149,11 @@ export class UserRouter extends RouterClass {
 
     private validatePassword(passwordToTest: string): Error | null {
         const passwordRegx: RegExp =
-            /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]).{8,32}$/
+            /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]).{8,32}$/;
         if (!passwordRegx.test(passwordToTest)) {
-            throw new Error("Invalid password, password must contain at least 1 special characther, capital letter, number, and in between 8-32 words");
+            throw new Error(
+                "Invalid password, password must contain at least 1 special characther, capital letter, number, and in between 8-32 words",
+            );
         }
         return null;
     }

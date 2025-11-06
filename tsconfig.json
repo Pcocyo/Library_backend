@@ -12,8 +12,8 @@
     "declaration": true,
     "sourceMap": true,
     "skipLibCheck": true,
-    "allowImportingTsExtensions":true,
-    "noEmit":true,
+//   "allowImportingTsExtensions":true,
+//    "noEmit":true,
 
   },
   "include": ["src/**/*.ts"],

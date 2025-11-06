@@ -1,8 +1,21 @@
+
 {
-    "extends":"./tsconfig.json",
+    "extends": "./tsconfig.json",
     "compilerOptions": {
-        "noEmit":true,
-        "allowImportingTsExtensions": true
+        "noEmit": true,
+        "allowImportingTsExtensions": true,
+        "types": ["jest", "node"],
+        "module": "ESNext", // or "ES2022", "ES2020"
+        "moduleResolution": "node",
+        "allowImportingTsExtensions":true,
+       "noEmit":true,
+        "esModuleInterop": true,
+        "allowSyntheticDefaultImports": true
     },
-    "include": ["src/**/*.ts","__types_/**/*.ts"]
+
+    "include": [
+        "src/**/*.ts",
+        "__types_/**/*.ts",
+        "**/*.test.ts"
+    ]
 }

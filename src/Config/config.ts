@@ -1,8 +1,8 @@
 import dotenv from "dotenv";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
-import User from "../Controller/User/User.ts";
-import type { UserJwtPayloadInterface } from "./config.interface.ts";
+import User from "../Controller/User/User.js";
+import type { UserJwtPayloadInterface } from "./config.interface.js";
 
 dotenv.config({quiet:true});
 
@@ -42,7 +42,7 @@ class Env {
         return newToken;
     }
 
-    public static getValidateToken(jwtToken: string): UserJwtPayloadInterface {
+    public static getValidateToken(jwtToken: string): UserJwtPayloadInterface{
         const userPayload: UserJwtPayloadInterface = jwt.verify(
             jwtToken,
             Env.JWT_SECRET,

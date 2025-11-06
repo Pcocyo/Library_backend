@@ -222,7 +222,7 @@ describe("database test suite", () => {
         try{
             //expect to work
             await dummyDbUser.setEmail(nullDummyUserRole)
-            expect(dummyDbUser.getUserRole()).toEqual(dummyRole)
+            expect(dummyDbUser.getUserRole()).toEqual(UserRole.GUEST);
         }catch(error){
             console.log(error);
         }

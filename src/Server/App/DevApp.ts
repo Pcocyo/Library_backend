@@ -1,5 +1,5 @@
 import type { Application } from "express";
-import { App } from "./AppInterface.ts";
+import { App } from "./AppInterface.js";
 import express from 'express';
 import helmet from "helmet";
 import cors from "cors";
