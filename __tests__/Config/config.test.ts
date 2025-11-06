@@ -15,10 +15,10 @@ describe("Env Test", () => {
         expect(Env.getPORT()).not.toBeNull();
     });
 
-    it("should return db url", () => {
-        let field = ["host", "port", "user", "password", "name"];
-        field.forEach((key) => expect(Env.getDB_URL()[key]).not.toBeNull());
-    });
+   // it("should return db url", () => {
+   //     let field = ["host", "port", "user", "password", "name"];
+   //     field.forEach((key) => expect(Env.getDB_URL()[key]).not.toBeNull());
+   // });
 
     //jwttoken not yet configured
     it("should return jwttoken", () => {

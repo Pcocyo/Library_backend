@@ -3,13 +3,13 @@
   "name": "library_backend",
   "version": "1.0.0",
   "description": "A libray/ book rental system",
-  "type": "module",
+  "type": "commonjs",
   "main": "index.js",
   "scripts": {
-    "test": "NODE_NO_WARNINGS=1 node --experimental-vm-modules node_modules/.bin/jest",
+    "test": "NODE_NO_WARNINGS=1 jest",
     "start": "node dist/index.js",
     "dev": "concurrently \"tsc -w\" \"nodemon dist/index.js\"",
-    "build": "tsc -p tsconfig.build.json && tsc-alias -p tsconfig.build.json",
+    "build": "tsc -p tsconfig.json && tsc-alias -p tsconfig.json",
     "migrate": "knex migrate:latest",
     "prismaSync": "npx prisma db pull && npx prisma generate"
   },

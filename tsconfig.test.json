@@ -2,15 +2,11 @@
 {
     "extends": "./tsconfig.json",
     "compilerOptions": {
-        "noEmit": true,
-        "allowImportingTsExtensions": true,
-        "types": ["jest", "node"],
-        "module": "ESNext", // or "ES2022", "ES2020"
-        "moduleResolution": "node",
-        "allowImportingTsExtensions":true,
-       "noEmit":true,
-        "esModuleInterop": true,
-        "allowSyntheticDefaultImports": true
+      "noEmit": true,
+      "module": "commonJs",
+      "moduleResolution":"node",
+      "types": ["jest","node"],
+      "allowImportingTsExtensions":true
     },
 
     "include": [

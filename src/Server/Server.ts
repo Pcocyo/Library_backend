@@ -1,7 +1,7 @@
 import type { Request, Response, Application } from "express";
-import { DevApp } from "./App/DevApp.js";
-import Env from "../Config/config.js";
-import { UserRouter } from "../Router/UserRouter.js";
+import { DevApp } from "./App/DevApp";
+import Env from "../Config/config";
+import { UserRouter } from "../Router/UserRouter";
 
 export class Server {
     private app: Application;

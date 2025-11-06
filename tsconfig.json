@@ -2,19 +2,13 @@
   // Visit https://aka.ms/tsconfig to read more about this file
   "compilerOptions": {
     "outDir": "dist",
-    "rootDir": "src",
-    "module": "nodeNext",
-    "moduleResolution": "nodeNext",
-    "isolatedModules":true,
+    "rootDir": "src", 
+    "module": "CommonJS",
+    "moduleResolution": "node",
     "target": "es2022",
     "esModuleInterop": true,
     "strict": true,
-    "declaration": true,
-    "sourceMap": true,
-    "skipLibCheck": true,
-//   "allowImportingTsExtensions":true,
-//    "noEmit":true,
-
+    "skipLibCheck": true
   },
   "include": ["src/**/*.ts"],
 }

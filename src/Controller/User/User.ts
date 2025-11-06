@@ -1,11 +1,11 @@
 import { throws } from "assert";
-import prisma from "../../prismaClient.js";
+import prisma from "../../prismaClient";
 import type {
     UserRegisterInterface,
     UserGetEmailInterface,
     UserDomainInterface,
     UserDeleteInterface,
-} from "./User.interface.js";
+} from "./User.interface";
 import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
 
 export enum UserRole {

@@ -1,8 +1,8 @@
 import dotenv from "dotenv";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
-import User from "../Controller/User/User.js";
-import type { UserJwtPayloadInterface } from "./config.interface.js";
+import User from "../Controller/User/User";
+import type { UserJwtPayloadInterface } from "./config.interface";
 
 dotenv.config({quiet:true});
 

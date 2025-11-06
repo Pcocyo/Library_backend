@@ -1,7 +1,7 @@
-import { RouterClass } from "./Ultils/RouterClass.js";
+import { RouterClass } from "./Ultils/RouterClass";
 import type { Request, Response } from "express";
-import User, { UserRole } from "../Controller/User/User.js";
-import Env from "../Config/config.js";
+import User, { UserRole } from "../Controller/User/User";
+import Env from "../Config/config";
 
 export class UserRouter extends RouterClass {
     public constructor() {
