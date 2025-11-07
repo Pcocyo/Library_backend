@@ -1,7 +1,8 @@
 import { RouterClass } from "./Ultils/RouterClass";
-import type { Request, Response } from "express";
+import type { NextFunction, Request, Response } from "express";
 import User, { UserRole } from "../Controller/User/User";
 import Env from "../Config/config";
+import { throws } from "assert";
 
 export class UserRouter extends RouterClass {
     public constructor() {
@@ -18,46 +19,61 @@ export class UserRouter extends RouterClass {
             this.createUser(req, res),
         );
 
-        this.router.get("/getUser", (req: Request, res: Response) => {
-            this.getUser(req, res);
-        });
+        this.router.get(
+            "/getUser",
+            this.validateToken,
+            (req: Request, res: Response) => {
+                this.getUser(req, res);
+            },
+        );
 
         this.router.post("/login", (req: Request, res: Response) => {
             this.login(req, res);
         });
 
-        this.router.delete("/delete", (req: Request, res: Response) => {
-            this.deleteUser(req, res);
-        });
+        this.router.delete(
+            "/delete",
+            this.validateToken,
+            (req: Request, res: Response) => {
+                this.deleteUser(req, res);
+            },
+        );
 
-        this.router.put("/update", (req: Request, res: Response) => {
-            this.updateUser(req, res);
-        });
+        this.router.put(
+            "/update",
+            this.validateToken,
+            (req: Request, res: Response) => {
+                this.updateUser(req, res);
+            },
+        );
     }
-    private async updateUser(req:Request,res:Response){
-      try{
-         const {requestToken, updateData} = req.body;
-         
-         const userToken = Env.getValidateToken(requestToken);
-         const userInstance = await User.getUserByEmail({email: userToken.userEmail});
-         if(updateData.email) this.validateEmail(updateData.email);
-         if(updateData.password) this.validatePassword(updateData.password);
-         if(updateData.role){
-            if(!UserRole[updateData.role as keyof typeof UserRole]){
-               throw new Error("Role inserted was invalid");
+
+
+    private async updateUser(req: Request, res: Response) {
+        try {
+            const { authorizedUser, updateData } = req.body;
+
+            if (updateData.email) this.validateEmail(updateData.email);
+            if (updateData.password) this.validatePassword(updateData.password);
+            if (updateData.role) {
+                if (!UserRole[updateData.role as keyof typeof UserRole]) {
+                    throw new Error("Role inserted was invalid");
+                }
             }
-         }
-         await userInstance.setEmail(updateData.email)
-         await userInstance.setPassword(updateData.password)
-         await userInstance.setRole(updateData.role)
-         let newToken = Env.getGenerateJwtToken(userInstance);
-         res.send({token: newToken});
-      }catch(err: any){
-         res.status(400).send({
-            error:err.message
-         });
-      }
-   }
+            const userInstance = await User.getUserByEmail({
+                email: authorizedUser.userEmail,
+            });
+            await userInstance.setEmail(updateData.email);
+            await userInstance.setPassword(updateData.password);
+            await userInstance.setRole(updateData.role);
+            let newToken = Env.getGenerateJwtToken(userInstance);
+            res.send({ token: newToken });
+        } catch (err: any) {
+            res.status(400).send({
+                error: err.message,
+            });
+        }
+    }
 
     private async createUser(req: Request, res: Response) {
         try {
@@ -105,14 +121,14 @@ export class UserRouter extends RouterClass {
     }
     private async getUser(req: Request, res: Response) {
         try {
-            const { email, requestToken } = req.body;
-            if (!requestToken) {
-                throw new Error("invalid request (token not included)");
-            }
+            const { email } = req.body;
             this.validateEmail(email);
-            Env.getValidateToken(requestToken);
-            const user: User = await User.getUserByEmail({ email: email });
-            res.send({ token: Env.getGenerateJwtToken(user) });
+            const userFound: User = await User.getUserByEmail({ email: email });
+            res.send({
+                id: userFound.getId(),
+                email: userFound.getEmail(),
+                role: userFound.getUserRole(),
+            });
         } catch (err: any) {
             res.status(400).send({
                 error: err.message,
@@ -122,14 +138,13 @@ export class UserRouter extends RouterClass {
 
     private async deleteUser(req: Request, res: Response) {
         try {
-            const { requestToken } = req.body;
-            if (!requestToken) {
-                throw new Error("invalid request (token not included)");
-            }
-            const user = Env.getValidateToken(requestToken);
-            await User.deleteUser({ id: user.userId, email: user.userEmail });
+            const { authorizedUser } = req.body;
+            await User.deleteUser({
+                id: authorizedUser.userId,
+                email: authorizedUser.userEmail,
+            });
             res.send({
-                message: `User ${user.userEmail} deleted`,
+                message: `User ${authorizedUser.userEmail} deleted`,
             });
         } catch (err: any) {
             res.status(400).send({

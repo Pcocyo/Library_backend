@@ -30,6 +30,7 @@ describe("Update user test suite", () => {
     dummyUserInstance.setPassword = jest.fn() as any;
     dummyUserInstance.setRole = jest.fn() as any;
     let getUserByEmailMock: any;
+    let payload: any;
 
     let decodeToken = (tokenString: string): UserJwtPayloadInterface => {
         return Env.getValidateToken(tokenString);
@@ -43,88 +44,80 @@ describe("Update user test suite", () => {
     beforeEach(() => {
         getUserByEmailMock = jest.spyOn(User, "getUserByEmail");
         getUserByEmailMock.mockResolvedValue(dummyUserInstance);
-    });
-
-    afterEach(() => {
-        getUserByEmailMock.mockRestore();
-    });
-
-    it("put /user/update should return a valid jwt token on valid payload", async () => {
-        const payload = {
-            requestToken: dummyToken,
+        payload = {
             updateData: {
                 email: "example@gmail.com",
                 password: "TestPassword123@",
                 role: UserRole.GUEST,
             },
         };
-        try {
-            const response = await request(serverApp)
-                .put("/user/update")
-                .send(payload);
-            expect(response.body).toHaveProperty("token");
-            expect(response.body.token).not.toBeNull();
-            const respondedToken = decodeToken(response.body.token);
-
-            expect(respondedToken).toHaveProperty("userEmail");
-            expect(respondedToken.userEmail).not.toBeNull();
-
-            expect(respondedToken).toHaveProperty("userId");
-            expect(respondedToken.userId).not.toBeNull();
-          
-            expect(respondedToken).toHaveProperty("userRole");
-            expect(respondedToken.userRole).not.toBeNull();
-        } catch (error) {
-            console.log(error);
-        }
     });
-   it("put /user/update should return an error on invalid user email", async()=>{
-         const payload = {
-            requestToken: dummyToken,
-            updateData: {
-               email:"invalidEmail",
-               password: "TestPassword123@",
-               role: UserRole.GUEST,
-            }
-         }
-         const response = await request(serverApp).put("/user/update").send(payload);
-         expect(response.body).not.toHaveProperty("token");
-         expect(response.body.token).toBeUndefined();
-         expect(response.body).toHaveProperty("error");
-         expect(response.body.error).not.toBeNull();
-   })
 
-   it("put /user/update should return an error on invalid user password",async ()=>{
-      const payload = {
-            requestToken: dummyToken,
-            updateData: {
-               email:"example@gmail.com",
-               password: "invalidPassword",
-               role: UserRole.GUEST,
-            }
-      }
-      const response = await request(serverApp).put("/user/update").send(payload);
-      expect(response.body).not.toHaveProperty("token");
-      expect(response.body.token).toBeUndefined();
-      expect(response.body).toHaveProperty("error");
-      expect(response.body.error).not.toBeNull();
-   })
-    
-   it("put /user/update should return an error on invalid user role",async ()=>{
-      const payload = {
-            requestToken: dummyToken,
-            updateData: {
-               email:"example@gmail.com",
-               password: "TestPassword123@",
-               role: "invalidRole",
-            }
-      }
-      const response = await request(serverApp).put("/user/update").send(payload);
-      expect(response.body).not.toHaveProperty("token");
-      expect(response.body.token).toBeUndefined();
-      expect(response.body).toHaveProperty("error");
-      expect(response.body.error).not.toBeNull();
-   })
+    afterEach(() => {
+        getUserByEmailMock.mockRestore();
+    });
+
+    it("put /user/update should return an error when requested without any token authorization on request header", async () => {
+        const response = await request(serverApp)
+            .put("/user/update")
+            .send(payload);
+        expect(response.body).toHaveProperty("error");
+        expect(response.status).toBe(400);
+    });
+
+    it("put /user/update should return a valid jwt token on valid payload", async () => {
+        const response = await request(serverApp)
+            .put("/user/update")
+            .set("Authorization", dummyToken)
+            .send(payload);
+        expect(response.body).toHaveProperty("token");
+        expect(response.body.token).not.toBeNull();
+        const respondedToken = decodeToken(response.body.token);
+
+        expect(respondedToken).toHaveProperty("userEmail");
+        expect(respondedToken.userEmail).not.toBeNull();
+
+        expect(respondedToken).toHaveProperty("userId");
+        expect(respondedToken.userId).not.toBeNull();
+
+        expect(respondedToken).toHaveProperty("userRole");
+        expect(respondedToken.userRole).not.toBeNull();
+    });
+    it("put /user/update should return an error on invalid user email", async () => {
+        payload.updateData.email = "invalidEmail";
+        const response = await request(serverApp)
+            .put("/user/update")
+            .set("Authorization", dummyToken)
+            .send(payload);
+        expect(response.body).not.toHaveProperty("token");
+        expect(response.body.token).toBeUndefined();
+        expect(response.body).toHaveProperty("error");
+        expect(response.body.error).not.toBeNull();
+    });
+
+    it("put /user/update should return an error on invalid user password", async () => {
+        payload.updateData.password = "invalidpassword";
+        const response = await request(serverApp)
+            .put("/user/update")
+            .set("Authorization", dummyToken)
+            .send(payload);
+        expect(response.body).not.toHaveProperty("token");
+        expect(response.body.token).toBeUndefined();
+        expect(response.body).toHaveProperty("error");
+        expect(response.body.error).not.toBeNull();
+    });
+
+    it("put /user/update should return an error on invalid user role", async () => {
+        payload.updateData.role = "invalidRole";
+        const response = await request(serverApp)
+            .put("/user/update")
+            .set("Authorization", dummyToken)
+            .send(payload);
+        expect(response.body).not.toHaveProperty("token");
+        expect(response.body.token).toBeUndefined();
+        expect(response.body).toHaveProperty("error");
+        expect(response.body.error).not.toBeNull();
+    });
 });
 
 describe("Create, Delete, Read Test Suite (Unit Test)", () => {
@@ -133,6 +126,7 @@ describe("Create, Delete, Read Test Suite (Unit Test)", () => {
     let dummyPassword: string = "dummyPassword123@";
     let dummyRole: UserRole = UserRole.GUEST;
     let dummyCreated_at: Date = new Date();
+    let dummyToken: string;
     let serverInstance: Server;
     let serverApp: App;
     let createNewUserSpy: any;
@@ -154,18 +148,10 @@ describe("Create, Delete, Read Test Suite (Unit Test)", () => {
         password: "invalidpassword",
     };
 
-    const invalidTokenPayload = {
-        email: dummyEmail,
-        password: dummyPassword,
-        requestToken: "invalidToken",
-    };
+     const getUserPayload = {
+         email: dummyEmail,
+     };
 
-    const nullTokenPayload = {
-        email: dummyEmail,
-        password: dummyPassword,
-    };
-
-    let tokenPayload: any;
     let dummyUser: User;
 
     let decodeToken = (jwtToken: string): UserJwtPayloadInterface => {
@@ -183,12 +169,7 @@ describe("Create, Delete, Read Test Suite (Unit Test)", () => {
             dummyRole,
             dummyCreated_at,
         );
-        tokenPayload = {
-            email: dummyEmail,
-            password: dummyPassword,
-            requestToken: Env.getGenerateJwtToken(dummyUser),
-        };
-
+        dummyToken = Env.getGenerateJwtToken(dummyUser);
         serverInstance = Server.getInstance();
         serverApp = (serverInstance as any).app;
     });
@@ -256,43 +237,35 @@ describe("Create, Delete, Read Test Suite (Unit Test)", () => {
     });
 
     // get User by email logic
-    it("get /user/getUser respond with valid jwtToken", async () => {
-        const response = await request(serverApp)
-            .get("/user/getUser")
-            .send(tokenPayload);
-        expect(response.body).toHaveProperty("token");
-        let responsedToken: UserJwtPayloadInterface = decodeToken(
-            response.body.token,
-        );
-        expect(responsedToken).toHaveProperty("userId");
-        expect(responsedToken).toHaveProperty("userEmail");
-        expect(responsedToken).toHaveProperty("userRole");
-    });
 
-    it("get /user/getUser respond with error when have been called with invalid jwtToken", async () => {
+    it("get /user/getUser respond with error when request was unauthorized with jwtToken", async () => {
         const response = await request(serverApp)
             .get("/user/getUser")
-            .send(invalidTokenPayload);
-        expect(response.body).not.toHaveProperty("token");
+            .send(getUserPayload);
         expect(response.body).toHaveProperty("error");
+        expect(response.status).toBe(400);
+         
     });
 
     it("get /user/getUser return with error when have been called with invalid email", async () => {
         const response = await request(serverApp)
             .get("/user/getUser")
-            .send(invalidEmailPayload);
+            .set("Authorization",dummyToken)
+            .send(invalidEmailPayload.email);
         expect(response.body).toHaveProperty("error");
         expect(response.body.error).not.toBeNull();
     });
 
-    it("get /user/getUser return with error when have been called with null request token", async () => {
+    it("get /user/getUser respond with valid user", async () => {
         const response = await request(serverApp)
             .get("/user/getUser")
-            .send(nullTokenPayload);
-        expect(response.body).toHaveProperty("error");
-        expect(response.body.error).not.toBeNull();
+            .set("Authorization", dummyToken)
+            .send(getUserPayload);
+        expect(response.status).toBe(200);
+        expect(response.body).toHaveProperty("id");
+        expect(response.body).toHaveProperty("email");
+        expect(response.body).toHaveProperty("role");
     });
-
     // login logic
     it("get /user/login respond with valid jwt token", async () => {
         const response = await request(serverApp)
@@ -336,21 +309,19 @@ describe("Create, Delete, Read Test Suite (Unit Test)", () => {
         expect(response.body.error).not.toBeNull();
     });
 
-    //delete user logic
-    it("delete /user/delete response with success when user enter a valid token", async () => {
-        const response = await request(serverApp)
-            .delete("/user/delete")
-            .send(tokenPayload);
-        expect(response.body).toHaveProperty("message");
-        expect(response.body.message).not.toBeNull();
-    });
-
-    it("delete /user/delete response with success when user enter a valid token", async () => {
-        const response = await request(serverApp)
-            .delete("/user/delete")
-            .send(invalidTokenPayload);
-        expect(response.body).not.toHaveProperty("message");
+    it("delete /user/delete response with error when user did not have authorization access", async () => {
+        const response = await request(serverApp).delete("/user/delete");
         expect(response.body).toHaveProperty("error");
         expect(response.body.error).not.toBeNull();
+        expect(response.status).toBe(400);
+    });
+
+    it("delete /user/delete response with success when user input correct data", async () => {
+        const response = await request(serverApp)
+            .delete("/user/delete")
+            .set("Authorization", dummyToken);
+        expect(response.body).toHaveProperty("message");
+        expect(response.body.message).not.toBeNull();
+        expect(response.status).toBe(200);
     });
 });
