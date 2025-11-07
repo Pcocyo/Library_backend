@@ -26,9 +26,12 @@ describe("Update user test suite", () => {
         dummyUserDate,
     );
     let dummyToken = Env.getGenerateJwtToken(dummyUserInstance);
-    dummyUserInstance.setEmail = jest.fn() as any;
-    dummyUserInstance.setPassword = jest.fn() as any;
-    dummyUserInstance.setRole = jest.fn() as any;
+    let setEmailMock = jest.fn();
+    let setPasswordMock = jest.fn();
+    let setRoleMock = jest.fn();
+    dummyUserInstance.setEmail = setEmailMock as any;
+    dummyUserInstance.setPassword = setPasswordMock as any;
+    dummyUserInstance.setRole = setRoleMock as any;
     let getUserByEmailMock: any;
     let payload: any;
 
@@ -63,6 +66,15 @@ describe("Update user test suite", () => {
             .send(payload);
         expect(response.body).toHaveProperty("error");
         expect(response.status).toBe(400);
+    });
+    it("put /user/update should call User.setPassword() with bcrypt payload when password included", async () => {
+        const response = await request(serverApp)
+            .put("/user/update")
+            .set("Authorization", dummyToken)
+            .send(payload);
+        const setPasswordCalls = setPasswordMock.mock.calls[0][0];
+        expect(setPasswordCalls).not.toBe(payload.updateData.password);
+        expect(await Env.getValidatePassword(payload.updateData.password,setPasswordCalls as string)).toBeTruthy();
     });
 
     it("put /user/update should return a valid jwt token on valid payload", async () => {
@@ -148,9 +160,9 @@ describe("Create, Delete, Read Test Suite (Unit Test)", () => {
         password: "invalidpassword",
     };
 
-     const getUserPayload = {
-         email: dummyEmail,
-     };
+    const getUserPayload = {
+        email: dummyEmail,
+    };
 
     let dummyUser: User;
 
@@ -244,13 +256,12 @@ describe("Create, Delete, Read Test Suite (Unit Test)", () => {
             .send(getUserPayload);
         expect(response.body).toHaveProperty("error");
         expect(response.status).toBe(400);
-         
     });
 
     it("get /user/getUser return with error when have been called with invalid email", async () => {
         const response = await request(serverApp)
             .get("/user/getUser")
-            .set("Authorization",dummyToken)
+            .set("Authorization", dummyToken)
             .send(invalidEmailPayload.email);
         expect(response.body).toHaveProperty("error");
         expect(response.body.error).not.toBeNull();

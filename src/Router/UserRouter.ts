@@ -64,7 +64,7 @@ export class UserRouter extends RouterClass {
                 email: authorizedUser.userEmail,
             });
             await userInstance.setEmail(updateData.email);
-            await userInstance.setPassword(updateData.password);
+            await userInstance.setPassword(await Env.getGenerateBcrypt(updateData.password));
             await userInstance.setRole(updateData.role);
             let newToken = Env.getGenerateJwtToken(userInstance);
             res.send({ token: newToken });
