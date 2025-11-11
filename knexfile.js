@@ -1,17 +1,18 @@
-import Env from './dist/Config/config.js'
+const Env = require("./dist/Config/config").default;
 const DB_URL = Env.getDB_URL();
 
 const common = {
     client: 'pg',
     migrations: {
         directory: './db/migrations',
+        loadExtensions: [".js",".mjs"]
     },
     seeds: {
         directory: './db/seeds'
     }
 }
 
-export const development = {
+const development = {
     ...common,
     connection: {
         host: DB_URL.host,
@@ -21,7 +22,7 @@ export const development = {
         password: DB_URL.password
     }
 }
-export const test = {
+const test = {
     ...common,
     connection: {
         host: DB_URL.host,
@@ -31,3 +32,8 @@ export const test = {
         password: DB_URL.password
     }
 }
+module.exports = {
+    development,
+    test
+}
+
