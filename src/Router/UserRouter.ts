@@ -3,6 +3,7 @@ import type { NextFunction, Request, Response } from "express";
 import User, { UserRole } from "../Controller/User/User";
 import Env from "../Config/config";
 import { throws } from "assert";
+import Profile from "../Controller/Profile/Profile";
 
 export class UserRouter extends RouterClass {
     public constructor() {
@@ -86,6 +87,7 @@ export class UserRouter extends RouterClass {
                 password: String(cryptedPass),
                 role: null,
             });
+            await Profile.CreateProfile({user_id:user.getId()});
             const token = Env.getGenerateJwtToken(user);
             res.json({
                 token: token,

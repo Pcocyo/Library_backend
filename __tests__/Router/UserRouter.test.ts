@@ -5,6 +5,7 @@ import bcrypt from "bcrypt";
 import { jest } from "@jest/globals";
 import User, { UserRole } from "../../src/Controller/User/User.ts";
 import { UserJwtPayloadInterface } from "../../src/Config/config.interface.ts";
+import Profile from "../../src/Controller/Profile/Profile.ts";
 import Env from "../../src/Config/config.ts";
 import dotenv from "dotenv";
 dotenv.config({ quiet: true });
@@ -144,6 +145,7 @@ describe("Create, Delete, Read Test Suite (Unit Test)", () => {
     let createNewUserSpy: any;
     let getUserSpy: any;
     let deleteUserSpy: any;
+    let createProfileSpy:any;
 
     const payload = {
         email: dummyEmail,
@@ -192,9 +194,11 @@ describe("Create, Delete, Read Test Suite (Unit Test)", () => {
             createNewUserSpy = jest.spyOn(User, "createNewUser");
             getUserSpy = jest.spyOn(User, "getUserByEmail");
             deleteUserSpy = jest.spyOn(User, "deleteUser");
+            createProfileSpy = jest.spyOn(Profile,"CreateProfile");
             createNewUserSpy.mockResolvedValue(dummyUser);
             getUserSpy.mockResolvedValue(dummyUser);
             deleteUserSpy.mockResolvedValue(dummyUser);
+            createProfileSpy.mockResolvedValue(null);
         });
     });
 
@@ -202,6 +206,7 @@ describe("Create, Delete, Read Test Suite (Unit Test)", () => {
         createNewUserSpy.mockRestore();
         getUserSpy.mockRestore();
         deleteUserSpy.mockRestore();
+        createProfileSpy.mockRestore();
     });
 
     // create user logic
@@ -220,6 +225,13 @@ describe("Create, Delete, Read Test Suite (Unit Test)", () => {
         expect(responsedToken.userEmail).not.toBeNull();
         expect(responsedToken).toHaveProperty("userRole");
         expect(responsedToken.userRole).not.toBeNull();
+    });
+
+    it("post /user/create route Call Profile.createProfile", async () => {
+        const response = await request(serverApp)
+            .post("/user/create")
+            .send(payload);
+        expect(createProfileSpy.mock.calls[0][0]).not.toBeNull();
     });
 
     it("post /user/create route Call User.createNewUser with crypted password", async () => {
