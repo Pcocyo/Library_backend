@@ -7,7 +7,6 @@ import type {
 import type { UserRegisterInterface } from "../../../src/Controller/User/User.interface";
 import User, { UserRole } from "../../../src/Controller/User/User";
 import prisma from "../../../src/prismaClient";
-import { profile } from "console";
 describe("Class Tests", () => {
     const dummyId: string = "dummyId";
     const dummyUserName: string = "dummyUserName";
@@ -110,7 +109,7 @@ describe("Profile table tests", () => {
             where: { user_id: dummyProfile.get_userId() },
         });
     });
-   
+
     //Create Profile tests
     it("Profile.CreateProfile should create a profile records with all required fields populated correctly", async () => {
         let profile = await prisma.profiles.findUnique({
@@ -136,132 +135,164 @@ describe("Profile table tests", () => {
         expect(dummyProfile).toBeInstanceOf(Profile);
     });
 
-    it("Profile.DeleteProfile should delete a record when user_id input",async()=>{
-      let newDummyUser = await User.createNewUser({email:"dummyUser2email",password:"dummyUserPassword",role:null}) ;
-      let dummyProfile2 = await Profile.CreateProfile({user_id:newDummyUser.getId()});
+    it("Profile.DeleteProfile should delete a record when user_id input", async () => {
+        let newDummyUser = await User.createNewUser({
+            email: "dummyUser2email",
+            password: "dummyUserPassword",
+            role: null,
+        });
+        let dummyProfile2 = await Profile.CreateProfile({
+            user_id: newDummyUser.getId(),
+        });
 
-      await Profile.DeleteProfile(dummyProfile2);
-      let profile = await prisma.profiles.findUnique({where:{user_id:dummyProfile2.get_userId()}});
-      expect(profile).toBeNull();
-      await prisma.users.delete({where:{user_id:newDummyUser.getId()}});
-    })
-   //Get Profile by user id tests
-   it("Profile.GetByUserId should return the correct profile records and Profile object",async ()=>{
-     let dbDummyProfile:Profile;
-     dbDummyProfile = await Profile.GetByUserId({user_id:dummyUser.getId()});
+        await Profile.DeleteProfile(dummyProfile2);
+        let profile = await prisma.profiles.findUnique({
+            where: { user_id: dummyProfile2.get_userId() },
+        });
+        expect(profile).toBeNull();
+        await prisma.users.delete({ where: { user_id: newDummyUser.getId() } });
+    });
+    //Get Profile by user id tests
+    it("Profile.GetByUserId should return the correct profile records and Profile object", async () => {
+        let dbDummyProfile: Profile;
+        dbDummyProfile = await Profile.GetByUserId({
+            user_id: dummyUser.getId(),
+        });
 
-     expect(dbDummyProfile.get_userId()).toBe(dummyProfile.get_userId());
-     expect(dbDummyProfile.get_firstName()).toBe(dummyProfile.get_firstName());
-     expect(dbDummyProfile).toBeInstanceOf(Profile);
-   })
+        expect(dbDummyProfile.get_userId()).toBe(dummyProfile.get_userId());
+        expect(dbDummyProfile.get_firstName()).toBe(
+            dummyProfile.get_firstName(),
+        );
+        expect(dbDummyProfile).toBeInstanceOf(Profile);
+    });
 
-   it("Profile.GetByUserId should return error when profile records did not exists",async()=>{
-      try{
-         await Profile.GetByUserId({user_id:"a1b2c3d4-e5f6-7890-abcd-ef1234567890"});
-      }catch(err){
-         expect(err).not.toBeNull();
-      }
-   })
+    it("Profile.GetByUserId should return error when profile records did not exists", async () => {
+        try {
+            await Profile.GetByUserId({
+                user_id: "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+            });
+        } catch (err) {
+            expect(err).not.toBeNull();
+        }
+    });
 
-   // update Profile tests
-   it("Profile_Object.set_userName should update profile user_name records", async ()=>{
-      try{
-         await dummyProfile.set_userName("newDummyUsername");
-      }catch(err){
-         console.log(err);
-      }
-      let profile = await prisma.profiles.findUnique({where:{user_id:dummyProfile.get_userId()}});
-      expect(profile?.user_name).toBe("newDummyUsername");
-      expect(dummyProfile.get_userName()).toBe("newDummyUsername");
-   })
+    // update Profile tests
+    it("Profile_Object.set_userName should update profile user_name records", async () => {
+        try {
+            await dummyProfile.set_userName("newDummyUsername");
+        } catch (err) {
+            console.log(err);
+        }
+        let profile = await prisma.profiles.findUnique({
+            where: { user_id: dummyProfile.get_userId() },
+        });
+        expect(profile?.user_name).toBe("newDummyUsername");
+        expect(dummyProfile.get_userName()).toBe("newDummyUsername");
+    });
 
-   it("Profile_Object.set_firstName should update profile first_name records", async ()=>{
-      try{
-         await dummyProfile.set_firstName("newDummyFirstName");
-      }catch(err){
-         console.log(err);
-      }
-      let profile = await prisma.profiles.findUnique({where:{user_id:dummyProfile.get_userId()}});
-      expect(profile?.first_name).toBe("newDummyFirstName");
-      expect(dummyProfile.get_firstName()).toBe("newDummyFirstName");
-   })
+    it("Profile_Object.set_firstName should update profile first_name records", async () => {
+        try {
+            await dummyProfile.set_firstName("newDummyFirstName");
+        } catch (err) {
+            console.log(err);
+        }
+        let profile = await prisma.profiles.findUnique({
+            where: { user_id: dummyProfile.get_userId() },
+        });
+        expect(profile?.first_name).toBe("newDummyFirstName");
+        expect(dummyProfile.get_firstName()).toBe("newDummyFirstName");
+    });
 
-   it("Profile_Object.set_lastName should update profile last_name records", async ()=>{
-      try{
-         await dummyProfile.set_lastName("newDummyLastName");
-      }catch(err){
-         console.log(err);
-      }
-      let profile = await prisma.profiles.findUnique({where:{user_id:dummyProfile.get_userId()}});
-      expect(profile?.last_name).toBe("newDummyLastName");
-      expect(dummyProfile.get_lastName()).toBe("newDummyLastName");
-   })
+    it("Profile_Object.set_lastName should update profile last_name records", async () => {
+        try {
+            await dummyProfile.set_lastName("newDummyLastName");
+        } catch (err) {
+            console.log(err);
+        }
+        let profile = await prisma.profiles.findUnique({
+            where: { user_id: dummyProfile.get_userId() },
+        });
+        expect(profile?.last_name).toBe("newDummyLastName");
+        expect(dummyProfile.get_lastName()).toBe("newDummyLastName");
+    });
 
-   it("Profile_Object.set_contact should update profile contact records", async ()=>{
-      try{
-         await dummyProfile.set_contact("newDummyContact");
-      }catch(err){
-         console.log(err);
-      }
-      let profile = await prisma.profiles.findUnique({where:{user_id:dummyProfile.get_userId()}});
-      expect(profile?.contact).toBe("newDummyContact");
-      expect(dummyProfile.get_contact()).toBe("newDummyContact");
-   })
+    it("Profile_Object.set_contact should update profile contact records", async () => {
+        try {
+            await dummyProfile.set_contact("newDummyContact");
+        } catch (err) {
+            console.log(err);
+        }
+        let profile = await prisma.profiles.findUnique({
+            where: { user_id: dummyProfile.get_userId() },
+        });
+        expect(profile?.contact).toBe("newDummyContact");
+        expect(dummyProfile.get_contact()).toBe("newDummyContact");
+    });
 
-   it("Profile_Object.set_address should update profile address records", async ()=>{
-      try{
-         await dummyProfile.set_address("newDummyAddress");
-      }catch(err){
-         console.log(err);
-      }
-      let profile = await prisma.profiles.findUnique({where:{user_id:dummyProfile.get_userId()}});
-      expect(profile?.address).toBe("newDummyAddress");
-      expect(dummyProfile.get_address()).toBe("newDummyAddress");
-   })
+    it("Profile_Object.set_address should update profile address records", async () => {
+        try {
+            await dummyProfile.set_address("newDummyAddress");
+        } catch (err) {
+            console.log(err);
+        }
+        let profile = await prisma.profiles.findUnique({
+            where: { user_id: dummyProfile.get_userId() },
+        });
+        expect(profile?.address).toBe("newDummyAddress");
+        expect(dummyProfile.get_address()).toBe("newDummyAddress");
+    });
 
-   it("Profile_Object.set_memberDate should update profile memberDate records", async ()=>{
-      let newMemberDate = new Date;
-      try{
-         await dummyProfile.set_memberDate(newMemberDate);
-      }catch(err){
-         console.log(err);
-      }
-      let profile = await prisma.profiles.findUnique({where:{user_id:dummyProfile.get_userId()}});
-      expect(profile?.membership_date).toStrictEqual(newMemberDate);
-      expect(dummyProfile.get_memberDate()).toStrictEqual(newMemberDate);
-   })
-  
-   it("Profile_Object.set_status should update profile status records", async ()=>{
-      try{
-         await dummyProfile.set_status(ProfileStatus.SUSPENDED);
-      }catch(err){
-         console.log(err);
-      }
-      let profile = await prisma.profiles.findUnique({where:{user_id:dummyProfile.get_userId()}});
-      expect(profile?.status).toBe(ProfileStatus.SUSPENDED.toString());
-      expect(dummyProfile.get_status()).toBe(ProfileStatus.SUSPENDED);
-   })
+    it("Profile_Object.set_memberDate should update profile memberDate records", async () => {
+        let newMemberDate = new Date();
+        try {
+            await dummyProfile.set_memberDate(newMemberDate);
+        } catch (err) {
+            console.log(err);
+        }
+        let profile = await prisma.profiles.findUnique({
+            where: { user_id: dummyProfile.get_userId() },
+        });
+        expect(profile?.membership_date).toStrictEqual(newMemberDate);
+        expect(dummyProfile.get_memberDate()).toStrictEqual(newMemberDate);
+    });
 
-   it("Profile_Object.set_fines should update profile total_fines records", async ()=>{
-      try{
-         await dummyProfile.set_fines(2.50);
-      }catch(err){
-         console.log(err);
-      }
-      let profile = await prisma.profiles.findUnique({where:{user_id:dummyProfile.get_userId()}});
-      expect(profile?.total_fines.toNumber()).toBe(2.50);
-      expect(dummyProfile.get_totalFines()).toBe(2.50);
-   })
+    it("Profile_Object.set_status should update profile status records", async () => {
+        try {
+            await dummyProfile.set_status(ProfileStatus.SUSPENDED);
+        } catch (err) {
+            console.log(err);
+        }
+        let profile = await prisma.profiles.findUnique({
+            where: { user_id: dummyProfile.get_userId() },
+        });
+        expect(profile?.status).toBe(ProfileStatus.SUSPENDED.toString());
+        expect(dummyProfile.get_status()).toBe(ProfileStatus.SUSPENDED);
+    });
 
-   it("Profile_Object.set_updatedAt should update profile updated_at records", async ()=>{
-      let newUpdateAtDate= new Date;
-      try{
-         await dummyProfile.set_updatedAt(newUpdateAtDate);
-      }catch(err){
-         console.log(err);
-      }
-      let profile = await prisma.profiles.findUnique({where:{user_id:dummyProfile.get_userId()}});
-      expect(profile?.updated_at).toStrictEqual(newUpdateAtDate);
-      expect(dummyProfile.get_updatedAt()).toStrictEqual(newUpdateAtDate);
-   })
+    it("Profile_Object.set_fines should update profile total_fines records", async () => {
+        try {
+            await dummyProfile.set_fines(2.5);
+        } catch (err) {
+            console.log(err);
+        }
+        let profile = await prisma.profiles.findUnique({
+            where: { user_id: dummyProfile.get_userId() },
+        });
+        expect(profile?.total_fines.toNumber()).toBe(2.5);
+        expect(dummyProfile.get_totalFines()).toBe(2.5);
+    });
+
+    it("Profile_Object.set_updatedAt should update profile updated_at records", async () => {
+        let newUpdateAtDate = new Date();
+        try {
+            await dummyProfile.set_updatedAt(newUpdateAtDate);
+        } catch (err) {
+            console.log(err);
+        }
+        let profile = await prisma.profiles.findUnique({
+            where: { user_id: dummyProfile.get_userId() },
+        });
+        expect(profile?.updated_at).toStrictEqual(newUpdateAtDate);
+        expect(dummyProfile.get_updatedAt()).toStrictEqual(newUpdateAtDate);
+    });
 });

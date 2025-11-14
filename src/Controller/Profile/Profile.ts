@@ -84,134 +84,132 @@ export default class Profile {
         return this.updated_at;
     }
 
-    public async set_userName(new_userName:string|null){
-      if(new_userName){
-         try{
-            await prisma.profiles.update({
-               where:{user_id:this.user_id},
-               data:{user_name:new_userName}
-            })
-            this.user_name = new_userName;
-         }catch(err){
-            throw err;
-         }
-      }
-   }
+    public async set_userName(new_userName: string | null) {
+        if (new_userName) {
+            try {
+                await prisma.profiles.update({
+                    where: { user_id: this.user_id },
+                    data: { user_name: new_userName },
+                });
+                this.user_name = new_userName;
+            } catch (err) {
+                throw err;
+            }
+        }
+    }
 
-   public async set_firstName(new_firstName:string|null){
-      if(new_firstName){
-         try{
-            await prisma.profiles.update({
-               where:{user_id:this.user_id},
-               data:{first_name:new_firstName}
-            })
-            this.first_name = new_firstName;
-         }catch(err){
-            throw err;
-         }
-      }
-   }
+    public async set_firstName(new_firstName: string | null) {
+        if (new_firstName) {
+            try {
+                await prisma.profiles.update({
+                    where: { user_id: this.user_id },
+                    data: { first_name: new_firstName },
+                });
+                this.first_name = new_firstName;
+            } catch (err) {
+                throw err;
+            }
+        }
+    }
 
-   public async set_lastName(new_lastName:string|null){
-      if(new_lastName){
-         try{
-            await prisma.profiles.update({
-               where:{user_id:this.user_id},
-               data:{last_name:new_lastName}
-            })
-            this.last_name = new_lastName;
-         }catch(err){
-            throw err;
-         }
-      }
-   }
+    public async set_lastName(new_lastName: string | null) {
+        if (new_lastName) {
+            try {
+                await prisma.profiles.update({
+                    where: { user_id: this.user_id },
+                    data: { last_name: new_lastName },
+                });
+                this.last_name = new_lastName;
+            } catch (err) {
+                throw err;
+            }
+        }
+    }
 
-   public async set_contact(new_contact:string|null){
-      if(new_contact){
-         try{
-            await prisma.profiles.update({
-               where:{user_id:this.user_id},
-               data:{contact:new_contact}
-            })
-            this.contact = new_contact;
-         }catch(err){
-            throw err;
-         }
-      }
-   }
-   
-   public async set_address(new_address:string|null){
-      if(new_address){
-         try{
-            await prisma.profiles.update({
-               where:{user_id:this.user_id},
-               data:{address:new_address}
-            })
-            this.address = new_address;
-         }catch(err){
-            throw err;
-         }
-      }
-   }
+    public async set_contact(new_contact: string | null) {
+        if (new_contact) {
+            try {
+                await prisma.profiles.update({
+                    where: { user_id: this.user_id },
+                    data: { contact: new_contact },
+                });
+                this.contact = new_contact;
+            } catch (err) {
+                throw err;
+            }
+        }
+    }
 
-   public async set_memberDate(new_memberDate:Date|null){
-      if(new_memberDate){
-         try{
-            await prisma.profiles.update({
-               where:{user_id:this.user_id},
-               data:{membership_date:new_memberDate}
-            })
-            this.membership_date = new_memberDate;
-         }catch(err){
-            throw err;
-         }
-      }
-   }
+    public async set_address(new_address: string | null) {
+        if (new_address) {
+            try {
+                await prisma.profiles.update({
+                    where: { user_id: this.user_id },
+                    data: { address: new_address },
+                });
+                this.address = new_address;
+            } catch (err) {
+                throw err;
+            }
+        }
+    }
 
-   public async set_status(new_status:ProfileStatus|null){
-      if(new_status){
-         try{
-            await prisma.profiles.update({
-               where:{user_id:this.user_id},
-               data:{status:new_status.toString()}
-            })
-            this.status = new_status;
-         }catch(err){
-            throw err;
-         }
-      }
-   }
+    public async set_memberDate(new_memberDate: Date | null) {
+        if (new_memberDate) {
+            try {
+                await prisma.profiles.update({
+                    where: { user_id: this.user_id },
+                    data: { membership_date: new_memberDate },
+                });
+                this.membership_date = new_memberDate;
+            } catch (err) {
+                throw err;
+            }
+        }
+    }
 
-   public async set_fines(new_fines:number|null){
-      if(new_fines){
-         try{
-            await prisma.profiles.update({
-               where:{user_id:this.user_id},
-               data:{total_fines:parseFloat(new_fines.toFixed(2))}
-            })
-            this.total_fines = parseFloat(new_fines.toFixed(2));
-         }catch(err){
-            throw err;
-         }
-      }
-   }
-   
-   public async set_updatedAt(new_updatedAt:Date|null){
-      if(new_updatedAt){
-         try{
-            await prisma.profiles.update({
-               where:{user_id:this.user_id},
-               data:{updated_at:new_updatedAt}
-            })
-            this.updated_at = new_updatedAt;
-         }catch(err){
-            throw err;
-         }
-      }
-   }
-   
-   
-   
+    public async set_status(new_status: ProfileStatus | null) {
+        if (new_status) {
+            try {
+                await prisma.profiles.update({
+                    where: { user_id: this.user_id },
+                    data: { status: new_status.toString() },
+                });
+                this.status = new_status;
+            } catch (err) {
+                throw err;
+            }
+        }
+    }
+
+    public async set_fines(new_fines: number | null) {
+        if (new_fines) {
+            try {
+                await prisma.profiles.update({
+                    where: { user_id: this.user_id },
+                    data: { total_fines: parseFloat(new_fines.toFixed(2)) },
+                });
+                this.total_fines = parseFloat(new_fines.toFixed(2));
+            } catch (err) {
+                throw err;
+            }
+        }
+    }
+
+    public async set_updatedAt(new_updatedAt: Date | null) {
+        if (new_updatedAt) {
+            try {
+                await prisma.profiles.update({
+                    where: { user_id: this.user_id },
+                    data: { updated_at: new_updatedAt },
+                });
+                this.updated_at = new_updatedAt;
+            } catch (err) {
+                throw err;
+            }
+        }
+    }
+
     public static async CreateProfile(
         params: CreateProfileParam,
     ): Promise<Profile> {
@@ -247,22 +245,25 @@ export default class Profile {
         };
         return new Profile(newProfileParam);
     }
-    
-    public static async DeleteProfile(profile:Profile){
-      try{
-         await prisma.profiles.delete({where:{user_id:profile.get_userId()}});
-      }
-      catch(err){
-         throw err;
-      }
+
+    public static async DeleteProfile(profile: Profile) {
+        try {
+            await prisma.profiles.delete({
+                where: { user_id: profile.get_userId() },
+            });
+        } catch (err) {
+            throw err;
+        }
     }
 
-    public static async GetByUserId(param:GetByUserIdParam):Promise<Profile>{
-      let profile = await prisma.profiles.findUnique({where:{user_id:param.user_id}});
-      if(!profile){
+    public static async GetByUserId(param: GetByUserIdParam): Promise<Profile> {
+        let profile = await prisma.profiles.findUnique({
+            where: { user_id: param.user_id },
+        });
+        if (!profile) {
             throw new Error(`User ${param.user_id} not exists`);
-      }
-      let newProfileParam:ProfileParam={
+        }
+        let newProfileParam: ProfileParam = {
             user_id: profile.user_id,
             user_name: profile.user_name,
             first_name: profile.first_name,
@@ -273,8 +274,8 @@ export default class Profile {
             status: ProfileStatus[profile.status as keyof typeof ProfileStatus],
             total_fines: profile.total_fines.toNumber(),
             updated_at: profile.updated_at,
-      }
-      return new Profile(newProfileParam);
+        };
+        return new Profile(newProfileParam);
     }
 
     static Tests__CreateProfile__(params: ProfileParam): Profile {
