@@ -1,4 +1,3 @@
-import type { PrismaClient } from "@prisma/client/extension";
 import { Router,Response,Request,NextFunction } from "express";
 import Env from "../../Config/config";
 export abstract class RouterClass {
