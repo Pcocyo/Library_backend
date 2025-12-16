@@ -2,10 +2,9 @@ import { RouterClass } from "./Ultils/RouterClass";
 import type { NextFunction, Request, Response } from "express";
 import User, { UserRole } from "../Controller/User/User";
 import Env from "../Config/config";
-import { throws } from "assert";
 import Profile from "../Controller/Profile/Profile";
 
-export class UserRouter extends RouterClass {
+export default class UserRouter extends RouterClass {
     public constructor() {
         super();
         this.initializeRoutes();
@@ -121,6 +120,7 @@ export class UserRouter extends RouterClass {
             res.status(400).send({ error: err.message });
         }
     }
+    
     private async getUser(req: Request, res: Response) {
         try {
             const { email } = req.body;

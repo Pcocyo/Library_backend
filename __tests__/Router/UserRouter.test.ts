@@ -227,11 +227,13 @@ describe("Create, Delete, Read Test Suite (Unit Test)", () => {
         expect(responsedToken.userRole).not.toBeNull();
     });
 
-    it("post /user/create route Call Profile.createProfile", async () => {
+    it("post /user/create route Call Profile.createProfile with correct parameter", async () => {
         const response = await request(serverApp)
             .post("/user/create")
             .send(payload);
-        expect(createProfileSpy.mock.calls[0][0]).not.toBeNull();
+        const createProfileCall = createProfileSpy.mock.calls[0][0];
+        expect(createProfileCall).toHaveProperty("user_id");
+        expect(createProfileCall.user_id).toBe(dummyUser.getId());
     });
 
     it("post /user/create route Call User.createNewUser with crypted password", async () => {
