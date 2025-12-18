@@ -3,6 +3,7 @@ import type { NextFunction, Request, Response } from "express";
 import User, { UserRole } from "../Controller/User/User";
 import Env from "../Config/config";
 import Profile from "../Controller/Profile/Profile";
+import ProfileRouter from "./ProfileRouter";
 
 export default class UserRouter extends RouterClass {
     public constructor() {
@@ -141,6 +142,8 @@ export default class UserRouter extends RouterClass {
     private async deleteUser(req: Request, res: Response) {
         try {
             const { authorizedUser } = req.body;
+            let userProfile:Profile = await Profile.GetByUserId({user_id:authorizedUser.userId});
+            await Profile.DeleteProfile(userProfile);
             await User.deleteUser({
                 id: authorizedUser.userId,
                 email: authorizedUser.userEmail,
