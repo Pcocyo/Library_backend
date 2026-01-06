@@ -159,7 +159,7 @@ export default class Profile {
             try {
                 await prisma.profiles.update({
                     where: { user_id: this.user_id },
-                    data: { membership_date: new_memberDate },
+                    data: { membership_date: new_memberDate.toISOString() },
                 });
                 this.membership_date = new_memberDate;
             } catch (err) {
@@ -201,7 +201,7 @@ export default class Profile {
             try {
                 await prisma.profiles.update({
                     where: { user_id: this.user_id },
-                    data: { updated_at: new_updatedAt },
+                    data: { updated_at: new_updatedAt.toISOString() },
                 });
                 this.updated_at = new_updatedAt;
             } catch (err) {
