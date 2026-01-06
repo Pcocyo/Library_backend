@@ -16,7 +16,6 @@ export class Server {
     }
 
     private routes(): void {
-        this.app.get("/", (req: Request, res: Response) => { res.json({ message: "success" }) });
         this.app.use("/user", this.userRouter.getRouter());
         this.app.use("/profile",this.profileRouter.getRouter());
     }
