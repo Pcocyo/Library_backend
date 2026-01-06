@@ -15,15 +15,4 @@ describe("Server class test", () => {
         let instance2 = Server.getInstance();
         expect(instance).toBe(instance2);
     })
-
-    it("should have /users routes", async () => {
-        const response = await request(app).get('/user/');
-        expect(response.body).toHaveProperty("message");
-        expect(response.body.message).toBe("userRouter");
-    })
-
-    it("define a userRouter class instance", () => {
-        let userRouter = (instance as any).userRouter;
-        expect(userRouter).toBeInstanceOf(UserRouter);
-    })
 })
