@@ -87,6 +87,7 @@ describe("Profile Route GET and PATCH endpoint test",()=>{
    let profileSet_Status = jest.fn();
    let profileSet_fines = jest.fn();
    let profileSet_memberDate = jest.fn();
+   let userSet_role = jest.fn();
 
    beforeAll(()=>{
       const serverInstance:Server = Server.getInstance(); 
@@ -96,6 +97,7 @@ describe("Profile Route GET and PATCH endpoint test",()=>{
    beforeEach(()=>{
       profileMock = jest.spyOn(Profile,"GetByUserId");
       userMock = jest.spyOn(User,"getUserByEmail");
+      // profile mocked funciton
       dummyProfile.set_userName = profileSetUsername;
       dummyProfile.set_firstName = profileSet_FirstName;
       dummyProfile.set_lastName = profileSet_LastName;
@@ -105,6 +107,8 @@ describe("Profile Route GET and PATCH endpoint test",()=>{
       dummyProfile.set_status = profileSet_Status;
       dummyProfile.set_fines = profileSet_fines;
       dummyProfile.set_memberDate = profileSet_memberDate;
+      //user mocked function
+      dummyUser.setRole = userSet_role;
       profileMock.mockResolvedValue(dummyProfile);
       userMock.mockResolvedValue(dummyUser);
    })
@@ -600,7 +604,6 @@ describe("Profile Route GET and PATCH endpoint test",()=>{
    
    it("PATCH /profile/subscribe will throw an error if user is already a member",async()=>{
       const response = await request(serverApp).patch("/profile/subscribe").set({"Authorization":dummyMemberUserToken});
-
       expect(response.status).toBe(400);
       expect(response.body).toHaveProperty("error");
       expect(response.body.error).toBe("User is already a MEMBER")
@@ -616,9 +619,16 @@ describe("Profile Route GET and PATCH endpoint test",()=>{
 
    // membership date logic success
    
-//   it("PATCH /profile/subscribe will call profile.set_memberDate",async()=>{
-//      const response = await request(serverApp).patch("/profile/subscribe").set({"Authorization":dummyUserToken});
-//      expect(response.status).toBe(200);
-//      expect(profileSet_memberDate).toHaveBeenCalled();
-//   })
+   it("PATCH /profile/subscribe will call profile.set_memberDate",async()=>{
+      const response = await request(serverApp).patch("/profile/subscribe").set({"Authorization":dummyUserToken});
+      expect(response.status).toBe(200);
+      expect(profileSet_memberDate).toHaveBeenCalled();
+   })
+
+   it("PATCH /profile/subscribe will call user.setRole and set role the current user to a MEMBER",async()=>{
+      const response =  await request(serverApp).patch("/profile/subscribe").set({"Authorization":dummyUserToken});
+      expect(response.status).toBe(200);
+      expect(userSet_role).toHaveBeenCalled();
+      expect(userSet_role).toHaveBeenCalledWith(UserRole.MEMBER);
+   })
 })
