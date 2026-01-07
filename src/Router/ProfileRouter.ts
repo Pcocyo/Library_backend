@@ -1,9 +1,10 @@
 import { RouterClass } from "./Ultils/RouterClass";
 import { NextFunction, Request,Response } from "express";
 import Profile from "../Controller/Profile/Profile";
-import User from "../Controller/User/User";
+import User, { UserRole } from "../Controller/User/User";
 import { ProfileStatus } from "../Controller/Profile/Profile.interface";
 import { LibrarianUpdateProfileParam, UserUpdateProfileParam } from "../Controller/Profile/Profile.interface";
+import { UserJwtPayloadInterface } from "../Config/config.interface";
 export default class ProfileRouter extends RouterClass{
    public constructor(){
       super();
@@ -32,7 +33,7 @@ export default class ProfileRouter extends RouterClass{
          this.validateToken,
          this.validateMemberStatus,
          (req:Request,res:Response)=>{
-            res.send("success");
+            this.subscribe(req,res);
          }
       )
 
@@ -113,8 +114,20 @@ export default class ProfileRouter extends RouterClass{
       }
    }
 
-   private async updateMemberDate(){
-
+   private async subscribe(req:Request,res:Response){
+      try{
+         const userData:UserJwtPayloadInterface = req.body.authorizedUser;
+         const user:User = await User.getUserByEmail({email:userData.userEmail});
+         const profile:Profile = await Profile.GetByUserId({user_id:userData.userId});
+         user.setRole(UserRole.MEMBER);
+         profile.set_memberDate(new Date);
+         res.status(200).send({message:`User ${userData.userEmail} successfully subscribed`});
+      }catch(err:any){
+         res.status(400).send({
+            message:err.message,
+            error:err
+         })
+      }
    }
 
    private validateUserUpdate(req:Request,res:Response,next:NextFunction){
@@ -191,9 +204,15 @@ export default class ProfileRouter extends RouterClass{
          res.status(400).send({error: error.message});
      }
    }
+
    private validateMemberStatus(req:Request,res:Response,next:NextFunction){
-      let userData = req.body.authorizedUser
-      if(userData.userRole === "GUEST") next();
-      res.status(400).send({error:`User is already a ${userData.userRole}`});
+      try{
+         let userData:UserJwtPayloadInterface = req.body.authorizedUser
+         if(userData.userRole !== "GUEST") throw new Error(`User is already a ${userData.userRole}`);
+         next()
+      }
+      catch(err:any){
+         res.status(400).send({error:err.message});
+      }
    }
 }
