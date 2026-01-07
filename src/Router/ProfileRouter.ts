@@ -5,6 +5,7 @@ import User, { UserRole } from "../Controller/User/User";
 import { ProfileStatus } from "../Controller/Profile/Profile.interface";
 import { LibrarianUpdateProfileParam, UserUpdateProfileParam } from "../Controller/Profile/Profile.interface";
 import { UserJwtPayloadInterface } from "../Config/config.interface";
+
 export default class ProfileRouter extends RouterClass{
    public constructor(){
       super();
@@ -47,10 +48,10 @@ export default class ProfileRouter extends RouterClass{
    }
 
    private async getProfile(req:Request,res:Response){
-      const user_id = req.body.authorizedUser.userId;
-      const userProfile:Profile = await Profile.GetByUserId({user_id:user_id});
+      const userData:UserJwtPayloadInterface = req.body.authorizedUser;
+      const userProfile:Profile = await Profile.GetByUserId({user_id:userData.userId});
       res.send({
-            user_id:user_id,
+            user_id:userData.userId,
             user_name: userProfile.get_userName(),
             first_name:userProfile.get_firstName(),
             last_name:userProfile.get_lastName(),
@@ -64,11 +65,11 @@ export default class ProfileRouter extends RouterClass{
    }
    
    private async updateUserProfile(req:Request,res:Response){
-      const user_id = req.body.authorizedUser.userId;
+      const userData:UserJwtPayloadInterface = req.body.authorizedUser;
       const userParam:(keyof UserUpdateProfileParam)[] = ["user_name","first_name","last_name","contact","address"];
       const userInput:UserUpdateProfileParam = req.body.validatedInput as UserUpdateProfileParam;
       try{
-         const userProfile:Profile = await Profile.GetByUserId({user_id:user_id})
+         const userProfile:Profile = await Profile.GetByUserId({user_id:userData.userId});
 
          const updates = {
             "user_name":(input:string | null)=>{
@@ -95,7 +96,7 @@ export default class ProfileRouter extends RouterClass{
          //update profile.update_at data
          const updateDate = new Date;
          userProfile.set_updatedAt(updateDate);
-         res.status(200).json({message:`Profile for user ${user_id} successfully updated on ${updateDate}`});
+         res.status(200).json({message:`Profile for user ${userData.userId} successfully updated on ${updateDate}`});
       }catch(err){
          res.send(400).json({error:err})
       }
@@ -192,6 +193,7 @@ export default class ProfileRouter extends RouterClass{
             }
          }
       }
+
      try {
         for(let param of librarianParam){
             if(userInput[param] === undefined) throw new Error(`${param} is undefined`);
