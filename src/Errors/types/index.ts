@@ -5,4 +5,5 @@ export type {
    ServerErrorStatusCode , HttpsStatusCode, HttpsErrorStatusCode, HttpsSuccessStatusCode
 } from "./httpsStatusCode.types";
 
+export type { ValidationErrorConstructorParam } from "./ValidationError.types";
 
