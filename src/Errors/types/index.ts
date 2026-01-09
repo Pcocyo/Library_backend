@@ -6,5 +6,5 @@ export type {
 
 export type { BaseErrorConstructorParams,ClientError,DevError } from "./BaseError.types";
 export type { ValidationErrorConstructorParam,  ValidationErrorDevResponse} from "./ValidationError.types";
-export type { ClientErrorConstructorParams, ClientErrorDev } from "./ClientError.types";
+export type { ClientErrorConstructorParams, ClientErrorDevResponse } from "./ClientError.types";
 
