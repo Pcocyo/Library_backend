@@ -1,9 +1,14 @@
 import { BaseError } from "./BaseError";
 import {
-   ValidationErrorDevResponse, ValidationErrorConstructorParam
+   ValidationErrorDevResponse, ValidationErrorConstructorParam,
+   CreateInvalidInputErrorParam
 } from "./types";
 
-class ValidationError extends BaseError {
+export enum ValidationErrorCode {
+   Invalid_Email_Input = "VALIDATION_ERROR_001",
+}
+
+export class ValidationError extends BaseError {
    private readonly field?: string;
    private readonly value?: string;
 
@@ -29,6 +34,16 @@ class ValidationError extends BaseError {
    }
 }
 
-export class ValidattionErrorFactory{
-
+export class ValidationErrorFactory{
+   public static createInvalidInputError(param:CreateInvalidInputErrorParam): ValidationError{
+      return new ValidationError({
+         message: "Invalid email input",
+         httpStatusCode: 400,
+         code: ValidationErrorCode.Invalid_Email_Input,
+         isOperational: true,
+         context:param.context,
+         field:param.field,
+         value:param.value
+      })
+   }
 }

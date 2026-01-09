@@ -8,3 +8,9 @@ export interface ValidationErrorDevResponse extends DevErrorResponse{
    field?: string,
    value?: any
 }
+
+export interface CreateInvalidInputErrorParam{
+   field: string,
+   value: any
+   context: Record<string,any>
+}
