@@ -1,4 +1,4 @@
-import { DevApp } from "../../../dist/Server/App/DevApp";
+import { DevApp } from "../../../src/Server/App/DevApp";
 import request from 'supertest';
 
 describe("DevApp class test", () => {

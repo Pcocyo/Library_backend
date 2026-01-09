@@ -1,6 +1,4 @@
-import { Server } from "../../dist/Server/Server"
-import request from 'supertest';
-import { UserRouter } from "../../dist/Router/UserRouter"
+import { Server } from "../../src/Server/Server"
 
 describe("Server class test", () => {
     let instance: Server;
