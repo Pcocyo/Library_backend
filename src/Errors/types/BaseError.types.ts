@@ -14,7 +14,7 @@ export interface BaseErrorConstructorParams {
    context?: Record<string,any>;
 }
 
-export interface ClientError{
+export interface ClientErrorResponse{
    name: string;
    message: string;
    code: string;
@@ -22,7 +22,7 @@ export interface ClientError{
    timestamp: string;
 }
 
-export interface DevError{
+export interface DevErrorResponse{
    name: string;
    message: string;
    code: string;

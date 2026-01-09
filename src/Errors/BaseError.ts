@@ -1,4 +1,4 @@
-import { BaseErrorConstructorParams, ClientError, DevError } from "./types";
+import { BaseErrorConstructorParams, ClientErrorResponse, DevErrorResponse } from "./types";
 import { HttpsStatusCode } from "./types";
 
 export abstract class BaseError extends Error{
@@ -31,7 +31,7 @@ export abstract class BaseError extends Error{
    }
    
    // For client error logs
-   public toClientResponse(): ClientError{
+   public toClientResponse(): ClientErrorResponse{
       return{
          name: this.name,
          message:this.message,
@@ -42,7 +42,7 @@ export abstract class BaseError extends Error{
    }
    
    // For developer error logs
-   public toDevResponse(): DevError{
+   public toDevResponse(): DevErrorResponse{
       return{
          name: this.name,
          message:this.message,

@@ -4,7 +4,7 @@ export type {
    ServerErrorStatusCode , HttpsStatusCode, HttpsErrorStatusCode, HttpsSuccessStatusCode
 } from "./httpsStatusCode.types";
 
-export type { BaseErrorConstructorParams,ClientError,DevError } from "./BaseError.types";
+export type { BaseErrorConstructorParams,ClientErrorResponse,DevErrorResponse } from "./BaseError.types";
 export type { ValidationErrorConstructorParam,  ValidationErrorDevResponse} from "./ValidationError.types";
 export type { 
    ClientErrorConstructorParams, ClientErrorDevResponse, 
