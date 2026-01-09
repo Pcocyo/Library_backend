@@ -1,10 +1,10 @@
-import { ClientErrorStatusCode } from "./httpsStatusCode.types"
+import { BaseErrorConstructorParams, DevError } from "./BaseError.types"
 
-export interface ValidationErrorConstructorParam {
-   message: string,
-   code: string,
-   httpErrorCode: ClientErrorStatusCode
-   context?: Record<string,any>
+export interface ValidationErrorConstructorParam extends BaseErrorConstructorParams{
+   field?: string,
+   value?: any
+}
+export interface ValidationErrorDevResponse extends DevError{
    field?: string,
    value?: any
 }

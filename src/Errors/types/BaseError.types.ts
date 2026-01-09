@@ -31,6 +31,4 @@ export interface DevError{
    timestamp: string;
    context?: Record<string,any>;
    isOperational: boolean;
-   field?:string,
-   value?:any
 }

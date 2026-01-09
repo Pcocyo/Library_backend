@@ -1,6 +1,6 @@
 import { BaseError } from "./BaseError";
 import {
-   DevError, ValidationErrorConstructorParam,
+   ValidationErrorDevResponse, ValidationErrorConstructorParam
 } from "./types";
 
 class ValidationError extends BaseError {
@@ -10,7 +10,7 @@ class ValidationError extends BaseError {
    constructor(param: ValidationErrorConstructorParam) {
       super({
          message: param.message,
-         httpStatusCode: param.httpErrorCode,
+         httpStatusCode: param.httpStatusCode,
          code: param.code,
          isOperational: true,
          context: param.context,
@@ -20,7 +20,7 @@ class ValidationError extends BaseError {
       this.value = param.value;
    }
 
-   public toDevResponse(): DevError {
+   public toDevResponse():  ValidationErrorDevResponse{
       return {
          ...this.toDevResponse(),
          value: this.value,
