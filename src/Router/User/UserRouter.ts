@@ -1,11 +1,10 @@
-import { RouterClass } from "./Ultils/RouterClass";
-import type { NextFunction, Request, Response } from "express";
-import User, { UserRole } from "../Controller/User/User";
-import Env from "../Config/config";
-import Profile from "../Controller/Profile/Profile";
-import ProfileRouter from "./ProfileRouter";
+import { RouterClass } from "../Ultils/RouterClass";
+import type { Request, Response } from "express";
+import User, {UserRole} from "../../Controller/User/User";
+import Env from "../../Config/config";
+import Profile from "../../Controller/Profile/Profile";
 
-export default class UserRouter extends RouterClass {
+export class UserRouter extends RouterClass {
     public constructor() {
         super();
         this.initializeRoutes();
