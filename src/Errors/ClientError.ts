@@ -1,7 +1,7 @@
 import { BaseError } from "./BaseError";
 import { ClientErrorConstructorParams, ClientErrorDevResponse, MissingFieldParam, UnauthorizedCLientParam} from "./types";
 
-class ClientError extends BaseError{
+export class ClientError extends BaseError{
    private readonly field:string;
 
    constructor(param:ClientErrorConstructorParams){
