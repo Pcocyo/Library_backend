@@ -70,10 +70,15 @@ export class UserRouter extends RouterClass {
          await userInstance.setRole(req.body.userRole);
          let newToken = Env.getGenerateJwtToken(userInstance);
          res.send({ token: newToken });
-      } catch (err: any) {
-         res.status(400).send({
-            error: err.message,
-         });
+      } catch (error: any) {
+         if(error instanceof ClientError){
+            res.status(error.httpsStatusCode).send(error.toClientResponse());
+         }
+         else{
+            res.status(400).send({
+               error: error.message,
+            });
+         }
       }
    }
 
@@ -132,10 +137,15 @@ export class UserRouter extends RouterClass {
             email: userFound.getEmail(),
             role: userFound.getUserRole(),
          });
-      } catch (err: any) {
-         res.status(400).send({
-            error: err.message,
-         });
+      } catch (error: any) {
+         if(error instanceof ClientError){
+            res.status(error.httpsStatusCode).send(error.toClientResponse());
+         }
+         else{
+            res.status(400).send({
+               error: error.message,
+            });
+         }
       }
    }
 
