@@ -11,6 +11,8 @@ import Env from "../../src/Config/config.ts";
 import dotenv from "dotenv";
 dotenv.config({ quiet: true });
 import jwt from "jsonwebtoken";
+import { ClientErrorCode } from "../../src/Errors/ClientError.ts";
+import { ValidationErrorCode } from "../../src/Errors/ValidationError.ts";
 
 describe("Update user test suite", () => {
    let dummyUserId = "dummyUseeId";
@@ -162,7 +164,7 @@ describe("Create, Delete, Read Test Suite (Unit Test)", () => {
    };
 
    const invalidPasswordPayload = {
-      email: "example@example.com",
+      email: "example12@example.com",
       password: "invalidpassword",
    };
 
@@ -248,7 +250,60 @@ describe("Create, Delete, Read Test Suite (Unit Test)", () => {
       getProfileSpy.mockRestore();
    });
 
-   // create user logic
+   // create user failed test
+
+   it("post /user/create route Respond with Error code CLIENT_ERROR_001 if email parameter is missing", async() => {
+      let missingEmailPayload = {
+         password: "ValidPassword@",
+      }
+      const response = await request(serverApp)
+         .post("/user/create")
+         .send(missingEmailPayload);
+      expect(response.status).toBe(400)
+      expect(response.body).toHaveProperty("name");
+      expect(response.body.name).toBe("CLIENT_ERROR");
+      expect(response.body).toHaveProperty("code");
+      expect(response.body.code).toBe(ClientErrorCode.Missing_Parameter);
+   })
+
+   it("post /user/create route Respond with Error code VALIDATION_ERROR_001 if user enter an invalid email", async () => {
+      const response = await request(serverApp)
+         .post("/user/create")
+         .send(invalidEmailPayload);
+      expect(response.body).toHaveProperty("name");
+      expect(response.body.name).toBe("VALIDATION_ERROR");
+      expect(response.body).toHaveProperty("code");
+      expect(response.body.code).toBe(ValidationErrorCode.Invalid_Email_Input);
+      expect(response.status).toBe(400);
+   });
+
+   it("post /user/create route Respond with Error code CLIENT_ERROR_001 if password parameter is missing", async() => {
+      let missingPasswordPayload = {
+         email:"example12@example.com",
+      }
+      const response = await request(serverApp)
+         .post("/user/create")
+         .send(missingPasswordPayload);
+      expect(response.status).toBe(400)
+      expect(response.body).toHaveProperty("name");
+      expect(response.body.name).toBe("CLIENT_ERROR");
+      expect(response.body).toHaveProperty("code");
+      expect(response.body.code).toBe(ClientErrorCode.Missing_Parameter);
+   })
+
+   it("post /user/create route Respond with Error code VALIDATION_ERROR_002 if user enter an invalid password format", async () => {
+      const response = await request(serverApp)
+         .post("/user/create")
+         .send(invalidPasswordPayload);
+      expect(response.body).toHaveProperty("name");
+      expect(response.body.name).toBe("VALIDATION_ERROR");
+      expect(response.body).toHaveProperty("code");
+      expect(response.body.code).toBe(ValidationErrorCode.Invalid_Password_Input);
+      expect(response.status).toBe(400);
+   });
+
+   // create user success logic
+   
    it("post /user/create route Respond with a valid jwtToken", async () => {
       const response = await request(serverApp)
          .post("/user/create")
@@ -285,20 +340,13 @@ describe("Create, Delete, Read Test Suite (Unit Test)", () => {
       ).toBeTruthy();
    });
 
-   it("post /user/create route Respond with error if user enter an invalid email", async () => {
+   it("post /user/create route respond with success and jwtToken", async () => {
       const response = await request(serverApp)
          .post("/user/create")
-         .send(invalidEmailPayload);
-      expect(response.body).toHaveProperty("error");
-      expect(response.body.error).not.toBeNull();
-   });
-
-   it("post /user/create route Respond with error if user enter an invalid password", async () => {
-      const response = await request(serverApp)
-         .post("/user/create")
-         .send(invalidPasswordPayload);
-      expect(response.body).toHaveProperty("error");
-      expect(response.body.error).not.toBeNull();
+         .send(payload);
+      const passwordCall = createNewUserSpy.mock.calls[0][0].password;
+      expect(response.status).toBe(200);
+      expect(response.body).toHaveProperty("token")
    });
 
    // get User by email logic
