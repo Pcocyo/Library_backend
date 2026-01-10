@@ -18,7 +18,7 @@ export class ClientError extends BaseError{
 
    public toDevResponse(): ClientErrorDevResponse{
       return {
-         ...this.toDevResponse(),
+         ...super.toDevResponse(),
          field:this.field
       }
    }

@@ -28,7 +28,7 @@ export class ValidationError extends BaseError {
 
    public toDevResponse():  ValidationErrorDevResponse{
       return {
-         ...this.toDevResponse(),
+         ...super.toDevResponse(),
          value: this.value,
          field:this.field
       }
