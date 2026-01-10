@@ -7,6 +7,8 @@ import type {
 import type { UserRegisterInterface } from "../../../src/Controller/User/User.interface";
 import User, { UserRole } from "../../../src/Controller/User/User";
 import prisma from "../../../src/prismaClient";
+import { ClientError } from "../../../src/Errors";
+import { ClientErrorCode } from "../../../src/Errors/ClientError";
 describe("Class Tests", () => {
     const dummyId: string = "dummyId";
     const dummyUserName: string = "dummyUserName";
@@ -152,7 +154,9 @@ describe("Profile table tests", () => {
         expect(profile).toBeNull();
         await prisma.users.delete({ where: { user_id: newDummyUser.getId() } });
     });
+
     //Get Profile by user id tests
+
     it("Profile.GetByUserId should return the correct profile records and Profile object", async () => {
         let dbDummyProfile: Profile;
         dbDummyProfile = await Profile.GetByUserId({
@@ -166,13 +170,16 @@ describe("Profile table tests", () => {
         expect(dbDummyProfile).toBeInstanceOf(Profile);
     });
 
-    it("Profile.GetByUserId should return error when profile records did not exists", async () => {
+    it("Profile.GetByUserId should return ClientError class with CLIENT_ERROR_005 code when profile records did not exists", async () => {
         try {
             await Profile.GetByUserId({
                 user_id: "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
             });
-        } catch (err) {
-            expect(err).not.toBeNull();
+        } catch (err:any) {
+            const clientError:ClientError = err as ClientError;
+            expect(clientError instanceof ClientError).toBeTruthy();
+            expect(clientError.httpsStatusCode).toBe(400);
+            expect(clientError.code).toBe(ClientErrorCode.User_Id_Not_Found);
         }
     });
 

@@ -1,7 +1,8 @@
 import { BaseError } from "./BaseError";
 import { ClientErrorConstructorParams, ClientErrorDevResponse, 
          EmailNotFoundParam, IncorrectPasswordParam,
-         MissingFieldParam, UnauthorizedCLientParam} from "./types";
+         MissingFieldParam, UnauthorizedCLientParam,
+         UserIdNotFoundParam} from "./types";
 
 export class ClientError extends BaseError{
    private readonly field:string;
@@ -30,7 +31,8 @@ export enum ClientErrorCode {
    Missing_Parameter = "CLIENT_ERROR_001",
    Unauthorized_Request = "CLIENT_ERROR_002",
    Incorrect_Password = "CLIENT_ERROR_003",
-   Email_Not_Found = "CLIENT_ERROR_004"
+   Email_Not_Found = "CLIENT_ERROR_004",
+   User_Id_Not_Found = "CLIENT_ERROR_005"
 }
 
 export class ClientErrorFactory {
@@ -73,6 +75,17 @@ export class ClientErrorFactory {
          message:"Email Not Found",
          httpStatusCode: 400,
          code: ClientErrorCode.Email_Not_Found,
+         isOperational: true,
+         context:param.context
+      })
+   }
+
+   public static createUserIdNotFoundError(param:UserIdNotFoundParam):ClientError{
+      return new ClientError({
+         field: "user_id",
+         message:"user id Not Found",
+         httpStatusCode: 400,
+         code: ClientErrorCode.User_Id_Not_Found,
          isOperational: true,
          context:param.context
       })

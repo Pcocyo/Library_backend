@@ -11,6 +11,7 @@
 //table.timestamp("updated_at"); // represent user data last profile updates
 //
 
+import { ClientErrorFactory } from "../../Errors";
 import prisma from "../../prismaClient";
 import {
     ProfileParam,
@@ -256,14 +257,15 @@ export default class Profile {
         }
     }
 
-    public static async GetByUserId(param: GetByUserIdParam): Promise<Profile> {
-        let profile = await prisma.profiles.findUnique({
+   public static async GetByUserId(param: GetByUserIdParam): Promise<Profile> {
+      try{
+         let profile = await prisma.profiles.findUnique({
             where: { user_id: param.user_id },
-        });
-        if (!profile) {
-            throw new Error(`User ${param.user_id} not exists`);
-        }
-        let newProfileParam: ProfileParam = {
+         });
+         if (!profile) {
+            throw ClientErrorFactory.createUserIdNotFoundError({context:{data_recieved:param}})
+         }
+         let newProfileParam: ProfileParam = {
             user_id: profile.user_id,
             user_name: profile.user_name,
             first_name: profile.first_name,
@@ -274,9 +276,12 @@ export default class Profile {
             status: ProfileStatus[profile.status as keyof typeof ProfileStatus],
             total_fines: profile.total_fines.toNumber(),
             updated_at: profile.updated_at,
-        };
-        return new Profile(newProfileParam);
-    }
+         };
+         return new Profile(newProfileParam);
+      }catch(err:any){
+         throw err
+      }
+   }
 
     static Tests__CreateProfile__(params: ProfileParam): Profile {
         return new Profile(params);

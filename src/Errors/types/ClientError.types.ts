@@ -26,3 +26,7 @@ export interface EmailNotFoundParam {
    context?:Record<string,any>
 }
 
+export interface UserIdNotFoundParam {
+   context?:Record<string,any>
+}
+
