@@ -1,5 +1,7 @@
 import { BaseError } from "./BaseError";
-import { ClientErrorConstructorParams, ClientErrorDevResponse, MissingFieldParam, UnauthorizedCLientParam} from "./types";
+import { ClientErrorConstructorParams, ClientErrorDevResponse, 
+         IncorrectPasswordParam, MissingFieldParam, 
+         UnauthorizedCLientParam} from "./types";
 
 export class ClientError extends BaseError{
    private readonly field:string;
@@ -26,7 +28,8 @@ export class ClientError extends BaseError{
 
 export enum ClientErrorCode {
    Missing_Parameter = "CLIENT_ERROR_001",
-   Unauthorized_Request = "CLIENT_ERROR_002"
+   Unauthorized_Request = "CLIENT_ERROR_002",
+   Incorrect_Password = "CLIENT_ERROR_003",
 }
 
 export class ClientErrorFactory {
@@ -48,6 +51,16 @@ export class ClientErrorFactory {
          message:"Unauthorized Request",
          httpStatusCode: 401,
          code: ClientErrorCode.Unauthorized_Request,
+         isOperational: true,
+         context:param.context
+      })
+   }
+   public static createIncorrectPasswordError(param:IncorrectPasswordParam):ClientError{
+      return new ClientError({
+         field: param.field,
+         message:"Password Incorrect",
+         httpStatusCode: 401,
+         code: ClientErrorCode.Incorrect_Password,
          isOperational: true,
          context:param.context
       })

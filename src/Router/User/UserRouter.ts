@@ -5,6 +5,7 @@ import { CreateUserRequest, DeleteUserRequest, GetUserRequest, LoginUserRequest,
 import {ErrorHandler_Middleware } from "../../Middleware/ErrorHandler_Middleware";
 import Env from "../../Config/config";
 import Profile from "../../Controller/Profile/Profile";
+import { ClientError, ClientErrorFactory } from "../../Errors";
 
 export class UserRouter extends RouterClass {
    public constructor() {
@@ -98,22 +99,28 @@ export class UserRouter extends RouterClass {
 
    private async login(req: LoginUserRequest, res: Response) {
       try {
-         const { email, password } = req.body;
-         const user = await User.getUserByEmail({ email: email });
+         const user = await User.getUserByEmail({ email: req.body.email });
          const correctPassword = await Env.getValidatePassword(
-            password,
+            req.body.password,
             user.getPassword(),
          );
-
          if (!correctPassword) {
-            throw new Error("Incorrect password");
+            throw ClientErrorFactory.createIncorrectPasswordError({
+               field:req.body.password,
+               context:{user_request_info:req.body}
+            });
          }
          const token = Env.getGenerateJwtToken(user);
          res.send({
             token: token,
          });
-      } catch (err: any) {
-         res.status(400).send({ error: err.message });
+      } catch (error: any) {
+         if(error instanceof ClientError){
+            res.status(error.httpsStatusCode).send(error.toClientResponse());
+         }
+         else{
+            res.status(400).send({ error: error.message });
+         }
       }
    }
 

@@ -8,11 +8,12 @@ export type { BaseErrorConstructorParams, ClientErrorResponse, DevErrorResponse 
 
 export type { 
    ValidationErrorConstructorParam, ValidationErrorDevResponse, 
-   CreateInvalidInputErrorParam 
+   CreateInvalidInputErrorParam
 } from "./ValidationError.types";
 
 export type { 
    ClientErrorConstructorParams, ClientErrorDevResponse, 
-   MissingFieldParam, UnauthorizedCLientParam 
+   MissingFieldParam, UnauthorizedCLientParam,
+   IncorrectPasswordParam
 } from "./ClientError.types";
 

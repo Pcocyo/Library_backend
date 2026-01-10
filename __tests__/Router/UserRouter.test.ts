@@ -461,19 +461,6 @@ describe("Create, Delete, Read Test Suite (Unit Test)", () => {
 
 
    // /user/login error logic
-   
-   it("get /user/login response with error when user enter wrong password", async () => {
-      const wrongPasswordPayload = {
-         email: payload.email,
-         password: "WrongPassword@123",
-      };
-      const response = await request(serverApp)
-         .post("/user/login")
-         .send(wrongPasswordPayload);
-      expect(response.body).not.toHaveProperty("token");
-      expect(response.body).toHaveProperty("error");
-      expect(response.body.error).not.toBeNull();
-   });
 
    it("get /user/login response with Error code CLIENT_ERROR_001 if email parameter is missing",async()=>{
       const missingEmailPayload = {
@@ -523,6 +510,17 @@ describe("Create, Delete, Read Test Suite (Unit Test)", () => {
       expect(response.body).toHaveProperty("code");
       expect(response.body.code).toBe(ValidationErrorCode.Invalid_Password_Input);
       expect(response.status).toBe(400);
+   });
+
+   it("get /user/login Respond with Error code CLIENT_ERROR_003 if user enter an incorrect password", async () => {
+      const response = await request(serverApp)
+         .post("/user/login")
+         .send({email:payload.email, password:"dummyPassword123@@"});
+      expect(response.body).toHaveProperty("name");
+      expect(response.body.name).toBe("CLIENT_ERROR");
+      expect(response.body).toHaveProperty("code");
+      expect(response.body.code).toBe(ClientErrorCode.Incorrect_Password);
+      expect(response.status).toBe(401);
    });
 
    // /user/login success logic

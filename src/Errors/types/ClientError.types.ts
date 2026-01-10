@@ -17,3 +17,10 @@ export interface MissingFieldParam {
 export interface UnauthorizedCLientParam {
    context?:Record<string,any>
 }
+
+export interface IncorrectPasswordParam {
+   field:string,
+   context?:Record<string,any>
+}
+
+
