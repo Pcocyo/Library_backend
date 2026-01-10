@@ -1,12 +1,12 @@
-import { RouterClass } from "./Ultils/RouterClass";
+import { RouterClass } from "../Ultils/RouterClass";
 import { NextFunction, Request,Response } from "express";
-import Profile from "../Controller/Profile/Profile";
-import User, { UserRole } from "../Controller/User/User";
-import { ProfileStatus } from "../Controller/Profile/Profile.interface";
-import { LibrarianUpdateProfileParam, UserUpdateProfileParam } from "../Controller/Profile/Profile.interface";
-import { UserJwtPayloadInterface } from "../Config/config.interface";
+import Profile from "../../Controller/Profile/Profile";
+import User, {UserRole} from "../../Controller/User/User";
+import { ProfileStatus } from "../../Controller/Profile/Profile.interface";
+import { LibrarianUpdateProfileParam,UserUpdateProfileParam } from "../../Controller/Profile/Profile.interface";
+import { UserJwtPayloadInterface } from "../../Config/config.interface";
 
-export default class ProfileRouter extends RouterClass{
+export class ProfileRouter extends RouterClass{
    public constructor(){
       super();
       this.initializeRoutes();
