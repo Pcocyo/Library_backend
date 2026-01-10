@@ -34,3 +34,7 @@ export interface DeleteUserRequest extends Request{
    }
 }
 
+export interface LoginUserRequest extends Request{
+   body: BasicUserData
+}
+

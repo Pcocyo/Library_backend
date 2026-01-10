@@ -1,7 +1,7 @@
 import { RouterClass } from "../Ultils/RouterClass";
 import type { Request, Response,RequestHandler } from "express";
 import User, {UserRole} from "../../Controller/User/User";
-import { CreateUserRequest, DeleteUserRequest, GetUserRequest, UpdateUserRequest} from "./UserRouter.types";
+import { CreateUserRequest, DeleteUserRequest, GetUserRequest, LoginUserRequest, UpdateUserRequest} from "./UserRouter.types";
 import {ErrorHandler_Middleware } from "../../Middleware/ErrorHandler_Middleware";
 import Env from "../../Config/config";
 import Profile from "../../Controller/Profile/Profile";
@@ -30,7 +30,10 @@ export class UserRouter extends RouterClass {
          },
       );
 
-      this.router.post("/login", (req: Request, res: Response) => {
+      this.router.post("/login",
+         ErrorHandler_Middleware.ValidateEmailParameter,
+         ErrorHandler_Middleware.ValidatePasswordParameter,
+         (req: LoginUserRequest, res: Response) => {
          this.login(req, res);
       });
 
@@ -93,11 +96,9 @@ export class UserRouter extends RouterClass {
       }
    }
 
-   private async login(req: Request, res: Response) {
+   private async login(req: LoginUserRequest, res: Response) {
       try {
          const { email, password } = req.body;
-         this.validateEmail(email);
-         this.validatePassword(password);
          const user = await User.getUserByEmail({ email: email });
          const correctPassword = await Env.getValidatePassword(
             password,

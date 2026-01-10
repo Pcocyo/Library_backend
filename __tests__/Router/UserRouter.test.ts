@@ -447,6 +447,7 @@ describe("Create, Delete, Read Test Suite (Unit Test)", () => {
 
 
    // get /user/getUser success logic
+   
    it("get /user/getUser respond with valid user", async () => {
       const response = await request(serverApp)
          .get("/user/getUser")
@@ -457,18 +458,10 @@ describe("Create, Delete, Read Test Suite (Unit Test)", () => {
       expect(response.body).toHaveProperty("email");
       expect(response.body).toHaveProperty("role");
    });
-   // login logic
-   it("get /user/login respond with valid jwt token", async () => {
-      const response = await request(serverApp)
-         .post("/user/login")
-         .send(payload);
-      expect(response.body).toHaveProperty("token");
-      const responsedToken = decodeToken(response.body.token);
-      expect(responsedToken).toHaveProperty("userId");
-      expect(responsedToken).toHaveProperty("userEmail");
-      expect(responsedToken).toHaveProperty("userRole");
-   });
 
+
+   // /user/login error logic
+   
    it("get /user/login response with error when user enter wrong password", async () => {
       const wrongPasswordPayload = {
          email: payload.email,
@@ -482,22 +475,67 @@ describe("Create, Delete, Read Test Suite (Unit Test)", () => {
       expect(response.body.error).not.toBeNull();
    });
 
-   it("get /user/login response with error when user enter invalid email payload", async () => {
+   it("get /user/login response with Error code CLIENT_ERROR_001 if email parameter is missing",async()=>{
+      const missingEmailPayload = {
+         password:payload.password,
+      }
+      const response = await request(serverApp)
+         .post("/user/login")
+         .send(missingEmailPayload)
+      expect(response.body).toHaveProperty("name");
+      expect(response.body.name).toBe("CLIENT_ERROR");
+      expect(response.body).toHaveProperty("code");
+      expect(response.body.code).toBe(ClientErrorCode.Missing_Parameter);
+      expect(response.status).toBe(400);
+   })
+
+   it("get /user/login Respond with Error code VALIDATION_ERROR_001 if user enter an invalid email", async () => {
       const response = await request(serverApp)
          .post("/user/login")
          .send(invalidEmailPayload);
-      expect(response.body).not.toHaveProperty("token");
-      expect(response.body).toHaveProperty("error");
-      expect(response.body.error).not.toBeNull();
+      expect(response.body).toHaveProperty("name");
+      expect(response.body.name).toBe("VALIDATION_ERROR");
+      expect(response.body).toHaveProperty("code");
+      expect(response.body.code).toBe(ValidationErrorCode.Invalid_Email_Input);
+      expect(response.status).toBe(400);
    });
 
-   it("get /user/login response with error when user enter invalid password payload", async () => {
+   it("get /user/login response with Error code CLIENT_ERROR_001 if password parameter is missing",async()=>{
+      const missingPasswordPayload = {
+         email:payload.email
+      };
+      const response = await request(serverApp)
+         .post("/user/login")
+         .send(missingPasswordPayload);
+      expect(response.body).toHaveProperty("name");
+      expect(response.body.name).toBe("CLIENT_ERROR");
+      expect(response.body).toHaveProperty("code");
+      expect(response.body.code).toBe(ClientErrorCode.Missing_Parameter);
+      expect(response.status).toBe(400);
+   })
+
+   it("get /user/login Respond with Error code VALIDATION_ERROR_001 if user enter an invalid password", async () => {
       const response = await request(serverApp)
          .post("/user/login")
          .send(invalidPasswordPayload);
-      expect(response.body).not.toHaveProperty("token");
-      expect(response.body).toHaveProperty("error");
-      expect(response.body.error).not.toBeNull();
+      expect(response.body).toHaveProperty("name");
+      expect(response.body.name).toBe("VALIDATION_ERROR");
+      expect(response.body).toHaveProperty("code");
+      expect(response.body.code).toBe(ValidationErrorCode.Invalid_Password_Input);
+      expect(response.status).toBe(400);
+   });
+
+   // /user/login success logic
+   
+   it("get /user/login respond with valid jwt token", async () => {
+      const response = await request(serverApp)
+         .post("/user/login")
+         .send(payload);
+      expect(response.body).toHaveProperty("token");
+      const responsedToken = decodeToken(response.body.token);
+      expect(responsedToken).toHaveProperty("userId");
+      expect(responsedToken).toHaveProperty("userEmail");
+      expect(responsedToken).toHaveProperty("userRole");
    });
 
    // /user/delete error logic
