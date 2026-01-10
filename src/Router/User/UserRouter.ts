@@ -167,24 +167,4 @@ export class UserRouter extends RouterClass {
          });
       }
    }
-
-   private validateEmail(emailToTest: string): Error | null {
-      const emailRegx: RegExp =
-         /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-      if (!emailRegx.test(emailToTest)) {
-         throw new Error("Invalid email");
-      }
-      return null;
-   }
-
-   private validatePassword(passwordToTest: string): Error | null {
-      const passwordRegx: RegExp =
-         /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]).{8,32}$/;
-      if (!passwordRegx.test(passwordToTest)) {
-         throw new Error(
-            "Invalid password, password must contain at least 1 special characther, capital letter, number, and in between 8-32 words",
-         );
-      }
-      return null;
-   }
 }
