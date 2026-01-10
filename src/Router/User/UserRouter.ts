@@ -1,7 +1,7 @@
 import { RouterClass } from "../Ultils/RouterClass";
 import type { Request, Response,RequestHandler } from "express";
 import User, {UserRole} from "../../Controller/User/User";
-import { CreateUserRequest, GetUserRequest } from "./UserRouter.types";
+import { CreateUserRequest, DeleteUserRequest, GetUserRequest, UpdateUserRequest} from "./UserRouter.types";
 import {ErrorHandler_Middleware } from "../../Middleware/ErrorHandler_Middleware";
 import Env from "../../Config/config";
 import Profile from "../../Controller/Profile/Profile";
@@ -24,6 +24,7 @@ export class UserRouter extends RouterClass {
       this.router.get(
          "/getUser",
          this.validateToken,
+         ErrorHandler_Middleware.ValidateEmailParameter,
          (req: GetUserRequest, res: Response) => {
             this.getUser(req, res);
          },
@@ -36,7 +37,7 @@ export class UserRouter extends RouterClass {
       this.router.delete(
          "/delete",
          this.validateToken,
-         (req: Request, res: Response) => {
+         (req: DeleteUserRequest, res: Response) => {
             this.deleteUser(req, res);
          },
       );
@@ -44,30 +45,29 @@ export class UserRouter extends RouterClass {
       this.router.put(
          "/update",
          this.validateToken,
-         (req: Request, res: Response) => {
+         ErrorHandler_Middleware.ValidateEmailParameter,
+         ErrorHandler_Middleware.ValidatePasswordParameter,
+         (req: UpdateUserRequest, res: Response) => {
             this.updateUser(req, res);
          },
       );
    }
 
 
-   private async updateUser(req: Request, res: Response) {
+   private async updateUser(req: UpdateUserRequest, res: Response) {
       try {
-         const { authorizedUser, updateData } = req.body;
-
-         if (updateData.email) this.validateEmail(updateData.email);
-         if (updateData.password) this.validatePassword(updateData.password);
-         if (updateData.role) {
-            if (!UserRole[updateData.role as keyof typeof UserRole]) {
+         const { authorizedUser } = req.body;
+         if (req.body.userRole) {
+            if (!UserRole[req.body.userRole as keyof typeof UserRole]) {
                throw new Error("Role inserted was invalid");
             }
          }
          const userInstance = await User.getUserByEmail({
             email: authorizedUser.userEmail,
          });
-         await userInstance.setEmail(updateData.email);
-         await userInstance.setPassword(await Env.getGenerateBcrypt(updateData.password));
-         await userInstance.setRole(updateData.role);
+         await userInstance.setEmail(req.body.email);
+         await userInstance.setPassword(await Env.getGenerateBcrypt(req.body.password));
+         await userInstance.setRole(req.body.userRole);
          let newToken = Env.getGenerateJwtToken(userInstance);
          res.send({ token: newToken });
       } catch (err: any) {
@@ -120,11 +120,9 @@ export class UserRouter extends RouterClass {
       }
    }
 
-   private async getUser(req: Request, res: Response) {
+   private async getUser(req: GetUserRequest, res: Response) {
       try {
-         const { email } = req.body;
-         this.validateEmail(email);
-         const userFound: User = await User.getUserByEmail({ email: email });
+         const userFound: User = await User.getUserByEmail({ email: req.body.email });
          res.send({
             id: userFound.getId(),
             email: userFound.getEmail(),
@@ -137,7 +135,7 @@ export class UserRouter extends RouterClass {
       }
    }
 
-   private async deleteUser(req: Request, res: Response) {
+   private async deleteUser(req: DeleteUserRequest, res: Response) {
       try {
          const { authorizedUser } = req.body;
          let userProfile:Profile = await Profile.GetByUserId({user_id:authorizedUser.userId});

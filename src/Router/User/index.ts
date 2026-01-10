@@ -1,4 +1,4 @@
 export { UserRouter } from "./UserRouter";
-export type { CreateUserRequest, GetUserRequest} from "./UserRouter.types";
+export type { CreateUserRequest, GetUserRequest, UpdateUserRequest, DeleteUserRequest} from "./UserRouter.types";
 
 

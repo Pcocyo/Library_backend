@@ -52,11 +52,9 @@ describe("Update user test suite", () => {
       getUserByEmailMock = jest.spyOn(User, "getUserByEmail");
       getUserByEmailMock.mockResolvedValue(dummyUserInstance);
       payload = {
-         updateData: {
             email: "example@gmail.com",
             password: "TestPassword123@",
-            role: UserRole.GUEST,
-         },
+            userRole: UserRole.GUEST,
       };
    });
 
@@ -64,6 +62,8 @@ describe("Update user test suite", () => {
       getUserByEmailMock.mockRestore();
    });
 
+   // /user/update error logic
+   
    it("put /user/update should return an error when requested without any token authorization on request header", async () => {
       const response = await request(serverApp)
          .put("/user/update")
@@ -74,14 +74,88 @@ describe("Update user test suite", () => {
       expect(response.body).toHaveProperty("code");
       expect(response.body.code).toBe(ClientErrorCode.Unauthorized_Request);
    });
+
+   it("put /user/update Respond with Error code VALIDATION_ERROR_001 if email parameter is invalid format", async () => {
+      payload.email = "invalidEmail";
+      const response = await request(serverApp)
+         .put("/user/update")
+         .set("Authorization", dummyToken)
+         .send(payload);
+      expect(response.body).toHaveProperty("name");
+      expect(response.body.name).toBe("VALIDATION_ERROR");
+      expect(response.body).toHaveProperty("code");
+      expect(response.body.code).toBe(ValidationErrorCode.Invalid_Email_Input);
+      expect(response.status).toBe(400);
+   });
+
+   it("put /user/update should Respond with Error code CLIENT_ERROR_001 if email parameter is missing", async () => {
+      const missingEmailPayload = {
+            password: "TestPassword123@",
+            role: UserRole.GUEST,
+      }
+      const response = await request(serverApp)
+         .put("/user/update")
+         .set("Authorization", dummyToken)
+         .send(missingEmailPayload);
+      expect(response.status).toBe(400)
+      expect(response.body).toHaveProperty("name");
+      expect(response.body.name).toBe("CLIENT_ERROR");
+      expect(response.body).toHaveProperty("code");
+      expect(response.body.code).toBe(ClientErrorCode.Missing_Parameter);
+   });
+
+   it("put /user/update Respond with Error code VALIDATION_ERROR_002 if password parameter is invalid format", async () => {
+      payload.password = "invalidpassword";
+      const response = await request(serverApp)
+         .put("/user/update")
+         .set("Authorization", dummyToken)
+         .send(payload);
+      expect(response.body).toHaveProperty("name");
+      expect(response.body.name).toBe("VALIDATION_ERROR");
+      expect(response.body).toHaveProperty("code");
+      expect(response.body.code).toBe(ValidationErrorCode.Invalid_Password_Input);
+      expect(response.status).toBe(400);
+   });
+
+   it("put /user/update should Respond with Error code CLIENT_ERROR_001 if password parameter is missing", async () => {
+      const missingEmailPayload = {
+            email: "example@gmail.com",
+            role: UserRole.GUEST,
+      }
+      const response = await request(serverApp)
+         .put("/user/update")
+         .set("Authorization", dummyToken)
+         .send(missingEmailPayload);
+      expect(response.status).toBe(400)
+      expect(response.body).toHaveProperty("name");
+      expect(response.body.name).toBe("CLIENT_ERROR");
+      expect(response.body).toHaveProperty("code");
+      expect(response.body.code).toBe(ClientErrorCode.Missing_Parameter);
+   });
+
+
+   it("put /user/update should return an error on invalid user role", async () => {
+      payload.userRole = "invalidRole";
+      const response = await request(serverApp)
+         .put("/user/update")
+         .set("Authorization", dummyToken)
+         .send(payload);
+      expect(response.body).not.toHaveProperty("token");
+      expect(response.body.token).toBeUndefined();
+      expect(response.body).toHaveProperty("error");
+      expect(response.body.error).not.toBeNull();
+   });
+
+   // /user/update success logic
+   
    it("put /user/update should call User.setPassword() with bcrypt payload when password included", async () => {
       const response = await request(serverApp)
          .put("/user/update")
          .set("Authorization", dummyToken)
          .send(payload);
       const setPasswordCalls = setPasswordMock.mock.calls[0][0];
-      expect(setPasswordCalls).not.toBe(payload.updateData.password);
-      expect(await Env.getValidatePassword(payload.updateData.password,setPasswordCalls as string)).toBeTruthy();
+      expect(setPasswordCalls).not.toBe(payload.password);
+      expect(await Env.getValidatePassword(payload.password,setPasswordCalls as string)).toBeTruthy();
    });
 
    it("put /user/update should return a valid jwt token on valid payload", async () => {
@@ -102,41 +176,7 @@ describe("Update user test suite", () => {
       expect(respondedToken).toHaveProperty("userRole");
       expect(respondedToken.userRole).not.toBeNull();
    });
-   it("put /user/update should return an error on invalid user email", async () => {
-      payload.updateData.email = "invalidEmail";
-      const response = await request(serverApp)
-         .put("/user/update")
-         .set("Authorization", dummyToken)
-         .send(payload);
-      expect(response.body).not.toHaveProperty("token");
-      expect(response.body.token).toBeUndefined();
-      expect(response.body).toHaveProperty("error");
-      expect(response.body.error).not.toBeNull();
-   });
 
-   it("put /user/update should return an error on invalid user password", async () => {
-      payload.updateData.password = "invalidpassword";
-      const response = await request(serverApp)
-         .put("/user/update")
-         .set("Authorization", dummyToken)
-         .send(payload);
-      expect(response.body).not.toHaveProperty("token");
-      expect(response.body.token).toBeUndefined();
-      expect(response.body).toHaveProperty("error");
-      expect(response.body.error).not.toBeNull();
-   });
-
-   it("put /user/update should return an error on invalid user role", async () => {
-      payload.updateData.role = "invalidRole";
-      const response = await request(serverApp)
-         .put("/user/update")
-         .set("Authorization", dummyToken)
-         .send(payload);
-      expect(response.body).not.toHaveProperty("token");
-      expect(response.body.token).toBeUndefined();
-      expect(response.body).toHaveProperty("error");
-      expect(response.body.error).not.toBeNull();
-   });
 });
 
 describe("Create, Delete, Read Test Suite (Unit Test)", () => {
@@ -352,7 +392,7 @@ describe("Create, Delete, Read Test Suite (Unit Test)", () => {
       expect(response.body).toHaveProperty("token")
    });
 
-   // get User by email logic
+   // get /user/getUser error logic
 
    it("get /user/getUser respond with error when request was unauthorized with jwtToken", async () => {
       const response = await request(serverApp)
@@ -365,15 +405,32 @@ describe("Create, Delete, Read Test Suite (Unit Test)", () => {
       expect(response.body.code).toBe(ClientErrorCode.Unauthorized_Request);
    });
 
+   it("get /user/getUser return with error when requested without email parameter", async () => {
+      const response = await request(serverApp)
+         .get("/user/getUser")
+         .set("Authorization", dummyToken)
+         .send();
+      expect(response.body).toHaveProperty("name");
+      expect(response.body.name).toBe("CLIENT_ERROR");
+      expect(response.body).toHaveProperty("code");
+      expect(response.body.code).toBe(ClientErrorCode.Missing_Parameter);
+      expect(response.status).toBe(400);
+   });
+
    it("get /user/getUser return with error when have been called with invalid email", async () => {
       const response = await request(serverApp)
          .get("/user/getUser")
          .set("Authorization", dummyToken)
-         .send(invalidEmailPayload.email);
-      expect(response.body).toHaveProperty("error");
-      expect(response.body.error).not.toBeNull();
+         .send({email:invalidEmailPayload.email});
+      expect(response.body).toHaveProperty("name");
+      expect(response.body.name).toBe("VALIDATION_ERROR");
+      expect(response.body).toHaveProperty("code");
+      expect(response.body.code).toBe(ValidationErrorCode.Invalid_Email_Input);
+      expect(response.status).toBe(400);
    });
 
+
+   // get /user/getUser success logic
    it("get /user/getUser respond with valid user", async () => {
       const response = await request(serverApp)
          .get("/user/getUser")
@@ -427,7 +484,8 @@ describe("Create, Delete, Read Test Suite (Unit Test)", () => {
       expect(response.body.error).not.toBeNull();
    });
 
-   // delete logic
+   // /user/delete error logic
+   
    it("delete /user/delete response with error when user did not have authorization access", async () => {
       const response = await request(serverApp).delete("/user/delete");
       expect(response.status).toBe(401);
@@ -437,6 +495,8 @@ describe("Create, Delete, Read Test Suite (Unit Test)", () => {
       expect(response.body.code).toBe(ClientErrorCode.Unauthorized_Request);
    });
 
+   // /user/delete success logic
+   
    it("delete /user/delete route delete profile information before deleting user",async ()=>{
       const response = await request(serverApp).delete("/user/delete").set("Authorization",dummyToken);
       expect(deleteProfileSpy).toHaveBeenCalled();

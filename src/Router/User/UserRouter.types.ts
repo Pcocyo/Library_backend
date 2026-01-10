@@ -1,5 +1,6 @@
 import { UserJwtPayloadInterface } from "../../Config/config.interface";
 import { Request } from "express";
+import { UserRole } from "../../Controller/User/User";
 
 interface BasicUserData{
    email:string,
@@ -17,3 +18,19 @@ export interface CreateUserRequest extends Request{
 export interface GetUserRequest extends Request{
    body: GetUserRequestBody
 }
+
+export interface UpdateUserRequest extends Request{
+   body:{
+      email:string,
+      password:string,
+      userRole:UserRole,
+      authorizedUser: UserJwtPayloadInterface
+   }
+}
+
+export interface DeleteUserRequest extends Request{
+   body:{
+      authorizedUser: UserJwtPayloadInterface
+   }
+}
+
