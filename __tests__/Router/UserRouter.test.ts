@@ -133,17 +133,33 @@ describe("Update user test suite", () => {
       expect(response.body.code).toBe(ClientErrorCode.Missing_Parameter);
    });
 
-
-   it("put /user/update should return an error on invalid user role", async () => {
+   it("put /user/update Respond with Error code VALIDATION_ERROR_003 if userRole parameter is invalid format", async () => {
       payload.userRole = "invalidRole";
       const response = await request(serverApp)
          .put("/user/update")
          .set("Authorization", dummyToken)
          .send(payload);
-      expect(response.body).not.toHaveProperty("token");
-      expect(response.body.token).toBeUndefined();
-      expect(response.body).toHaveProperty("error");
-      expect(response.body.error).not.toBeNull();
+      expect(response.body).toHaveProperty("name");
+      expect(response.body.name).toBe("VALIDATION_ERROR");
+      expect(response.body).toHaveProperty("code");
+      expect(response.body.code).toBe(ValidationErrorCode.Invalid_UserRole_Input);
+      expect(response.status).toBe(400);
+   });
+
+   it("put /user/update should Respond with Error code CLIENT_ERROR_001 if userRole parameter is missing", async () => {
+      const missingEmailPayload = {
+            email: "example@gmail.com",
+            password: "TestPassword123@"
+      }
+      const response = await request(serverApp)
+         .put("/user/update")
+         .set("Authorization", dummyToken)
+         .send(missingEmailPayload);
+      expect(response.status).toBe(400)
+      expect(response.body).toHaveProperty("name");
+      expect(response.body.name).toBe("CLIENT_ERROR");
+      expect(response.body).toHaveProperty("code");
+      expect(response.body.code).toBe(ClientErrorCode.Missing_Parameter);
    });
 
    // /user/update success logic

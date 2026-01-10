@@ -47,6 +47,7 @@ export class UserRouter extends RouterClass {
          this.validateToken,
          ErrorHandler_Middleware.ValidateEmailParameter,
          ErrorHandler_Middleware.ValidatePasswordParameter,
+         ErrorHandler_Middleware.ValidateUserRoleParameter,
          (req: UpdateUserRequest, res: Response) => {
             this.updateUser(req, res);
          },
@@ -57,11 +58,6 @@ export class UserRouter extends RouterClass {
    private async updateUser(req: UpdateUserRequest, res: Response) {
       try {
          const { authorizedUser } = req.body;
-         if (req.body.userRole) {
-            if (!UserRole[req.body.userRole as keyof typeof UserRole]) {
-               throw new Error("Role inserted was invalid");
-            }
-         }
          const userInstance = await User.getUserByEmail({
             email: authorizedUser.userEmail,
          });
