@@ -38,9 +38,9 @@ export class ValidationError extends BaseError {
 export class ValidationErrorFactory{
    public static createInvalidInputError(param:CreateInvalidInputErrorParam): ValidationError{
       return new ValidationError({
-         message: "Invalid email input",
+         message: `Invalid ${param.field} input`,
          httpStatusCode: 400,
-         code: ValidationErrorCode.Invalid_Email_Input,
+         code: param.code,
          isOperational: true,
          context:param.context,
          field:param.field,
