@@ -1,4 +1,3 @@
-import { Record } from "@prisma/client/runtime/library";
 import { BaseErrorConstructorParams, DevErrorResponse } from "./BaseError.types";
 
 export interface ClientErrorConstructorParams extends BaseErrorConstructorParams {
@@ -23,4 +22,7 @@ export interface IncorrectPasswordParam {
    context?:Record<string,any>
 }
 
+export interface EmailNotFoundParam {
+   context?:Record<string,any>
+}
 

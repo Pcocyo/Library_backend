@@ -1,4 +1,4 @@
-import { throws } from "assert";
+import { ClientErrorFactory } from "../../Errors";
 import prisma from "../../prismaClient";
 import type {
     UserRegisterInterface,
@@ -6,7 +6,6 @@ import type {
     UserDomainInterface,
     UserDeleteInterface,
 } from "./User.interface";
-import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
 
 export enum UserRole {
     MEMBER = "MEMBER",
@@ -141,9 +140,7 @@ export default class User {
             });
 
             if (userDbFound == null) {
-                throw new Error(
-                    `User Email ${userLoginData.email} not exist in database`,
-                );
+               throw ClientErrorFactory.createEmailNotFoundError({context:{data_recieved:userLoginData}});
             }
             return new User({
                 id: userDbFound.user_id,

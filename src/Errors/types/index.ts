@@ -14,6 +14,6 @@ export type {
 export type { 
    ClientErrorConstructorParams, ClientErrorDevResponse, 
    MissingFieldParam, UnauthorizedCLientParam,
-   IncorrectPasswordParam
+   IncorrectPasswordParam, EmailNotFoundParam
 } from "./ClientError.types";
 

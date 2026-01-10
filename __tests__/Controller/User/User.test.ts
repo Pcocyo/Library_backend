@@ -3,6 +3,7 @@ import { UserRole } from "../../../src/Controller/User/User";
 import prisma from "../../../src/prismaClient";
 import { Prisma } from "@prisma/client";
 import { resolve } from "path";
+import { ClientError, ClientErrorCode } from "../../../src/Errors/ClientError.ts";
 
 describe("User class test", () => {
     const dummyId = "dummyId";
@@ -144,17 +145,17 @@ describe("database test suite", () => {
         }
     });
 
-    it("Return an error when getUserEmail() not found a user", async () => {
+    it("Return ClientError CLIENT_ERROR_004 when getUserEmail() does not found a user", async () => {
         let userGot: User;
         try {
-            expect(async ()=>{
-                userGot = await User.getUserByEmail({
+            userGot = await User.getUserByEmail({
                     email: "invalidEmail",
-                });
-                expect(userGot).toBeNull();
-            }).rejects.toThrow();
+            });
         } catch (error) {
-            console.log(error);
+            const clientError:ClientError = error as ClientError;
+            expect(clientError instanceof ClientError);
+            expect(clientError.httpsStatusCode).toBe(400);
+            expect(clientError.code).toBe(ClientErrorCode.Email_Not_Found);
         }
     });
 
