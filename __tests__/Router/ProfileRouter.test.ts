@@ -5,6 +5,7 @@ import Profile from "../../src/Controller/Profile/Profile";
 import { ProfileStatus,UserUpdateProfileParam,LibrarianUpdateProfileParam } from "../../src/Controller/Profile/Profile.interface";
 import Env from "../../src/Config/config";
 import request from "supertest";
+import { ClientErrorCode } from "../../src/Errors/ClientError";
 
 describe("Profile Route GET and PATCH endpoint test",()=>{
    let initializeDummyUser = ()=>{
@@ -122,8 +123,11 @@ describe("Profile Route GET and PATCH endpoint test",()=>{
 
    it("GET /profile/getProfile route should return error when request is unauthorized",async ()=>{
       const response = await request(serverApp).get("/profile/getProfile");
-      expect(response.body).toHaveProperty("error");
-      expect(response.body.error).toBe("Unauthorized Request");
+      expect(response.status).toBe(401);
+      expect(response.body).toHaveProperty("name");
+      expect(response.body.name).toBe("CLIENT_ERROR");
+      expect(response.body).toHaveProperty("code");
+      expect(response.body.code).toBe(ClientErrorCode.Unauthorized_Request);
    })
 
    it("GET /profile/getProfile route should return profile information",async ()=>{
@@ -154,8 +158,11 @@ describe("Profile Route GET and PATCH endpoint test",()=>{
       }
       const response = await request(serverApp).patch('/profile/update')
          .send({payload:{...updateData}});
-      expect(response.body).toHaveProperty("error");
-      expect(response.body.error).toBe("Unauthorized Request");
+      expect(response.status).toBe(401);
+      expect(response.body).toHaveProperty("name");
+      expect(response.body.name).toBe("CLIENT_ERROR");
+      expect(response.body).toHaveProperty("code");
+      expect(response.body.code).toBe(ClientErrorCode.Unauthorized_Request);
    })
    it("PATCH /profile/update should validate set_username parameter and respond with error when username is invalid characther length",async ()=>{
       const updateData: UserUpdateProfileParam={
@@ -601,6 +608,16 @@ describe("Profile Route GET and PATCH endpoint test",()=>{
    })
 
    // membership date logic error
+   
+   it("PATCH /profile/subscribe will should return error when request is unauthorized",async()=>{
+      const response = await request(serverApp).patch("/profile/subscribe");
+      expect(response.status).toBe(401);
+      expect(response.body).toHaveProperty("name");
+      expect(response.body.name).toBe("CLIENT_ERROR");
+      expect(response.body).toHaveProperty("code");
+      expect(response.body.code).toBe(ClientErrorCode.Unauthorized_Request);
+   })
+
    
    it("PATCH /profile/subscribe will throw an error if user is already a member",async()=>{
       const response = await request(serverApp).patch("/profile/subscribe").set({"Authorization":dummyMemberUserToken});

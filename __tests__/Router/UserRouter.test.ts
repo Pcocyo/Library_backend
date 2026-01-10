@@ -68,8 +68,11 @@ describe("Update user test suite", () => {
       const response = await request(serverApp)
          .put("/user/update")
          .send(payload);
-      expect(response.body).toHaveProperty("error");
-      expect(response.status).toBe(400);
+      expect(response.status).toBe(401);
+      expect(response.body).toHaveProperty("name");
+      expect(response.body.name).toBe("CLIENT_ERROR");
+      expect(response.body).toHaveProperty("code");
+      expect(response.body.code).toBe(ClientErrorCode.Unauthorized_Request);
    });
    it("put /user/update should call User.setPassword() with bcrypt payload when password included", async () => {
       const response = await request(serverApp)
@@ -355,8 +358,11 @@ describe("Create, Delete, Read Test Suite (Unit Test)", () => {
       const response = await request(serverApp)
          .get("/user/getUser")
          .send(getUserPayload);
-      expect(response.body).toHaveProperty("error");
-      expect(response.status).toBe(400);
+      expect(response.status).toBe(401);
+      expect(response.body).toHaveProperty("name");
+      expect(response.body.name).toBe("CLIENT_ERROR");
+      expect(response.body).toHaveProperty("code");
+      expect(response.body.code).toBe(ClientErrorCode.Unauthorized_Request);
    });
 
    it("get /user/getUser return with error when have been called with invalid email", async () => {
@@ -424,9 +430,11 @@ describe("Create, Delete, Read Test Suite (Unit Test)", () => {
    // delete logic
    it("delete /user/delete response with error when user did not have authorization access", async () => {
       const response = await request(serverApp).delete("/user/delete");
-      expect(response.body).toHaveProperty("error");
-      expect(response.body.error).not.toBeNull();
-      expect(response.status).toBe(400);
+      expect(response.status).toBe(401);
+      expect(response.body).toHaveProperty("name");
+      expect(response.body.name).toBe("CLIENT_ERROR");
+      expect(response.body).toHaveProperty("code");
+      expect(response.body.code).toBe(ClientErrorCode.Unauthorized_Request);
    });
 
    it("delete /user/delete route delete profile information before deleting user",async ()=>{

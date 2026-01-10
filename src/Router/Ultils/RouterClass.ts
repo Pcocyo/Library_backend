@@ -2,6 +2,7 @@ import { Router,Response,Request,NextFunction } from "express";
 import Env from "../../Config/config";
 import { UserJwtPayloadInterface } from "../../Config/config.interface";
 import { UserRole } from "../../Controller/User/User";
+import { BaseError, ClientError, ClientErrorFactory } from "../../Errors";
 export abstract class RouterClass {
     protected router: Router;
 
@@ -16,12 +17,13 @@ export abstract class RouterClass {
   protected validateToken(req: Request, res: Response, next: NextFunction) {
       try {
          const token = req.headers.authorization;
-         if (!token) throw new Error("Unauthorized Request");
+         if (!token) throw ClientErrorFactory.createUnauthorizedRequestError({context:{user_request_info:req.body}});
          if (!req.body) req.body = {authorizedUser: Env.getValidateToken(token)};
          req.body.authorizedUser = Env.getValidateToken(token);
          next();
-      } catch (err: any) {
-         res.status(400).send({ error: err.message });
+      } catch (error: any) {
+         if(error instanceof ClientError) res.status(error.httpsStatusCode).send(error.toClientResponse());
+         res.send({error});
       }
    }
 
