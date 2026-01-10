@@ -6,7 +6,8 @@ import {
 
 export enum ValidationErrorCode {
    Invalid_Email_Input = "VALIDATION_ERROR_001",
-   Invalid_Password_Input = "VALIDATION_ERROR_002"
+   Invalid_Password_Input = "VALIDATION_ERROR_002",
+   Invalid_UserRole_Input = "VALIDATION_ERROR_003"
 }
 
 export class ValidationError extends BaseError {
