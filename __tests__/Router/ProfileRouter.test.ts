@@ -6,6 +6,7 @@ import { ProfileStatus,UserUpdateProfileParam,LibrarianUpdateProfileParam } from
 import Env from "../../src/Config/config";
 import request from "supertest";
 import { ClientErrorCode } from "../../src/Errors/ClientError";
+import { ValidationErrorCode } from "../../src/Errors";
 
 describe("Profile Route GET and PATCH endpoint test",()=>{
    let initializeDummyUser = ()=>{
@@ -166,9 +167,9 @@ describe("Profile Route GET and PATCH endpoint test",()=>{
       expect(response.body.code).toBe(ClientErrorCode.Unauthorized_Request);
    })
 
-   it("PATCH /profile/update should validate set_username parameter and respond with error when username is invalid characther length",async ()=>{
+   it("PATCH /profile/update should validate set_username parameter and respond with VALIDATION_ERROR_004 when username is invalid characther length",async ()=>{
       const updateData: UserUpdateProfileParam={
-         user_name:"",
+         user_name:" ",
          first_name:"validFirstName",
          last_name:"validLastName",
          contact:"600000000000",
@@ -179,12 +180,14 @@ describe("Profile Route GET and PATCH endpoint test",()=>{
          .patch("/profile/update")
          .set("Authorization",dummyUserToken)
          .send(updateData);
-
-      expect(response.body).toHaveProperty("error");
-      expect(response.body.error).toBe("Username must be atleast 3 characther long");
+      expect(response.body).toHaveProperty("code");
+      expect(response.status).toBe(400);
+      expect(response.body.code).toBe(ValidationErrorCode.Invalid_Profile_Parameter_Length);
+      expect(response.body).toHaveProperty("name");
+      expect(response.body.name).toBe("VALIDATION_ERROR");
    })
 
-   it("PATCH /profile/update should validate set_username parameter and respond with error when set_username contain invalid characther",async ()=>{
+   it("PATCH /profile/update should validate set_username parameter and respond with VALIDATION_ERROR_005 when set_username contain invalid characther",async ()=>{
       const updateData: UserUpdateProfileParam={
          user_name:"invalid username",
          first_name:"validFirstName",
@@ -196,11 +199,14 @@ describe("Profile Route GET and PATCH endpoint test",()=>{
          .patch("/profile/update")
          .set("Authorization",dummyUserToken)
          .send(updateData);
-      expect(response.body).toHaveProperty("error");
-      expect(response.body.error).toBe("Username can only contain letters, numbers, and underscores");
+      expect(response.status).toBe(400);
+      expect(response.body).toHaveProperty("code");
+      expect(response.body.code).toBe(ValidationErrorCode.Invalid_Profile_Parameter_Format);
+      expect(response.body).toHaveProperty("name");
+      expect(response.body.name).toBe("VALIDATION_ERROR");
    })
 
-   it("PATCH /profile/update should validate set_username parameter and respond with error when username is undefined",async ()=>{
+   it("PATCH /profile/update should validate set_username parameter and respond with CLIENT_ERROR_001 when username is undefined",async ()=>{
       const updateData: UserUpdateProfileParam={
          // no user_name parameter
          first_name:"validFirstName",
@@ -212,12 +218,14 @@ describe("Profile Route GET and PATCH endpoint test",()=>{
          .patch("/profile/update")
          .set("Authorization",dummyUserToken)
          .send(updateData);
-
-      expect(response.body).toHaveProperty("error");
-      expect(response.body.error).toBe("Missing user_name attributes");
+      expect(response.status).toBe(400);
+      expect(response.body).toHaveProperty("code");
+      expect(response.body.code).toBe(ClientErrorCode.Missing_Parameter);
+      expect(response.body).toHaveProperty("name");
+      expect(response.body.name).toBe("CLIENT_ERROR");
    })
 
-   it("PATCH /profile/update should validate first_name parameter and respond with error when first_name is undefined",async ()=>{
+   it("PATCH /profile/update should validate first_name parameter and respond with CLIENT_ERROR_001 when first_name is undefined",async ()=>{
       const updateData: UserUpdateProfileParam={
          user_name:"validUsername",
          // no first_name parameter
@@ -229,11 +237,14 @@ describe("Profile Route GET and PATCH endpoint test",()=>{
          .patch('/profile/update')
          .set({"Authorization":dummyUserToken})
          .send(updateData);
-      expect(response.body).toHaveProperty("error");
-      expect(response.body.error).toBe("Missing first_name attributes");
+      expect(response.status).toBe(400);
+      expect(response.body).toHaveProperty("code");
+      expect(response.body.code).toBe(ClientErrorCode.Missing_Parameter);
+      expect(response.body).toHaveProperty("name");
+      expect(response.body.name).toBe("CLIENT_ERROR");
    })
 
-   it("PATCH /profile/update should validate first_name parameter and respond with error when first_name is invalid characther length",async ()=>{
+   it("PATCH /profile/update should validate first_name parameter and respond with VALIDATION_ERROR_004 when first_name is invalid characther length",async ()=>{
       const updateData: UserUpdateProfileParam={
          user_name:"validUsername",
          first_name:"",
@@ -245,11 +256,13 @@ describe("Profile Route GET and PATCH endpoint test",()=>{
          .patch('/profile/update')
          .set({"Authorization":dummyUserToken})
          .send(updateData);
-      expect(response.body).toHaveProperty("error");
-      expect(response.body.error).toBe("Name must be atleast 3 characther long");
+      expect(response.status).toBe(400);
+      expect(response.body.code).toBe(ValidationErrorCode.Invalid_Profile_Parameter_Length);
+      expect(response.body).toHaveProperty("name");
+      expect(response.body.name).toBe("VALIDATION_ERROR");
    })
 
-   it("PATCH /profile/update should validate last_name parameter and respond with error when last_name is undefined",async ()=>{
+   it("PATCH /profile/update should validate last_name parameter and respond with CLIENT_ERROR_001 when last_name is undefined",async ()=>{
       const updateData: UserUpdateProfileParam={
          user_name:"validUsername",
          first_name:"validFirstName",
@@ -261,10 +274,13 @@ describe("Profile Route GET and PATCH endpoint test",()=>{
          .patch("/profile/update")
          .set("Authorization",dummyUserToken)
          .send(updateData);
-      expect(response.body.error).toBe("Missing last_name attributes");
+      expect(response.status).toBe(400);
+      expect(response.body.code).toBe(ClientErrorCode.Missing_Parameter);
+      expect(response.body).toHaveProperty("name");
+      expect(response.body.name).toBe("CLIENT_ERROR");
    })
 
-   it("PATCH /profile/update should validate last_name parameter and respond with error when last_name is invalid characther length",async ()=>{
+   it("PATCH /profile/update should validate last_name parameter and respond with VALIDATION_ERROR_004 when last_name is invalid characther length",async ()=>{
       const updateData: UserUpdateProfileParam={
          user_name:"validUsername",
          first_name:"validFirstName",
@@ -276,11 +292,13 @@ describe("Profile Route GET and PATCH endpoint test",()=>{
          .patch('/profile/update')
          .set({"Authorization":dummyUserToken})
          .send(updateData);
-      expect(response.body).toHaveProperty("error");
-      expect(response.body.error).toBe("Name must be atleast 3 characther long");
+      expect(response.status).toBe(400);
+      expect(response.body.code).toBe(ValidationErrorCode.Invalid_Profile_Parameter_Length);
+      expect(response.body).toHaveProperty("name");
+      expect(response.body.name).toBe("VALIDATION_ERROR");
    })
 
-   it("PATCH /profile/update should validate contact parameter and respond with error when contact is undefined",async ()=>{
+   it("PATCH /profile/update should validate contact parameter and respond with CLIENT_ERROR_001 when contact is undefined",async ()=>{
       const updateData: UserUpdateProfileParam={
          user_name:"validUsername",
          first_name:"validFirstName",
@@ -292,11 +310,13 @@ describe("Profile Route GET and PATCH endpoint test",()=>{
          .patch('/profile/update')
          .set({"Authorization":dummyUserToken})
          .send(updateData);
-      expect(response.body).toHaveProperty("error");
-      expect(response.body.error).toBe("Missing contact attributes");
+      expect(response.status).toBe(400);
+      expect(response.body.code).toBe(ClientErrorCode.Missing_Parameter);
+      expect(response.body).toHaveProperty("name");
+      expect(response.body.name).toBe("CLIENT_ERROR");
    })
 
-   it("PATCH /profile/update should validate contact parameter and respond with error when contact is invalid characther length",async ()=>{
+   it("PATCH /profile/update should validate contact parameter and respond with VALIDATION_ERROR_004 when contact is invalid characther length",async ()=>{
       const updateData: UserUpdateProfileParam={
          user_name:"validUsername",
          first_name:"validFirstName",
@@ -308,11 +328,13 @@ describe("Profile Route GET and PATCH endpoint test",()=>{
          .patch('/profile/update')
          .set({"Authorization":dummyUserToken})
          .send(updateData);
-      expect(response.body).toHaveProperty("error");
-      expect(response.body.error).toBe("Contact number must be between 7 and 15 digits");
+      expect(response.status).toBe(400);
+      expect(response.body.code).toBe(ValidationErrorCode.Invalid_Profile_Parameter_Length);
+      expect(response.body).toHaveProperty("name");
+      expect(response.body.name).toBe("VALIDATION_ERROR");
    })
 
-   it("PATCH /profile/update should validate contact parameter and respond with error when contact contain invalid characther",async ()=>{
+   it("PATCH /profile/update should validate contact parameter and respond with VALIDATION_ERROR_005 when contact contain invalid characther",async ()=>{
       const updateData: UserUpdateProfileParam={
          user_name:"validUsername",
          first_name:"validFirstName",
@@ -324,11 +346,13 @@ describe("Profile Route GET and PATCH endpoint test",()=>{
          .patch('/profile/update')
          .set({"Authorization":dummyUserToken})
          .send(updateData);
-      expect(response.body).toHaveProperty("error");
-      expect(response.body.error).toBe("Contact number can only contain digits");
+      expect(response.status).toBe(400);
+      expect(response.body.code).toBe(ValidationErrorCode.Invalid_Profile_Parameter_Format);
+      expect(response.body).toHaveProperty("name");
+      expect(response.body.name).toBe("VALIDATION_ERROR");
    })
 
-   it("PATCH /profile/update should validate address parameter and respond with error when address is undefined",async ()=>{
+   it("PATCH /profile/update should validate address parameter and respond with CLIENT_ERROR_001 when address is undefined",async ()=>{
       const updateData: UserUpdateProfileParam={
          user_name:"validUsername",
          first_name:"validFirstName",
@@ -340,11 +364,13 @@ describe("Profile Route GET and PATCH endpoint test",()=>{
          .patch('/profile/update')
          .set({"Authorization":dummyUserToken})
          .send(updateData);
-      expect(response.body).toHaveProperty("error");
-      expect(response.body.error).toBe("Missing address attributes");
+      expect(response.status).toBe(400);
+      expect(response.body.code).toBe(ClientErrorCode.Missing_Parameter);
+      expect(response.body).toHaveProperty("name");
+      expect(response.body.name).toBe("CLIENT_ERROR");
    })
 
-   it("PATCH /profile/update should validate address parameter and respond with error when address is invalid",async ()=>{
+   it("PATCH /profile/update should validate address parameter and respond with VALIDATION_ERROR_004 when address is invalid length",async ()=>{
       const updateData: UserUpdateProfileParam={
          user_name:"validUsername",
          first_name:"validFirstName",
@@ -356,8 +382,10 @@ describe("Profile Route GET and PATCH endpoint test",()=>{
          .patch('/profile/update')
          .set({"Authorization":dummyUserToken})
          .send(updateData);
-      expect(response.body).toHaveProperty("error");
-      expect(response.body.error).toBe("Address is invalid");
+      expect(response.status).toBe(400);
+      expect(response.body.code).toBe(ValidationErrorCode.Invalid_Profile_Parameter_Length);
+      expect(response.body).toHaveProperty("name");
+      expect(response.body.name).toBe("VALIDATION_ERROR");
    })
 
    // User PATCH /profile/update logic success
@@ -374,7 +402,6 @@ describe("Profile Route GET and PATCH endpoint test",()=>{
          .patch('/profile/update')
          .set({"Authorization":dummyUserToken})
          .send(updateData);
-      console.log(response.body);
       expect(profileSet_UpdateAt).toHaveBeenCalled();
       expect(profileSetUsername).toHaveBeenCalledWith("new_username");
    })

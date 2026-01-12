@@ -7,6 +7,7 @@ import { LibrarianUpdateProfileParam,UserUpdateProfileParam } from "../../Contro
 import { ProfileUpdateRequest } from "./ProfileRouter.types";
 import { UserJwtPayloadInterface } from "../../Config/config.interface";
 import { ClientError } from "../../Errors";
+import { ErrorHandler_Middleware } from "../../Middleware";
 
 export class ProfileRouter extends RouterClass{
    public constructor(){
@@ -27,7 +28,7 @@ export class ProfileRouter extends RouterClass{
 
       this.router.patch("/update",
          this.validateToken,
-         this.validateUserUpdate,
+         ErrorHandler_Middleware.ValidatePofileUptadeInput,
          (req:ProfileUpdateRequest,res:Response)=>{
             this.updateUserProfile(req,res);
          })
@@ -76,10 +77,9 @@ export class ProfileRouter extends RouterClass{
    }
    
    private async updateUserProfile(req:ProfileUpdateRequest,res:Response){
-      const userData:UserJwtPayloadInterface = req.body.authorizedUser;
       const userParam:(keyof UserUpdateProfileParam)[] = ["user_name","first_name","last_name","contact","address"];
       try{
-         const userProfile:Profile = await Profile.GetByUserId({user_id:userData.userId});
+         const userProfile:Profile = await Profile.GetByUserId({user_id:req.body.authorizedUser.userId});
 
          const updates = {
             "user_name":(input:string | null)=>{
@@ -106,7 +106,7 @@ export class ProfileRouter extends RouterClass{
          //update profile.update_at data
          const updateDate = new Date;
          userProfile.set_updatedAt(updateDate);
-         res.status(200).json({message:`Profile for user ${userData.userId} successfully updated on ${updateDate}`});
+         res.status(200).json({message:`Profile for user ${req.body.authorizedUser.userId} successfully updated on ${updateDate}`});
       }catch(error:any){
          if(error instanceof ClientError){
             res.status(error.httpsStatusCode).send(error.toClientResponse());
@@ -143,46 +143,6 @@ export class ProfileRouter extends RouterClass{
             message:err.message,
             error:err
          })
-      }
-   }
-
-   private validateUserUpdate(req:Request,res:Response,next:NextFunction){
-      const userParam:(keyof UserUpdateProfileParam)[] = ["user_name","first_name","last_name","contact","address"];
-      const userInput:UserUpdateProfileParam = req.body;
-
-      const validators = {
-         user_name:(user_name:string)=>{
-            if(user_name.length < 3) throw new Error( "Username must be atleast 3 characther long") 
-            if(!/^[a-zA-Z-1-9_]+$/.test(user_name)) throw new Error( "Username can only contain letters, numbers, and underscores");
-         },
-         first_name:(first_name:string)=>{
-            if(first_name.length < 3) throw new Error("Name must be atleast 3 characther long");
-         },
-         last_name:(last_name:string)=>{
-            if(last_name.length < 3) throw new Error("Name must be atleast 3 characther long");
-         },
-         contact:(contact:string)=>{
-            if(contact.length < 7 || contact.length > 15) throw new Error("Contact number must be between 7 and 15 digits");
-            if(!/^[0-9]+$/.test(contact)) throw new Error("Contact number can only contain digits");
-         },
-         address:(address:string)=>{
-            if(address.length < 3) throw new Error("Address is invalid");
-         },
-      }
-
-      try {
-         for(const param of userParam){
-            const value = userInput[param];
-            if(userInput[param] === undefined) throw new Error(`Missing ${param} attributes`); 
-            if(userInput[param] === null) continue;
-            if(validators[param as keyof typeof validators]){
-               validators[param as keyof typeof validators](value as string)
-            }
-         }
-         req.body.validatedInput = userInput;
-         next();
-      } catch (error:any) {
-         res.status(400).json({error:error.message});
       }
    }
 
