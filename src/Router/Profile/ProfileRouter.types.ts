@@ -10,5 +10,11 @@ export interface ProfileUpdateRequest extends Request {
       address:string | null,
       authorizedUser:UserJwtPayloadInterface
    }
-}
+};
+
+export interface ProfileSubscribeRequest extends Request {
+   body:{
+      authorizedUser:UserJwtPayloadInterface
+   }
+};
 

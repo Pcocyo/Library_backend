@@ -1,3 +1,5 @@
 export { ProfileRouter } from "./ProfileRouter";
 
-export type { ProfileUpdateRequest } from "./ProfileRouter.types"
+export type { 
+   ProfileUpdateRequest, ProfileSubscribeRequest,
+} from "./ProfileRouter.types"

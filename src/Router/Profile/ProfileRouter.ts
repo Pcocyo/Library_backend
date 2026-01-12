@@ -138,11 +138,14 @@ export class ProfileRouter extends RouterClass{
          user.setRole(UserRole.MEMBER);
          profile.set_memberDate(new Date);
          res.status(200).send({message:`User ${userData.userEmail} successfully subscribed`});
-      }catch(err:any){
-         res.status(400).send({
-            message:err.message,
-            error:err
-         })
+      }catch(error:any){
+         if(error instanceof ClientError){
+            res.status(error.httpsStatusCode).send(error.toClientResponse());
+         }
+         else{
+            res.send({error:error});
+         }
+         
       }
    }
 
