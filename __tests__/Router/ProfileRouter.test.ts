@@ -119,7 +119,8 @@ describe("Profile Route GET and PATCH endpoint test",()=>{
       userMock.mockRestore();
       jest.resetModules();
    })
-   // GET logic
+
+   // GET /profile/getProfile logic
 
    it("GET /profile/getProfile route should return error when request is unauthorized",async ()=>{
       const response = await request(serverApp).get("/profile/getProfile");
@@ -146,7 +147,7 @@ describe("Profile Route GET and PATCH endpoint test",()=>{
 
    // User PATCH logic
    
-   // User PATCH logic error
+   // User PATCH /profile/update logic error
 
    it("PATCH /profile/update should return with error when user is not authorized", async()=>{
       const updateData: UserUpdateProfileParam={
@@ -164,6 +165,7 @@ describe("Profile Route GET and PATCH endpoint test",()=>{
       expect(response.body).toHaveProperty("code");
       expect(response.body.code).toBe(ClientErrorCode.Unauthorized_Request);
    })
+
    it("PATCH /profile/update should validate set_username parameter and respond with error when username is invalid characther length",async ()=>{
       const updateData: UserUpdateProfileParam={
          user_name:"",
@@ -173,12 +175,10 @@ describe("Profile Route GET and PATCH endpoint test",()=>{
          address:"validAddress"
       }
 
-
-      const payload = {payload:{...updateData}};
       const response = await request(serverApp)
          .patch("/profile/update")
          .set("Authorization",dummyUserToken)
-         .send(payload);
+         .send(updateData);
 
       expect(response.body).toHaveProperty("error");
       expect(response.body.error).toBe("Username must be atleast 3 characther long");
@@ -192,13 +192,10 @@ describe("Profile Route GET and PATCH endpoint test",()=>{
          contact:"600000000000",
          address:"validAddress"
       }
-
-      const payload = {payload:{...updateData}};
       const response = await request(serverApp)
          .patch("/profile/update")
          .set("Authorization",dummyUserToken)
-         .send(payload);
-
+         .send(updateData);
       expect(response.body).toHaveProperty("error");
       expect(response.body.error).toBe("Username can only contain letters, numbers, and underscores");
    })
@@ -211,11 +208,10 @@ describe("Profile Route GET and PATCH endpoint test",()=>{
          contact:"600000000000",
          address:"validAddress"
       }
-      const payload = {payload:{...updateData}};
       const response = await request(serverApp)
          .patch("/profile/update")
          .set("Authorization",dummyUserToken)
-         .send(payload);
+         .send(updateData);
 
       expect(response.body).toHaveProperty("error");
       expect(response.body.error).toBe("Missing user_name attributes");
@@ -232,7 +228,7 @@ describe("Profile Route GET and PATCH endpoint test",()=>{
       const response = await request(serverApp)
          .patch('/profile/update')
          .set({"Authorization":dummyUserToken})
-         .send({payload:{...updateData}});
+         .send(updateData);
       expect(response.body).toHaveProperty("error");
       expect(response.body.error).toBe("Missing first_name attributes");
    })
@@ -248,7 +244,7 @@ describe("Profile Route GET and PATCH endpoint test",()=>{
       const response = await request(serverApp)
          .patch('/profile/update')
          .set({"Authorization":dummyUserToken})
-         .send({payload:{...updateData}});
+         .send(updateData);
       expect(response.body).toHaveProperty("error");
       expect(response.body.error).toBe("Name must be atleast 3 characther long");
    })
@@ -261,11 +257,10 @@ describe("Profile Route GET and PATCH endpoint test",()=>{
          contact:"600000000000",
          address:"validAddress"
       }
-      const payload = {payload:{...updateData}};
       const response = await request(serverApp)
          .patch("/profile/update")
          .set("Authorization",dummyUserToken)
-         .send(payload);
+         .send(updateData);
       expect(response.body.error).toBe("Missing last_name attributes");
    })
 
@@ -280,7 +275,7 @@ describe("Profile Route GET and PATCH endpoint test",()=>{
       const response = await request(serverApp)
          .patch('/profile/update')
          .set({"Authorization":dummyUserToken})
-         .send({payload:{...updateData}});
+         .send(updateData);
       expect(response.body).toHaveProperty("error");
       expect(response.body.error).toBe("Name must be atleast 3 characther long");
    })
@@ -296,7 +291,7 @@ describe("Profile Route GET and PATCH endpoint test",()=>{
       const response = await request(serverApp)
          .patch('/profile/update')
          .set({"Authorization":dummyUserToken})
-         .send({payload:{...updateData}});
+         .send(updateData);
       expect(response.body).toHaveProperty("error");
       expect(response.body.error).toBe("Missing contact attributes");
    })
@@ -312,7 +307,7 @@ describe("Profile Route GET and PATCH endpoint test",()=>{
       const response = await request(serverApp)
          .patch('/profile/update')
          .set({"Authorization":dummyUserToken})
-         .send({payload:{...updateData}});
+         .send(updateData);
       expect(response.body).toHaveProperty("error");
       expect(response.body.error).toBe("Contact number must be between 7 and 15 digits");
    })
@@ -328,7 +323,7 @@ describe("Profile Route GET and PATCH endpoint test",()=>{
       const response = await request(serverApp)
          .patch('/profile/update')
          .set({"Authorization":dummyUserToken})
-         .send({payload:{...updateData}});
+         .send(updateData);
       expect(response.body).toHaveProperty("error");
       expect(response.body.error).toBe("Contact number can only contain digits");
    })
@@ -344,7 +339,7 @@ describe("Profile Route GET and PATCH endpoint test",()=>{
       const response = await request(serverApp)
          .patch('/profile/update')
          .set({"Authorization":dummyUserToken})
-         .send({payload:{...updateData}});
+         .send(updateData);
       expect(response.body).toHaveProperty("error");
       expect(response.body.error).toBe("Missing address attributes");
    })
@@ -360,12 +355,12 @@ describe("Profile Route GET and PATCH endpoint test",()=>{
       const response = await request(serverApp)
          .patch('/profile/update')
          .set({"Authorization":dummyUserToken})
-         .send({payload:{...updateData}});
+         .send(updateData);
       expect(response.body).toHaveProperty("error");
       expect(response.body.error).toBe("Address is invalid");
    })
 
-   // User PATCH logic success
+   // User PATCH /profile/update logic success
    
    it("PATCH /profile/update should update username if userInput.user_name is not null and validated", async ()=>{
       const updateData:UserUpdateProfileParam={
@@ -378,7 +373,8 @@ describe("Profile Route GET and PATCH endpoint test",()=>{
       const response = await request(serverApp)
          .patch('/profile/update')
          .set({"Authorization":dummyUserToken})
-         .send({payload:{...updateData}});
+         .send(updateData);
+      console.log(response.body);
       expect(profileSet_UpdateAt).toHaveBeenCalled();
       expect(profileSetUsername).toHaveBeenCalledWith("new_username");
    })
@@ -393,7 +389,7 @@ describe("Profile Route GET and PATCH endpoint test",()=>{
       }
       const response = await request(serverApp).patch("/profile/update")
           .set({"Authorization":dummyUserToken})
-          .send({payload:{...updateData}})
+          .send(updateData)
       expect(profileSet_UpdateAt).toHaveBeenCalled();
       expect(profileSet_FirstName).toHaveBeenCalledWith("new_firstname");
    })
@@ -408,7 +404,7 @@ describe("Profile Route GET and PATCH endpoint test",()=>{
       }
       const response = await request(serverApp).patch("/profile/update")
           .set({"Authorization":dummyUserToken})
-          .send({payload:{...updateData}})
+          .send(updateData)
       expect(profileSet_UpdateAt).toHaveBeenCalled();
       expect(profileSet_LastName).toHaveBeenCalledWith("new_lastName");
    })
@@ -423,7 +419,7 @@ describe("Profile Route GET and PATCH endpoint test",()=>{
       }
       const response = await request(serverApp).patch("/profile/update")
           .set({"Authorization":dummyUserToken})
-          .send({payload:{...updateData}})
+          .send(updateData)
       expect(profileSet_UpdateAt).toHaveBeenCalled();
       expect(profileSet_Contact).toHaveBeenCalledWith("0000000");
    })
@@ -438,7 +434,7 @@ describe("Profile Route GET and PATCH endpoint test",()=>{
       }
       const response = await request(serverApp).patch("/profile/update")
           .set({"Authorization":dummyUserToken})
-          .send({payload:{...updateData}})
+          .send(updateData)
       expect(profileSet_UpdateAt).toHaveBeenCalled();
       expect(profileSet_Address).toHaveBeenCalledWith("new_address");
    })
@@ -453,13 +449,13 @@ describe("Profile Route GET and PATCH endpoint test",()=>{
       }
       const response = await request(serverApp).patch("/profile/update")
           .set({"Authorization":dummyUserToken})
-          .send({payload:{...updateData}})
+          .send(updateData)
       expect(profileSet_UpdateAt).toHaveBeenCalled();
    })
 
 
    // PATCH Librarian
-   // Librarian PATCH logic error
+   // Librarian PATCH /profile/librarian/update logic error
    
    it("PATCH /profile/librarian/update should return with error if librarian are not authorized", async()=>{
       const response = await request(serverApp).patch("/profile/librarian/update")
@@ -563,7 +559,7 @@ describe("Profile Route GET and PATCH endpoint test",()=>{
       expect(response.body.error).toBe("Invalid email input")
    })
 
-   // librarian PATCH success logic
+   // librarian PATCH /profile/librarian/update success logic
 
    it("PATCH /profile/librarian/update should Profile.set_status attributes",async()=>{
       const librarianInput:LibrarianUpdateProfileParam={
@@ -607,7 +603,7 @@ describe("Profile Route GET and PATCH endpoint test",()=>{
       expect(response.status).toBe(200);
    })
 
-   // membership date logic error
+   // PATCH membership date /profile/subscribe logic error
    
    it("PATCH /profile/subscribe will should return error when request is unauthorized",async()=>{
       const response = await request(serverApp).patch("/profile/subscribe");
@@ -634,7 +630,7 @@ describe("Profile Route GET and PATCH endpoint test",()=>{
       expect(response.body.error).toBe("User is already a LIBRARIAN")
    })
 
-   // membership date logic success
+   // PATCH membership date/profile/subscribe logic success
    
    it("PATCH /profile/subscribe will call profile.set_memberDate",async()=>{
       const response = await request(serverApp).patch("/profile/subscribe").set({"Authorization":dummyUserToken});

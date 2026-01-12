@@ -4,7 +4,9 @@ import Profile from "../../Controller/Profile/Profile";
 import User, {UserRole} from "../../Controller/User/User";
 import { ProfileStatus } from "../../Controller/Profile/Profile.interface";
 import { LibrarianUpdateProfileParam,UserUpdateProfileParam } from "../../Controller/Profile/Profile.interface";
+import { ProfileUpdateRequest } from "./ProfileRouter.types";
 import { UserJwtPayloadInterface } from "../../Config/config.interface";
+import { ClientError } from "../../Errors";
 
 export class ProfileRouter extends RouterClass{
    public constructor(){
@@ -26,7 +28,7 @@ export class ProfileRouter extends RouterClass{
       this.router.patch("/update",
          this.validateToken,
          this.validateUserUpdate,
-         (req:Request,res:Response)=>{
+         (req:ProfileUpdateRequest,res:Response)=>{
             this.updateUserProfile(req,res);
          })
 
@@ -49,8 +51,9 @@ export class ProfileRouter extends RouterClass{
 
    private async getProfile(req:Request,res:Response){
       const userData:UserJwtPayloadInterface = req.body.authorizedUser;
-      const userProfile:Profile = await Profile.GetByUserId({user_id:userData.userId});
-      res.send({
+      try {
+         const userProfile:Profile = await Profile.GetByUserId({user_id:userData.userId});
+         res.send({
             user_id:userData.userId,
             user_name: userProfile.get_userName(),
             first_name:userProfile.get_firstName(),
@@ -61,13 +64,20 @@ export class ProfileRouter extends RouterClass{
             status:userProfile.get_status(),
             total_fines:userProfile.get_totalFines(),
             updated_at:userProfile.get_updatedAt(),
-      })
+         })
+      } catch (error:any) {
+         if(error instanceof ClientError){
+            res.status(error.httpsStatusCode).send(error.toClientResponse());
+         }
+         else{
+            res.send({error:error});
+         }
+      }
    }
    
-   private async updateUserProfile(req:Request,res:Response){
+   private async updateUserProfile(req:ProfileUpdateRequest,res:Response){
       const userData:UserJwtPayloadInterface = req.body.authorizedUser;
       const userParam:(keyof UserUpdateProfileParam)[] = ["user_name","first_name","last_name","contact","address"];
-      const userInput:UserUpdateProfileParam = req.body.validatedInput as UserUpdateProfileParam;
       try{
          const userProfile:Profile = await Profile.GetByUserId({user_id:userData.userId});
 
@@ -89,7 +99,7 @@ export class ProfileRouter extends RouterClass{
             }
          }
          for(let param of userParam){
-            const input = userInput[param];
+            const input = req.body[param];
             updates[param as keyof typeof updates ](input as string | null);
          }
 
@@ -97,8 +107,13 @@ export class ProfileRouter extends RouterClass{
          const updateDate = new Date;
          userProfile.set_updatedAt(updateDate);
          res.status(200).json({message:`Profile for user ${userData.userId} successfully updated on ${updateDate}`});
-      }catch(err){
-         res.send(400).json({error:err})
+      }catch(error:any){
+         if(error instanceof ClientError){
+            res.status(error.httpsStatusCode).send(error.toClientResponse());
+         }
+         else{
+            res.send({error:error});
+         }
       }
    }
 
@@ -133,7 +148,7 @@ export class ProfileRouter extends RouterClass{
 
    private validateUserUpdate(req:Request,res:Response,next:NextFunction){
       const userParam:(keyof UserUpdateProfileParam)[] = ["user_name","first_name","last_name","contact","address"];
-      const userInput:UserUpdateProfileParam = req.body.payload;
+      const userInput:UserUpdateProfileParam = req.body;
 
       const validators = {
          user_name:(user_name:string)=>{
