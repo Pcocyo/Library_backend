@@ -35,7 +35,7 @@ export class ProfileRouter extends RouterClass{
 
       this.router.patch("/subscribe",
          this.validateToken,
-         this.validateMemberStatus,
+         ErrorHandler_Middleware.ValidateMemberStatus,
          (req:Request,res:Response)=>{
             this.subscribe(req,res);
          }

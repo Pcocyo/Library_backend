@@ -5,6 +5,8 @@ import { ClientError } from "../Errors";
 import { ClientErrorResponse } from "../Errors/types";
 import { UserRole } from "../Controller/User/User";
 import { UserUpdateProfileParam } from "../Controller/Profile/Profile.interface";
+import { UserJwtPayloadInterface } from "../Config/config.interface";
+import { ClientErrorCode } from "../Errors/ClientError";
 
 export class ErrorHandler_Middleware{
    public static ValidateEmailParameter: RequestHandler = (req:Request,res:Response,next:NextFunction)=>{
@@ -197,4 +199,22 @@ export class ErrorHandler_Middleware{
          }
       }
    }
+   public static ValidateMemberStatus: RequestHandler = (req:Request,res:Response,next:NextFunction)=>{
+      try{
+         let userData:UserJwtPayloadInterface = req.body.authorizedUser
+         if(userData.userRole !== "GUEST") throw ClientErrorFactory.createInvalidClientRequestError({
+            context:req.body,
+            message:"User status is not a guest"
+         })
+         next()
+      }catch(error:any){
+         if(error instanceof ClientError){
+            res.status(error.httpsStatusCode).send(error.toClientResponse());
+         }
+         else{
+            res.send({error:error});
+         }
+      }
+   }
+
 }

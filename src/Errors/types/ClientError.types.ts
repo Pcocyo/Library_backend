@@ -30,3 +30,8 @@ export interface UserIdNotFoundParam {
    context?:Record<string,any>
 }
 
+export interface InvalidClientRequestParam{
+   message:string,
+   context?: Record<string,any>
+}
+

@@ -1,6 +1,7 @@
 import { BaseError } from "./BaseError";
 import { ClientErrorConstructorParams, ClientErrorDevResponse, 
          EmailNotFoundParam, IncorrectPasswordParam,
+         InvalidClientRequestParam,
          MissingFieldParam, UnauthorizedCLientParam,
          UserIdNotFoundParam} from "./types";
 
@@ -32,7 +33,8 @@ export enum ClientErrorCode {
    Unauthorized_Request = "CLIENT_ERROR_002",
    Incorrect_Password = "CLIENT_ERROR_003",
    Email_Not_Found = "CLIENT_ERROR_004",
-   User_Id_Not_Found = "CLIENT_ERROR_005"
+   User_Id_Not_Found = "CLIENT_ERROR_005",
+   Invalid_Request = "CLIENT_ERROR_006"
 }
 
 export class ClientErrorFactory {
@@ -87,6 +89,17 @@ export class ClientErrorFactory {
          httpStatusCode: 400,
          code: ClientErrorCode.User_Id_Not_Found,
          isOperational: true,
+         context:param.context
+      })
+   }
+
+   public static createInvalidClientRequestError(param:InvalidClientRequestParam){
+      return new ClientError({
+         field:"",
+         message:param.message,
+         httpStatusCode:400,
+         code:ClientErrorCode.Invalid_Request,
+         isOperational:true,
          context:param.context
       })
    }

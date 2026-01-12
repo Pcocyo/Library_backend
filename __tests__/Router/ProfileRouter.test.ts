@@ -642,30 +642,33 @@ describe("Profile Route GET and PATCH endpoint test",()=>{
    })
 
    
-   it("PATCH /profile/subscribe will throw an error if user is already a member",async()=>{
+   it.only("PATCH /profile/subscribe will throw an CLIENT_ERROR_006 if user is already a member",async()=>{
       const response = await request(serverApp).patch("/profile/subscribe").set({"Authorization":dummyMemberUserToken});
       expect(response.status).toBe(400);
-      expect(response.body).toHaveProperty("error");
-      expect(response.body.error).toBe("User is already a MEMBER")
+      expect(response.body).toHaveProperty("name");
+      expect(response.body.name).toBe("CLIENT_ERROR");
+      expect(response.body).toHaveProperty("code");
+      expect(response.body.code).toBe(ClientErrorCode.Invalid_Request);
    })
 
-   it("PATCH /profile/subscribe will throw an error if user is already a librarian",async()=>{
+   it.only("PATCH /profile/subscribe will throw an CLIENT_ERROR_006 if user is already a librarian",async()=>{
       const response = await request(serverApp).patch("/profile/subscribe").set({"Authorization":dummyLibrarianToken});
-
       expect(response.status).toBe(400);
-      expect(response.body).toHaveProperty("error");
-      expect(response.body.error).toBe("User is already a LIBRARIAN")
+      expect(response.body).toHaveProperty("name");
+      expect(response.body.name).toBe("CLIENT_ERROR");
+      expect(response.body).toHaveProperty("code");
+      expect(response.body.code).toBe(ClientErrorCode.Invalid_Request);
    })
 
    // PATCH membership date/profile/subscribe logic success
    
-   it("PATCH /profile/subscribe will call profile.set_memberDate",async()=>{
+   it.only("PATCH /profile/subscribe will call profile.set_memberDate",async()=>{
       const response = await request(serverApp).patch("/profile/subscribe").set({"Authorization":dummyUserToken});
       expect(response.status).toBe(200);
       expect(profileSet_memberDate).toHaveBeenCalled();
    })
 
-   it("PATCH /profile/subscribe will call user.setRole and set role the current user to a MEMBER",async()=>{
+   it.only("PATCH /profile/subscribe will call user.setRole and set role the current user to a MEMBER",async()=>{
       const response =  await request(serverApp).patch("/profile/subscribe").set({"Authorization":dummyUserToken});
       expect(response.status).toBe(200);
       expect(userSet_role).toHaveBeenCalled();
