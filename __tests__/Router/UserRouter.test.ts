@@ -60,6 +60,7 @@ describe("Update user test suite", () => {
 
    afterEach(() => {
       getUserByEmailMock.mockRestore();
+      jest.resetModules();
    });
 
    // /user/update error logic
@@ -307,6 +308,7 @@ describe("Create, Delete, Read Test Suite (Unit Test)", () => {
       createProfileSpy.mockRestore();
       deleteProfileSpy.mockRestore();
       getProfileSpy.mockRestore();
+      jest.resetModules();
    });
 
    // create user failed test
