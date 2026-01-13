@@ -3,8 +3,8 @@ import { NextFunction, Request,Response } from "express";
 import Profile from "../../Controller/Profile/Profile";
 import User, {UserRole} from "../../Controller/User/User";
 import { ProfileStatus } from "../../Controller/Profile/Profile.interface";
-import { LibrarianUpdateProfileParam,UserUpdateProfileParam } from "../../Controller/Profile/Profile.interface";
-import { ProfileUpdateRequest } from "./ProfileRouter.types";
+import { LibrarianUpdateProfileParam,UserUpdateProfileParam, } from "../../Controller/Profile/Profile.interface";
+import { ProfileUpdateRequest,LibrarianUpdateUserProfileRequest } from "./ProfileRouter.types";
 import { UserJwtPayloadInterface } from "../../Config/config.interface";
 import { ClientError } from "../../Errors";
 import { ErrorHandler_Middleware } from "../../Middleware";
@@ -45,7 +45,7 @@ export class ProfileRouter extends RouterClass{
          this.validateLibrarianToken,
          this.validateLibrarianProfileUpdate,
          (req:Request,res:Response) =>{
-            this.updateLibrarianProfile(req,res);
+            this.librarianUpdateUserProfile(req,res);
          }
       )
    }
@@ -117,16 +117,20 @@ export class ProfileRouter extends RouterClass{
       }
    }
 
-   private async updateLibrarianProfile(req:Request,res:Response){
-      const input:LibrarianUpdateProfileParam = req.body.payload;
-      const userToUpdate:User = await User.getUserByEmail({email:input.email})
+   private async librarianUpdateUserProfile(req:LibrarianUpdateUserProfileRequest,res:Response){
+      const userToUpdate:User = await User.getUserByEmail({email:req.body.email})
       const userProfile:Profile = await Profile.GetByUserId({user_id:userToUpdate.getId()});
       try{
-         userProfile.set_fines(input.total_fines as number);
-         userProfile.set_status(ProfileStatus[input.status as keyof typeof ProfileStatus]);
+         userProfile.set_fines(req.body.total_fines as number);
+         userProfile.set_status(req.body.status);
          res.status(200).json({message:"success"});
-      }catch(err: any){
-         res.status(400).send({error:err.message})
+      }catch(error: any){
+         if(error instanceof ClientError){
+            res.status(error.httpsStatusCode).send(error.toClientResponse());
+         }
+         else{
+            res.send({error:error});
+         }
       }
    }
 
@@ -150,7 +154,6 @@ export class ProfileRouter extends RouterClass{
    }
 
    private validateLibrarianProfileUpdate(req:Request,res:Response,next:NextFunction){
-      const userInput = req.body.payload;
       const librarianParam:(keyof LibrarianUpdateProfileParam)[] = ["status","total_fines","email"];
       const validators = {
          "total_fines":(input:string)=>{
@@ -174,10 +177,10 @@ export class ProfileRouter extends RouterClass{
 
      try {
         for(let param of librarianParam){
-            if(userInput[param] === undefined) throw new Error(`${param} is undefined`);
-            if(param === "email" && userInput[param] === null) throw new Error(`email is null`);
-            if(userInput[param] === null) continue;
-            validators[param as keyof typeof validators](userInput[param] as string);
+            if(req.body[param] === undefined) throw new Error(`${String(param)} is undefined`);
+            if(param === "email" && req.body[param] === null) throw new Error(`email is null`);
+            if(req.body[param] === null) continue;
+            validators[param as keyof typeof validators](req.body[param] as string);
          }
          next()
      } catch (error:any) {

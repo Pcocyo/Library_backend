@@ -1,5 +1,7 @@
 import { Request } from "express"
 import { UserJwtPayloadInterface } from "../../Config/config.interface"
+import { UserRole } from "../../Controller/User/User"
+import { ProfileStatus } from "../../Controller/Profile/Profile.interface"
 
 export interface ProfileUpdateRequest extends Request {
    body: {
@@ -17,4 +19,14 @@ export interface ProfileSubscribeRequest extends Request {
       authorizedUser:UserJwtPayloadInterface
    }
 };
+
+export interface LibrarianUpdateUserProfileRequest extends Request {
+   body:{
+      total_fines:number | null,
+      status:ProfileStatus | null,
+      email:string,
+      authorizedUser:UserJwtPayloadInterface
+   }
+};
+
 

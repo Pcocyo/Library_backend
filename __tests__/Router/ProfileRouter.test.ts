@@ -498,7 +498,7 @@ describe("Profile Route GET and PATCH endpoint test",()=>{
       const responds = await request(serverApp)
          .patch("/profile/librarian/update")
          .set({"Authorization":dummyLibrarianToken})
-         .send({payload:invalidInput});
+         .send(invalidInput);
       expect(responds.body).toHaveProperty("error");
       expect(responds.body.error).toBe("total_fines is undefined")
    })
@@ -511,7 +511,7 @@ describe("Profile Route GET and PATCH endpoint test",()=>{
       const responds = await request(serverApp)
          .patch("/profile/librarian/update")
          .set({"Authorization":dummyLibrarianToken})
-         .send({payload:invalidInput});
+         .send(invalidInput);
       expect(responds.body).toHaveProperty("error");
       expect(responds.body.error).toBe("status is undefined")
    })
@@ -524,7 +524,7 @@ describe("Profile Route GET and PATCH endpoint test",()=>{
       const responds = await request(serverApp)
          .patch("/profile/librarian/update")
          .set({"Authorization":dummyLibrarianToken})
-         .send({payload:invalidInput});
+         .send(invalidInput);
       expect(responds.body).toHaveProperty("error");
       expect(responds.body.error).toBe("email is undefined")
    })
@@ -538,7 +538,7 @@ describe("Profile Route GET and PATCH endpoint test",()=>{
       const responds = await request(serverApp)
          .patch("/profile/librarian/update")
          .set({"Authorization":dummyLibrarianToken})
-         .send({payload:invalidInput});
+         .send(invalidInput);
       expect(responds.body).toHaveProperty("error");
       expect(responds.body.error).toBe("email is null")
    })
@@ -553,7 +553,7 @@ describe("Profile Route GET and PATCH endpoint test",()=>{
       const response = await request(serverApp)
          .patch("/profile/librarian/update")
          .set({"Authorization":dummyLibrarianToken})
-         .send({payload:{...librarianInput}})
+         .send(librarianInput)
       expect(response.body).toHaveProperty("error");
       expect(response.body.error).toBe("Invalid total_fines format")
    })
@@ -567,7 +567,7 @@ describe("Profile Route GET and PATCH endpoint test",()=>{
       const response = await request(serverApp)
          .patch("/profile/librarian/update")
          .set({"Authorization":dummyLibrarianToken})
-         .send({payload:{...librarianInput}})
+         .send(librarianInput)
       expect(response.body).toHaveProperty("error");
       expect(response.body.error).toBe("Invalid status input")
    })
@@ -581,7 +581,7 @@ describe("Profile Route GET and PATCH endpoint test",()=>{
       const response = await request(serverApp)
          .patch("/profile/librarian/update")
          .set({"Authorization":dummyLibrarianToken})
-         .send({payload:{...librarianInput}})
+         .send(librarianInput)
       expect(response.body).toHaveProperty("error");
       expect(response.body.error).toBe("Invalid email input")
    })
@@ -597,7 +597,7 @@ describe("Profile Route GET and PATCH endpoint test",()=>{
       const response =  await request(serverApp)
          .patch("/profile/librarian/update")
          .set({"Authorization":dummyLibrarianToken})
-         .send({payload:librarianInput})
+         .send(librarianInput)
       expect(profileSet_Status).toHaveBeenCalled();
       expect(response.status).toBe(200);
    })
@@ -611,12 +611,12 @@ describe("Profile Route GET and PATCH endpoint test",()=>{
       const response =  await request(serverApp)
          .patch("/profile/librarian/update")
          .set({"Authorization":dummyLibrarianToken})
-         .send({payload:librarianInput})
+         .send(librarianInput)
       expect(profileSet_fines).toHaveBeenCalled();
       expect(response.status).toBe(200);
    })
 
-   it("PATCH /profile/librarian/update total_fines and status attributes can be of type null",async()=>{
+   it("PATCH /profile/librarian/update total_fines and status can be called with type null",async()=>{
       const librarianInput:LibrarianUpdateProfileParam={
          total_fines:null,
          email:"dummyEmail@example.com",
@@ -625,8 +625,9 @@ describe("Profile Route GET and PATCH endpoint test",()=>{
       const response =  await request(serverApp)
          .patch("/profile/librarian/update")
          .set({"Authorization":dummyLibrarianToken})
-         .send({payload:librarianInput})
-      expect(profileSet_Status).toHaveBeenCalled();
+         .send(librarianInput)
+      expect(profileSet_Status.mock.calls[0][0]).toBeNull();
+      expect(profileSet_fines.mock.calls[0][0]).toBeNull();
       expect(response.status).toBe(200);
    })
 
@@ -642,7 +643,7 @@ describe("Profile Route GET and PATCH endpoint test",()=>{
    })
 
    
-   it.only("PATCH /profile/subscribe will throw an CLIENT_ERROR_006 if user is already a member",async()=>{
+   it("PATCH /profile/subscribe will throw an CLIENT_ERROR_006 if user is already a member",async()=>{
       const response = await request(serverApp).patch("/profile/subscribe").set({"Authorization":dummyMemberUserToken});
       expect(response.status).toBe(400);
       expect(response.body).toHaveProperty("name");
@@ -651,7 +652,7 @@ describe("Profile Route GET and PATCH endpoint test",()=>{
       expect(response.body.code).toBe(ClientErrorCode.Invalid_Request);
    })
 
-   it.only("PATCH /profile/subscribe will throw an CLIENT_ERROR_006 if user is already a librarian",async()=>{
+   it("PATCH /profile/subscribe will throw an CLIENT_ERROR_006 if user is already a librarian",async()=>{
       const response = await request(serverApp).patch("/profile/subscribe").set({"Authorization":dummyLibrarianToken});
       expect(response.status).toBe(400);
       expect(response.body).toHaveProperty("name");
@@ -662,13 +663,13 @@ describe("Profile Route GET and PATCH endpoint test",()=>{
 
    // PATCH membership date/profile/subscribe logic success
    
-   it.only("PATCH /profile/subscribe will call profile.set_memberDate",async()=>{
+   it("PATCH /profile/subscribe will call profile.set_memberDate",async()=>{
       const response = await request(serverApp).patch("/profile/subscribe").set({"Authorization":dummyUserToken});
       expect(response.status).toBe(200);
       expect(profileSet_memberDate).toHaveBeenCalled();
    })
 
-   it.only("PATCH /profile/subscribe will call user.setRole and set role the current user to a MEMBER",async()=>{
+   it("PATCH /profile/subscribe will call user.setRole and set role the current user to a MEMBER",async()=>{
       const response =  await request(serverApp).patch("/profile/subscribe").set({"Authorization":dummyUserToken});
       expect(response.status).toBe(200);
       expect(userSet_role).toHaveBeenCalled();
