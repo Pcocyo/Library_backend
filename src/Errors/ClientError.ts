@@ -53,7 +53,7 @@ export class ClientErrorFactory {
    public static createUnauthorizedRequestError(param:UnauthorizedCLientParam):ClientError{
       return new ClientError({
          field: "",
-         message:"Unauthorized Request",
+         message:param.message,
          httpStatusCode: 401,
          code: ClientErrorCode.Unauthorized_Request,
          isOperational: true,

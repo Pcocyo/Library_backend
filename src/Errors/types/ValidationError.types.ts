@@ -13,6 +13,7 @@ export interface ValidationErrorDevResponse extends DevErrorResponse{
 export interface CreateInvalidInputErrorParam{
    field: string;
    value: any;
-   context: Record<string,any>;
+   message:string;
+   context?: Record<string,any>;
    code: ValidationErrorCode;
 };

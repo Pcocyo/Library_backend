@@ -15,6 +15,7 @@ export interface MissingFieldParam {
 
 export interface UnauthorizedCLientParam {
    context?:Record<string,any>
+   message:string;
 }
 
 export interface IncorrectPasswordParam {
