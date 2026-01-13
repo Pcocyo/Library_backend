@@ -5,8 +5,9 @@ import Profile from "../../src/Controller/Profile/Profile";
 import { ProfileStatus,UserUpdateProfileParam,LibrarianUpdateProfileParam } from "../../src/Controller/Profile/Profile.interface";
 import Env from "../../src/Config/config";
 import request from "supertest";
-import { ClientErrorCode } from "../../src/Errors/ClientError";
+import { ClientError, ClientErrorCode } from "../../src/Errors/ClientError";
 import { ValidationErrorCode } from "../../src/Errors";
+import { response } from "express";
 
 describe("Profile Route GET and PATCH endpoint test",()=>{
    let initializeDummyUser = ()=>{
@@ -484,67 +485,72 @@ describe("Profile Route GET and PATCH endpoint test",()=>{
    // PATCH Librarian
    // Librarian PATCH /profile/librarian/update logic error
    
-   it("PATCH /profile/librarian/update should return with error if librarian are not authorized", async()=>{
+   it("PATCH /profile/librarian/update should return with CLIENT_ERROR_002 if user is not a librarian", async()=>{
       const response = await request(serverApp).patch("/profile/librarian/update")
-      expect(response.body).toHaveProperty("error");
-      expect(response.body.error).toBe("Unauthorized Request");
+      expect(response.status).toBe(401);
+      expect(response.body.code).toBe(ClientErrorCode.Unauthorized_Request);
+      expect(response.body.name).toBe("CLIENT_ERROR");
    })
 
-   it("PATCH /profile/librarian/update should responds with error when total_fines attributes is undefined", async()=>{
+   it("PATCH /profile/librarian/update should responds with CLIENT_ERROR_001 when total_fines parameter is undefined", async()=>{
       const invalidInput = {
          status:"ACTIVE",
          email:"dummyEmail@example.com",
       }
-      const responds = await request(serverApp)
+      const response = await request(serverApp)
          .patch("/profile/librarian/update")
          .set({"Authorization":dummyLibrarianToken})
          .send(invalidInput);
-      expect(responds.body).toHaveProperty("error");
-      expect(responds.body.error).toBe("total_fines is undefined")
+      expect(response.status).toBe(400)
+      expect(response.body.code).toBe(ClientErrorCode.Missing_Parameter);
+      expect(response.body.name).toBe("CLIENT_ERROR");
    })
 
-   it("PATCH /profile/librarian/update should responds with error when status attributes is undefined", async()=>{
+   it("PATCH /profile/librarian/update should responds with CLIENT_ERROR_001 when status attributes is undefined", async()=>{
       const invalidInput = {
          email:"dummyEmail@example.com",
          total_fines : 21.22
       }
-      const responds = await request(serverApp)
+      const response = await request(serverApp)
          .patch("/profile/librarian/update")
          .set({"Authorization":dummyLibrarianToken})
          .send(invalidInput);
-      expect(responds.body).toHaveProperty("error");
-      expect(responds.body.error).toBe("status is undefined")
+      expect(response.status).toBe(400)
+      expect(response.body.code).toBe(ClientErrorCode.Missing_Parameter);
+      expect(response.body.name).toBe("CLIENT_ERROR");
    })
 
-   it("PATCH /profile/librarian/update should responds with error when email attributes is undefined", async()=>{
+   it("PATCH /profile/librarian/update should responds with CLIENT_ERROR_001 when email attributes is undefined", async()=>{
       const invalidInput = {
          status:"ACTIVE",
          total_fines : 21.22,
       }
-      const responds = await request(serverApp)
+      const response = await request(serverApp)
          .patch("/profile/librarian/update")
          .set({"Authorization":dummyLibrarianToken})
          .send(invalidInput);
-      expect(responds.body).toHaveProperty("error");
-      expect(responds.body.error).toBe("email is undefined")
+      expect(response.status).toBe(400)
+      expect(response.body.code).toBe(ClientErrorCode.Missing_Parameter);
+      expect(response.body.name).toBe("CLIENT_ERROR");
    })
 
-   it("PATCH /profile/librarian/update should responds with error when email attributes is null", async()=>{
+   it("PATCH /profile/librarian/update should responds with VALIDATION_ERROR_005 when email attributes is null", async()=>{
       const invalidInput = {
          status:"ACTIVE",
          total_fines : 21.22,
          email: null
       }
-      const responds = await request(serverApp)
+      const response = await request(serverApp)
          .patch("/profile/librarian/update")
          .set({"Authorization":dummyLibrarianToken})
          .send(invalidInput);
-      expect(responds.body).toHaveProperty("error");
-      expect(responds.body.error).toBe("email is null")
+      expect(response.status).toBe(400);
+      expect(response.body.code).toBe(ValidationErrorCode.Invalid_Profile_Parameter_Format);
+      expect(response.body.name).toBe("VALIDATION_ERROR");
    })
 
 
-   it("PATCH /profile/librarian/update should responds with error when total_fines input is an invalid format",async ()=>{
+   it("PATCH /profile/librarian/update should responds with VALIDATION_ERROR_005 when total_fines input is an invalid format",async ()=>{
       const librarianInput:LibrarianUpdateProfileParam = {
          total_fines:12345678901.000,
          email:"dummyEmail@example.com",
@@ -554,11 +560,12 @@ describe("Profile Route GET and PATCH endpoint test",()=>{
          .patch("/profile/librarian/update")
          .set({"Authorization":dummyLibrarianToken})
          .send(librarianInput)
-      expect(response.body).toHaveProperty("error");
-      expect(response.body.error).toBe("Invalid total_fines format")
+      expect(response.status).toBe(400);
+      expect(response.body.code).toBe(ValidationErrorCode.Invalid_Profile_Parameter_Format);
+      expect(response.body.name).toBe("VALIDATION_ERROR");
    })
 
-   it("PATCH /profile/librarian/update should responds with error when status input is an invalid",async ()=>{
+   it("PATCH /profile/librarian/update should responds with VALIDATION_ERROR_005 when status input is an invalid",async ()=>{
       const librarianInput:LibrarianUpdateProfileParam = {
          total_fines:21.22,
          email:"dummyEmail@example.com",
@@ -568,11 +575,12 @@ describe("Profile Route GET and PATCH endpoint test",()=>{
          .patch("/profile/librarian/update")
          .set({"Authorization":dummyLibrarianToken})
          .send(librarianInput)
-      expect(response.body).toHaveProperty("error");
-      expect(response.body.error).toBe("Invalid status input")
+      expect(response.status).toBe(400);
+      expect(response.body.code).toBe(ValidationErrorCode.Invalid_Profile_Parameter_Format);
+      expect(response.body.name).toBe("VALIDATION_ERROR");
    })
 
-   it("PATCH /profile/librarian/update should responds with error when email input is an invalid format",async ()=>{
+   it("PATCH /profile/librarian/update should responds with VALIDATION_ERROR_005 when email input is an invalid format",async ()=>{
       const librarianInput:LibrarianUpdateProfileParam = {
          total_fines:21.22,
          email:"invalidEmail",
@@ -582,8 +590,9 @@ describe("Profile Route GET and PATCH endpoint test",()=>{
          .patch("/profile/librarian/update")
          .set({"Authorization":dummyLibrarianToken})
          .send(librarianInput)
-      expect(response.body).toHaveProperty("error");
-      expect(response.body.error).toBe("Invalid email input")
+      expect(response.status).toBe(400);
+      expect(response.body.code).toBe(ValidationErrorCode.Invalid_Profile_Parameter_Format);
+      expect(response.body.name).toBe("VALIDATION_ERROR");
    })
 
    // librarian PATCH /profile/librarian/update success logic

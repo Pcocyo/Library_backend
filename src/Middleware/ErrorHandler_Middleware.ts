@@ -4,9 +4,10 @@ import { ClientErrorFactory } from "../Errors";
 import { ClientError } from "../Errors";
 import { ClientErrorResponse } from "../Errors/types";
 import { UserRole } from "../Controller/User/User";
-import { UserUpdateProfileParam } from "../Controller/Profile/Profile.interface";
+import { ProfileStatus, UserUpdateProfileParam } from "../Controller/Profile/Profile.interface";
 import { UserJwtPayloadInterface } from "../Config/config.interface";
 import { ClientErrorCode } from "../Errors/ClientError";
+import { LibrarianUpdateUserProfileRequest } from "../Router/Profile";
 
 export class ErrorHandler_Middleware{
    public static ValidateEmailParameter: RequestHandler = (req:Request,res:Response,next:NextFunction)=>{
@@ -24,6 +25,7 @@ export class ErrorHandler_Middleware{
                field:"email",
                value:req.body.email,
                context:{user_request_info:req.body},
+               message:"Invalid input format",
                code:ValidationErrorCode.Invalid_Email_Input
             })
          }
@@ -57,6 +59,7 @@ export class ErrorHandler_Middleware{
                field:"password",
                value:req.body.password,
                context:{user_request_info:req.body},
+               message:"Invalid password format. (password must contain at most 32 characther, a number and a symbol))",
                code:ValidationErrorCode.Invalid_Password_Input
             })
          };
@@ -88,6 +91,7 @@ export class ErrorHandler_Middleware{
                field:"userRole",
                value:req.body.userRole,
                context:{user_request_info:req.body},
+               message:"Invalid user role input",
                code:ValidationErrorCode.Invalid_UserRole_Input
             })
          }
@@ -116,6 +120,7 @@ export class ErrorHandler_Middleware{
                   field:"user_name",
                   value:user_name,
                   code:ValidationErrorCode.Invalid_Profile_Parameter_Length,
+                  message:"Username must be more than 3 characther",
                   context:{user_input_data:req.body, reason:"user_name invalid format"}
                })
             }
@@ -124,6 +129,7 @@ export class ErrorHandler_Middleware{
                   field:"user_name",
                   value:user_name,
                   code:ValidationErrorCode.Invalid_Profile_Parameter_Format,
+                  message:"Username must cannot contain any symbol",
                   context:{user_input_data:req.body, reason:"user_name invalid format"}
                });
             }
@@ -134,6 +140,7 @@ export class ErrorHandler_Middleware{
                   field:"first_name",
                   value:first_name,
                   code:ValidationErrorCode.Invalid_Profile_Parameter_Length,
+                  message:"First name must be more than 3 characther",
                   context:{user_input_data:req.body,reason:"name length less than 3"}
                });
          },
@@ -142,6 +149,7 @@ export class ErrorHandler_Middleware{
                throw ValidationErrorFactory.createInvalidInputError({
                   field:"last_name",
                   value:last_name,
+                  message:"Last name must be more than 3 characther",
                   code:ValidationErrorCode.Invalid_Profile_Parameter_Length,
                   context:{user_input_data:req.body,reason:"name length less than 3"}
                });
@@ -152,7 +160,8 @@ export class ErrorHandler_Middleware{
                   field:"contact",
                   value:contact,
                   code:ValidationErrorCode.Invalid_Profile_Parameter_Length,
-                  context:{user_input_data:req.body,reason:"contact length less than 7 or more than 15"}
+                  message:"Contact must be less than 7 or more than 15 characther",
+                  context:{user_input_data:req.body}
                })
             }
             if(!/^[0-9]+$/.test(contact)) {
@@ -160,7 +169,8 @@ export class ErrorHandler_Middleware{
                   field:"contact",
                   value:contact,
                   code:ValidationErrorCode.Invalid_Profile_Parameter_Format,
-                  context:{user_input_data:req.body,reason:"contact contain non-numeric characther"}
+                  message:"Contact contain non-numeric characther",
+                  context:{user_input_data:req.body,}
                })
             };
          },
@@ -170,7 +180,8 @@ export class ErrorHandler_Middleware{
                   field:"address",
                   value:address,
                   code:ValidationErrorCode.Invalid_Profile_Parameter_Length,
-                  context:{user_input_data:req.body,reason:"address characther length is less than 3"}
+                  message:"address characther length is less than 3",
+                  context:{user_input_data:req.body}
                });
          },
       }
@@ -199,6 +210,77 @@ export class ErrorHandler_Middleware{
          }
       }
    }
+
+   public static ValidateLibrarianUpdateProfileInput: RequestHandler= (req:Request,res:Response,next:NextFunction) => {
+      const librarianRequiredParam = ["status","total_fines","email"];
+      const validators = {
+         "total_fines":(input:string)=>{
+            if(!/^\d{1,10}\.\d+$/.test(`${input}`)){
+               throw ValidationErrorFactory.createInvalidInputError({
+                  field:"total_fines",
+                  value:input,
+                  code:ValidationErrorCode.Invalid_Profile_Parameter_Format,
+                  message:"Invalid total fines input format"
+               })
+            }
+         },
+         "status":(input:string)=>{
+            if(!(input in ProfileStatus)){
+               throw ValidationErrorFactory.createInvalidInputError({
+                  field:"status",
+                  value:input,
+                  code:ValidationErrorCode.Invalid_Profile_Parameter_Format,
+                  message:"Invalid profile status input format"
+               })
+            }
+         },
+         "email":(input:string)=>{
+            const emailRegx: RegExp =
+               /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+            if (!emailRegx.test(input)) {
+               throw ValidationErrorFactory.createInvalidInputError({
+                  field:"email",
+                  value:input,
+                  code:ValidationErrorCode.Invalid_Profile_Parameter_Format,
+                  message:"Invalid email input format"
+               })
+            }
+         }
+      }
+
+     try {
+        for(let param of librarianRequiredParam){
+            if(req.body[param] === undefined) {
+               throw ClientErrorFactory.createMissingFieldError({
+                  field:String(param),
+                  context: {user_input_data:req.body},
+               })
+            }
+            if(param === "email" && req.body[param] === null) {
+               throw ValidationErrorFactory.createInvalidInputError({
+                  field:"email",
+                  value:req.body[param],
+                  code:ValidationErrorCode.Invalid_Profile_Parameter_Format,
+                  message:"Email cannot recive value null"
+               })
+            };
+            if(req.body[param] === null) continue;
+            validators[param as keyof typeof validators](req.body[param] as string);
+         }
+         next()
+     } catch (error:any) {
+         if(error instanceof ClientError){
+            res.status(error.httpsStatusCode).send(error.toClientResponse());
+         }
+         if(error instanceof ValidationError){
+            res.status(error.httpsStatusCode).send(error.toClientResponse());
+         }
+         else{
+            res.send({error:error});
+         }
+     }
+   }
+
    public static ValidateMemberStatus: RequestHandler = (req:Request,res:Response,next:NextFunction)=>{
       try{
          let userData:UserJwtPayloadInterface = req.body.authorizedUser
@@ -216,5 +298,4 @@ export class ErrorHandler_Middleware{
          }
       }
    }
-
 }

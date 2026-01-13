@@ -16,10 +16,6 @@ export class ProfileRouter extends RouterClass{
    }
 
    protected initializeRoutes(){
-      this.router.get('/',(req:Request,res:Response)=>{
-         res.send({message:"ProfileRouter"});
-      })
-
       this.router.get("/getProfile",
          this.validateToken,
          (req:Request,res:Response)=>{
@@ -43,7 +39,7 @@ export class ProfileRouter extends RouterClass{
 
       this.router.patch("/librarian/update",
          this.validateLibrarianToken,
-         this.validateLibrarianProfileUpdate,
+         ErrorHandler_Middleware.ValidateLibrarianUpdateProfileInput,
          (req:Request,res:Response) =>{
             this.librarianUpdateUserProfile(req,res);
          }
@@ -150,52 +146,6 @@ export class ProfileRouter extends RouterClass{
             res.send({error:error});
          }
          
-      }
-   }
-
-   private validateLibrarianProfileUpdate(req:Request,res:Response,next:NextFunction){
-      const librarianParam:(keyof LibrarianUpdateProfileParam)[] = ["status","total_fines","email"];
-      const validators = {
-         "total_fines":(input:string)=>{
-            if(!/^\d{1,10}\.\d+$/.test(`${input}`)){
-               throw new Error("Invalid total_fines format");
-            }
-         },
-         "status":(input:string)=>{
-            if(!(input in ProfileStatus)){
-               throw new Error("Invalid status input");
-            }
-         },
-         "email":(input:string)=>{
-            const emailRegx: RegExp =
-               /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-            if (!emailRegx.test(input)) {
-               throw new Error("Invalid email input");
-            }
-         }
-      }
-
-     try {
-        for(let param of librarianParam){
-            if(req.body[param] === undefined) throw new Error(`${String(param)} is undefined`);
-            if(param === "email" && req.body[param] === null) throw new Error(`email is null`);
-            if(req.body[param] === null) continue;
-            validators[param as keyof typeof validators](req.body[param] as string);
-         }
-         next()
-     } catch (error:any) {
-         res.status(400).send({error: error.message});
-     }
-   }
-
-   private validateMemberStatus(req:Request,res:Response,next:NextFunction){
-      try{
-         let userData:UserJwtPayloadInterface = req.body.authorizedUser
-         if(userData.userRole !== "GUEST") throw new Error(`User is already a ${userData.userRole}`);
-         next()
-      }
-      catch(err:any){
-         res.status(400).send({error:err.message});
       }
    }
 }

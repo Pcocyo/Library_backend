@@ -17,7 +17,12 @@ export abstract class RouterClass {
   protected validateToken(req: Request, res: Response, next: NextFunction) {
       try {
          const token = req.headers.authorization;
-         if (!token) throw ClientErrorFactory.createUnauthorizedRequestError({context:{user_request_info:req.body}});
+         if (!token) {
+            throw ClientErrorFactory.createUnauthorizedRequestError({
+               context:{user_request_info:req.body},
+               message:"Unauthorized Request"
+            })
+         };
          if (!req.body) req.body = {authorizedUser: Env.getValidateToken(token)};
          req.body.authorizedUser = Env.getValidateToken(token);
          next();
@@ -34,14 +39,29 @@ export abstract class RouterClass {
       }
       try {
          const token = req.headers.authorization;
-         if (!token) throw new Error("Unauthorized Request");
+         if (!token){
+            throw ClientErrorFactory.createUnauthorizedRequestError({
+               context:{user_request_info:req.body},
+               message:"Unauthorized Request"
+            });
+         }
          const parsedToken = Env.getValidateToken(token);
-         if (!isLibrarian(parsedToken)) throw new Error("Unauthorized Request")
-         if (!req.body) req.body = {authorizedAdmin: parsedToken};
-         req.body.authorizedAdmin = parsedToken;
+         if (!isLibrarian(parsedToken)){
+            throw ClientErrorFactory.createUnauthorizedRequestError({
+               context:{user_request_info:req.body},
+               message:"Unauthorized Request (User is not a librarian)"
+            });
+         }
+         if (!req.body) req.body = {authorizedUser: parsedToken};
+         req.body.authorizedUser = parsedToken;
          next();
-      } catch (err: any) {
-         res.status(400).send({ error: err.message });
+      } catch (error: any) {
+         if(error instanceof ClientError){
+            res.status(error.httpsStatusCode).send(error.toClientResponse());
+         }
+         else{
+            res.status(400).send({ error: error });
+         }
       }
    }
    protected abstract initializeRoutes(): void;
