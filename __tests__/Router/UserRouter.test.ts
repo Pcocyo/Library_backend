@@ -122,29 +122,6 @@ describe("Update user test suite", () => {
       expect(response.body.name).toBe("VALIDATION_ERROR");
    });
 
-   it("put /user/update Respond with Error code VALIDATION_ERROR if userRole parameter is invalid format", async () => {
-      payload.userRole = "invalidRole";
-      const response = await request(serverApp)
-         .put("/user/update")
-         .set("Authorization", dummyToken)
-         .send(payload);
-      expect(response.status).toBe(400);
-      expect(response.body.name).toBe("VALIDATION_ERROR");
-   });
-
-   it("put /user/update should Respond with Error code VALIDATION_ERROR if userRole parameter is missing", async () => {
-      const missingEmailPayload = {
-            email: "example@gmail.com",
-            password: "TestPassword123@"
-      }
-      const response = await request(serverApp)
-         .put("/user/update")
-         .set("Authorization", dummyToken)
-         .send(missingEmailPayload);
-      expect(response.status).toBe(400);
-      expect(response.body.name).toBe("VALIDATION_ERROR");
-   });
-
    // /user/update success logic
    
    it("put /user/update should call User.setPassword() with bcrypt payload when password included", async () => {

@@ -23,7 +23,6 @@ export interface UpdateUserRequest extends Request{
    body:{
       email:string,
       password:string,
-      userRole:UserRole,
       authorizedUser: UserJwtPayloadInterface
    }
 }

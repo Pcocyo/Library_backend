@@ -14,6 +14,5 @@ export const errorHandler = (
    if(err instanceof ValidationError){
       return res.status(err.httpsStatusCode).send(err.toClientResponse());
    }
-   console.log(err);
    res.status(500).json({message:"Internal server error",error:err});
 }

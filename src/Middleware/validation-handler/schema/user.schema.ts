@@ -23,7 +23,6 @@ export const LoginUserRequestSchema = z.object({
 })
 
 export const UpdateUserRequestSchema = z.object({
-   userRole:z.nativeEnum(UserRole,"Invalid user role input (expected: MEMBER,GUEST,LIBRARIAN)"),
    email:z.string("Invalid email input format").email("Invalid email input format").nullable(),
    password:z
       .string()
