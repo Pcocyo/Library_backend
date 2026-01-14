@@ -2,11 +2,11 @@ import { RouterClass } from "../Ultils/RouterClass";
 import type {Response,NextFunction } from "express";
 import User from "../../Controller/User/User";
 import { CreateUserRequest, DeleteUserRequest, GetUserRequest, LoginUserRequest, UpdateUserRequest} from "./UserRouter.types";
-import {ErrorHandler_Middleware } from "../../Middleware/ErrorHandler_Middleware";
 import Env from "../../Config/config";
 import Profile from "../../Controller/Profile/Profile";
 import {ClientErrorFactory } from "../../Errors";
-
+import { validate } from "../../Middleware/validation-handler";
+import { CreateUserRequestSchema,GetUserRequestSchema,LoginUserRequestSchema, UpdateUserRequestSchema} from "../../Middleware/validation-handler/schema";
 export class UserRouter extends RouterClass {
    public constructor() {
       super();
@@ -15,8 +15,7 @@ export class UserRouter extends RouterClass {
 
    protected initializeRoutes() {
       this.router.post("/create",
-         ErrorHandler_Middleware.ValidateEmailParameter,
-         ErrorHandler_Middleware.ValidatePasswordParameter,
+         validate(CreateUserRequestSchema),
          (req: CreateUserRequest, res: Response, next:NextFunction) =>{
             this.createUser(req, res,next);
          }
@@ -25,15 +24,14 @@ export class UserRouter extends RouterClass {
       this.router.get(
          "/getUser",
          this.validateToken,
-         ErrorHandler_Middleware.ValidateEmailParameter,
+         validate(GetUserRequestSchema),
          (req: GetUserRequest, res: Response, next:NextFunction) => {
             this.getUser(req, res,next);
          },
       );
 
       this.router.post("/login",
-         ErrorHandler_Middleware.ValidateEmailParameter,
-         ErrorHandler_Middleware.ValidatePasswordParameter,
+         validate(LoginUserRequestSchema),
          (req: LoginUserRequest, res: Response, next:NextFunction) => {
          this.login(req, res,next);
       });
@@ -49,9 +47,7 @@ export class UserRouter extends RouterClass {
       this.router.put(
          "/update",
          this.validateToken,
-         ErrorHandler_Middleware.ValidateEmailParameter,
-         ErrorHandler_Middleware.ValidatePasswordParameter,
-         ErrorHandler_Middleware.ValidateUserRoleParameter,
+         validate(UpdateUserRequestSchema),
          (req: UpdateUserRequest, res: Response, next:NextFunction) => {
             this.updateUser(req, res,next);
          },

@@ -5,7 +5,9 @@ import User, {UserRole} from "../../Controller/User/User";
 import { UserUpdateProfileParam, } from "../../Controller/Profile/Profile.interface";
 import { ProfileUpdateRequest,LibrarianUpdateUserProfileRequest } from "./ProfileRouter.types";
 import { UserJwtPayloadInterface } from "../../Config/config.interface";
-import { ErrorHandler_Middleware } from "../../Middleware";
+import { LibrarianUpdateProfileRequestSchema, ProfileUpdateRequestSchema } from "../../Middleware/validation-handler/schema";
+import { ClientErrorFactory } from "../../Errors";
+import { validate } from "../../Middleware/validation-handler";
 
 export class ProfileRouter extends RouterClass{
    public constructor(){
@@ -22,14 +24,13 @@ export class ProfileRouter extends RouterClass{
 
       this.router.patch("/update",
          this.validateToken,
-         ErrorHandler_Middleware.ValidatePofileUptadeInput,
+         validate(ProfileUpdateRequestSchema),
          (req:ProfileUpdateRequest,res:Response,next:NextFunction)=>{
             this.updateUserProfile(req,res,next);
          })
 
       this.router.patch("/subscribe",
          this.validateToken,
-         ErrorHandler_Middleware.ValidateMemberStatus,
          (req:Request,res:Response,next:NextFunction)=>{
             this.subscribe(req,res,next);
          }
@@ -37,7 +38,7 @@ export class ProfileRouter extends RouterClass{
 
       this.router.patch("/librarian/update",
          this.validateLibrarianToken,
-         ErrorHandler_Middleware.ValidateLibrarianUpdateProfileInput,
+         validate(LibrarianUpdateProfileRequestSchema),
          (req:Request,res:Response,next:NextFunction) =>{
             this.librarianUpdateUserProfile(req,res,next);
          }
@@ -105,7 +106,7 @@ export class ProfileRouter extends RouterClass{
       const userToUpdate:User = await User.getUserByEmail({email:req.body.email})
       const userProfile:Profile = await Profile.GetByUserId({user_id:userToUpdate.getId()});
       try{
-         userProfile.set_fines(req.body.total_fines as number);
+         userProfile.set_fines(req.body.total_fines);
          userProfile.set_status(req.body.status);
          res.status(200).json({message:"success"});
       }catch(error: any){
@@ -115,6 +116,10 @@ export class ProfileRouter extends RouterClass{
 
    private async subscribe(req:Request,res:Response,next:NextFunction){
       try{
+         if(req.body.authorizedUser.userRole !== "GUEST") throw ClientErrorFactory.createInvalidClientRequestError({
+            context:req.body,
+            message:"User status is not a guest"
+         })
          const userData:UserJwtPayloadInterface = req.body.authorizedUser;
          const user:User = await User.getUserByEmail({email:userData.userEmail});
          const profile:Profile = await Profile.GetByUserId({user_id:userData.userId});

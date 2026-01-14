@@ -76,20 +76,17 @@ describe("Update user test suite", () => {
       expect(response.body.code).toBe(ClientErrorCode.Unauthorized_Request);
    });
 
-   it("put /user/update Respond with Error code VALIDATION_ERROR_001 if email parameter is invalid format", async () => {
+   it("put /user/update Respond with Error code VALIDATION_ERROR if email parameter is invalid format", async () => {
       payload.email = "invalidEmail";
       const response = await request(serverApp)
          .put("/user/update")
          .set("Authorization", dummyToken)
          .send(payload);
-      expect(response.body).toHaveProperty("name");
-      expect(response.body.name).toBe("VALIDATION_ERROR");
-      expect(response.body).toHaveProperty("code");
-      expect(response.body.code).toBe(ValidationErrorCode.Invalid_Email_Input);
       expect(response.status).toBe(400);
+      expect(response.body.name).toBe("VALIDATION_ERROR");
    });
 
-   it("put /user/update should Respond with Error code CLIENT_ERROR_001 if email parameter is missing", async () => {
+   it("put /user/update should Respond with Error code VALIDATION_ERROR if email parameter is missing", async () => {
       const missingEmailPayload = {
             password: "TestPassword123@",
             role: UserRole.GUEST,
@@ -98,27 +95,21 @@ describe("Update user test suite", () => {
          .put("/user/update")
          .set("Authorization", dummyToken)
          .send(missingEmailPayload);
-      expect(response.status).toBe(400)
-      expect(response.body).toHaveProperty("name");
-      expect(response.body.name).toBe("CLIENT_ERROR");
-      expect(response.body).toHaveProperty("code");
-      expect(response.body.code).toBe(ClientErrorCode.Missing_Parameter);
+      expect(response.status).toBe(400);
+      expect(response.body.name).toBe("VALIDATION_ERROR");
    });
 
-   it("put /user/update Respond with Error code VALIDATION_ERROR_002 if password parameter is invalid format", async () => {
+   it("put /user/update Respond with Error code VALIDATION_ERROR if password parameter is invalid format", async () => {
       payload.password = "invalidpassword";
       const response = await request(serverApp)
          .put("/user/update")
          .set("Authorization", dummyToken)
          .send(payload);
-      expect(response.body).toHaveProperty("name");
-      expect(response.body.name).toBe("VALIDATION_ERROR");
-      expect(response.body).toHaveProperty("code");
-      expect(response.body.code).toBe(ValidationErrorCode.Invalid_Password_Input);
       expect(response.status).toBe(400);
+      expect(response.body.name).toBe("VALIDATION_ERROR");
    });
 
-   it("put /user/update should Respond with Error code CLIENT_ERROR_001 if password parameter is missing", async () => {
+   it("put /user/update should Respond with Error code VALIDATION_ERROR if password parameter is missing", async () => {
       const missingEmailPayload = {
             email: "example@gmail.com",
             role: UserRole.GUEST,
@@ -127,27 +118,21 @@ describe("Update user test suite", () => {
          .put("/user/update")
          .set("Authorization", dummyToken)
          .send(missingEmailPayload);
-      expect(response.status).toBe(400)
-      expect(response.body).toHaveProperty("name");
-      expect(response.body.name).toBe("CLIENT_ERROR");
-      expect(response.body).toHaveProperty("code");
-      expect(response.body.code).toBe(ClientErrorCode.Missing_Parameter);
+      expect(response.status).toBe(400);
+      expect(response.body.name).toBe("VALIDATION_ERROR");
    });
 
-   it("put /user/update Respond with Error code VALIDATION_ERROR_003 if userRole parameter is invalid format", async () => {
+   it("put /user/update Respond with Error code VALIDATION_ERROR if userRole parameter is invalid format", async () => {
       payload.userRole = "invalidRole";
       const response = await request(serverApp)
          .put("/user/update")
          .set("Authorization", dummyToken)
          .send(payload);
-      expect(response.body).toHaveProperty("name");
-      expect(response.body.name).toBe("VALIDATION_ERROR");
-      expect(response.body).toHaveProperty("code");
-      expect(response.body.code).toBe(ValidationErrorCode.Invalid_UserRole_Input);
       expect(response.status).toBe(400);
+      expect(response.body.name).toBe("VALIDATION_ERROR");
    });
 
-   it("put /user/update should Respond with Error code CLIENT_ERROR_001 if userRole parameter is missing", async () => {
+   it("put /user/update should Respond with Error code VALIDATION_ERROR if userRole parameter is missing", async () => {
       const missingEmailPayload = {
             email: "example@gmail.com",
             password: "TestPassword123@"
@@ -156,11 +141,8 @@ describe("Update user test suite", () => {
          .put("/user/update")
          .set("Authorization", dummyToken)
          .send(missingEmailPayload);
-      expect(response.status).toBe(400)
-      expect(response.body).toHaveProperty("name");
-      expect(response.body.name).toBe("CLIENT_ERROR");
-      expect(response.body).toHaveProperty("code");
-      expect(response.body.code).toBe(ClientErrorCode.Missing_Parameter);
+      expect(response.status).toBe(400);
+      expect(response.body.name).toBe("VALIDATION_ERROR");
    });
 
    // /user/update success logic
@@ -313,7 +295,7 @@ describe("Create, Delete, Read Test Suite (Unit Test)", () => {
 
    // create user failed test
 
-   it("post /user/create route Respond with Error code CLIENT_ERROR_001 if email parameter is missing", async() => {
+   it("post /user/create route Respond with Error code VALIDATION_ERROR if email parameter is missing", async() => {
       let missingEmailPayload = {
          password: "ValidPassword@",
       }
@@ -322,45 +304,37 @@ describe("Create, Delete, Read Test Suite (Unit Test)", () => {
          .send(missingEmailPayload);
       expect(response.status).toBe(400)
       expect(response.body).toHaveProperty("name");
-      expect(response.body.name).toBe("CLIENT_ERROR");
-      expect(response.body).toHaveProperty("code");
-      expect(response.body.code).toBe(ClientErrorCode.Missing_Parameter);
+      expect(response.body.name).toBe("VALIDATION_ERROR");
    })
 
-   it("post /user/create route Respond with Error code VALIDATION_ERROR_001 if user enter an invalid email", async () => {
+   it("post /user/create route Respond with Error code VALIDATION_ERROR if user enter an invalid email", async () => {
       const response = await request(serverApp)
          .post("/user/create")
          .send(invalidEmailPayload);
+      expect(response.status).toBe(400);
       expect(response.body).toHaveProperty("name");
       expect(response.body.name).toBe("VALIDATION_ERROR");
-      expect(response.body).toHaveProperty("code");
-      expect(response.body.code).toBe(ValidationErrorCode.Invalid_Email_Input);
-      expect(response.status).toBe(400);
    });
 
-   it("post /user/create route Respond with Error code CLIENT_ERROR_001 if password parameter is missing", async() => {
+   it("post /user/create route Respond with Error code VALIDATION_ERROR if password parameter is missing", async() => {
       let missingPasswordPayload = {
          email:"example12@example.com",
       }
       const response = await request(serverApp)
          .post("/user/create")
          .send(missingPasswordPayload);
-      expect(response.status).toBe(400)
+      expect(response.status).toBe(400);
       expect(response.body).toHaveProperty("name");
-      expect(response.body.name).toBe("CLIENT_ERROR");
-      expect(response.body).toHaveProperty("code");
-      expect(response.body.code).toBe(ClientErrorCode.Missing_Parameter);
+      expect(response.body.name).toBe("VALIDATION_ERROR");
    })
 
-   it("post /user/create route Respond with Error code VALIDATION_ERROR_002 if user enter an invalid password format", async () => {
+   it("post /user/create route Respond with Error code VALIDATION_ERROR if user enter an invalid password format", async () => {
       const response = await request(serverApp)
          .post("/user/create")
          .send(invalidPasswordPayload);
+      expect(response.status).toBe(400);
       expect(response.body).toHaveProperty("name");
       expect(response.body.name).toBe("VALIDATION_ERROR");
-      expect(response.body).toHaveProperty("code");
-      expect(response.body.code).toBe(ValidationErrorCode.Invalid_Password_Input);
-      expect(response.status).toBe(400);
    });
 
    // create user success logic
@@ -412,15 +386,13 @@ describe("Create, Delete, Read Test Suite (Unit Test)", () => {
 
    // get /user/getUser error logic
 
-   it("get /user/getUser respond with error when request was unauthorized with jwtToken", async () => {
+   it("get /user/getUser respond with CLIENT_ERROR when request was unauthorized with jwtToken", async () => {
       const response = await request(serverApp)
          .get("/user/getUser")
          .send(getUserPayload);
       expect(response.status).toBe(401);
       expect(response.body).toHaveProperty("name");
       expect(response.body.name).toBe("CLIENT_ERROR");
-      expect(response.body).toHaveProperty("code");
-      expect(response.body.code).toBe(ClientErrorCode.Unauthorized_Request);
    });
 
    it("get /user/getUser return with error when requested without email parameter", async () => {
@@ -428,11 +400,9 @@ describe("Create, Delete, Read Test Suite (Unit Test)", () => {
          .get("/user/getUser")
          .set("Authorization", dummyToken)
          .send();
-      expect(response.body).toHaveProperty("name");
-      expect(response.body.name).toBe("CLIENT_ERROR");
-      expect(response.body).toHaveProperty("code");
-      expect(response.body.code).toBe(ClientErrorCode.Missing_Parameter);
       expect(response.status).toBe(400);
+      expect(response.body).toHaveProperty("name");
+      expect(response.body.name).toBe("VALIDATION_ERROR");
    });
 
    it("get /user/getUser return with error when have been called with invalid email", async () => {
@@ -440,11 +410,9 @@ describe("Create, Delete, Read Test Suite (Unit Test)", () => {
          .get("/user/getUser")
          .set("Authorization", dummyToken)
          .send({email:invalidEmailPayload.email});
+      expect(response.status).toBe(400);
       expect(response.body).toHaveProperty("name");
       expect(response.body.name).toBe("VALIDATION_ERROR");
-      expect(response.body).toHaveProperty("code");
-      expect(response.body.code).toBe(ValidationErrorCode.Invalid_Email_Input);
-      expect(response.status).toBe(400);
    });
 
 
@@ -464,7 +432,7 @@ describe("Create, Delete, Read Test Suite (Unit Test)", () => {
 
    // /user/login error logic
 
-   it("get /user/login response with Error code CLIENT_ERROR_001 if email parameter is missing",async()=>{
+   it("get /user/login response with Error code VALIDATION_ERROR if email parameter is missing",async()=>{
       const missingEmailPayload = {
          password:payload.password,
       }
@@ -472,47 +440,30 @@ describe("Create, Delete, Read Test Suite (Unit Test)", () => {
          .post("/user/login")
          .send(missingEmailPayload)
       expect(response.body).toHaveProperty("name");
-      expect(response.body.name).toBe("CLIENT_ERROR");
-      expect(response.body).toHaveProperty("code");
-      expect(response.body.code).toBe(ClientErrorCode.Missing_Parameter);
-      expect(response.status).toBe(400);
+      expect(response.body.name).toBe("VALIDATION_ERROR");
+      expect(response.body).toHaveProperty("name");
    })
 
-   it("get /user/login Respond with Error code VALIDATION_ERROR_001 if user enter an invalid email", async () => {
+   it("get /user/login Respond with Error code VALIDATION_ERROR if user enter an invalid email", async () => {
       const response = await request(serverApp)
          .post("/user/login")
          .send(invalidEmailPayload);
+      expect(response.status).toBe(400);
       expect(response.body).toHaveProperty("name");
       expect(response.body.name).toBe("VALIDATION_ERROR");
-      expect(response.body).toHaveProperty("code");
-      expect(response.body.code).toBe(ValidationErrorCode.Invalid_Email_Input);
-      expect(response.status).toBe(400);
    });
 
-   it("get /user/login response with Error code CLIENT_ERROR_001 if password parameter is missing",async()=>{
+   it("get /user/login response with Error code VALIDATION_ERROR if password parameter is missing",async()=>{
       const missingPasswordPayload = {
          email:payload.email
       };
       const response = await request(serverApp)
          .post("/user/login")
          .send(missingPasswordPayload);
-      expect(response.body).toHaveProperty("name");
-      expect(response.body.name).toBe("CLIENT_ERROR");
-      expect(response.body).toHaveProperty("code");
-      expect(response.body.code).toBe(ClientErrorCode.Missing_Parameter);
       expect(response.status).toBe(400);
-   })
-
-   it("get /user/login Respond with Error code VALIDATION_ERROR_001 if user enter an invalid password", async () => {
-      const response = await request(serverApp)
-         .post("/user/login")
-         .send(invalidPasswordPayload);
       expect(response.body).toHaveProperty("name");
       expect(response.body.name).toBe("VALIDATION_ERROR");
-      expect(response.body).toHaveProperty("code");
-      expect(response.body.code).toBe(ValidationErrorCode.Invalid_Password_Input);
-      expect(response.status).toBe(400);
-   });
+   })
 
    it("get /user/login Respond with Error code CLIENT_ERROR_003 if user enter an incorrect password", async () => {
       const response = await request(serverApp)

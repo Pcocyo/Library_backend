@@ -9,10 +9,10 @@ export const errorHandler = (
 ) => 
    {
    if(err instanceof ClientError){
-      return res.status(err.httpsStatusCode).send(err.toDevResponse());
+      return res.status(err.httpsStatusCode).send(err.toClientResponse());
    }
    if(err instanceof ValidationError){
-      return res.status(err.httpsStatusCode).send(err.toDevResponse());
+      return res.status(err.httpsStatusCode).send(err.toClientResponse());
    }
    res.status(500).json({error:"Internal server error"});
 }
