@@ -29,26 +29,14 @@ export class ClientError extends BaseError{
 }
 
 export enum ClientErrorCode {
-   Missing_Parameter = "CLIENT_ERROR_001",
-   Unauthorized_Request = "CLIENT_ERROR_002",
-   Incorrect_Password = "CLIENT_ERROR_003",
-   Email_Not_Found = "CLIENT_ERROR_004",
-   User_Id_Not_Found = "CLIENT_ERROR_005",
-   Invalid_Request = "CLIENT_ERROR_006"
+   Unauthorized_Request = "Unauthorized_Request",
+   Incorrect_Password = "Incorrect_Password",
+   Email_Not_Found = "Email_Not_Found",
+   User_Id_Not_Found = "User_Id_Not_Found",
+   Invalid_Request = "Invalid_Request"
 }
 
 export class ClientErrorFactory {
-
-   public static createMissingFieldError(param:MissingFieldParam):ClientError{
-      return new ClientError({
-         field: param.field,
-         message:`Missing ${param.field} parameter`,
-         httpStatusCode: 400,
-         code: ClientErrorCode.Missing_Parameter,
-         isOperational: true,
-         context: param.context,
-      })
-   }
 
    public static createUnauthorizedRequestError(param:UnauthorizedCLientParam):ClientError{
       return new ClientError({
