@@ -1,13 +1,9 @@
 import { Request,Response,NextFunction, RequestHandler } from "express";
-import { ValidationError, ValidationErrorCode, ValidationErrorFactory } from "../Errors";
+import { ValidationErrorCode, ValidationErrorFactory } from "../Errors";
 import { ClientErrorFactory } from "../Errors";
-import { ClientError } from "../Errors";
-import { ClientErrorResponse } from "../Errors/types";
 import { UserRole } from "../Controller/User/User";
 import { ProfileStatus, UserUpdateProfileParam } from "../Controller/Profile/Profile.interface";
 import { UserJwtPayloadInterface } from "../Config/config.interface";
-import { ClientErrorCode } from "../Errors/ClientError";
-import { LibrarianUpdateUserProfileRequest } from "../Router/Profile";
 
 export class ErrorHandler_Middleware{
    public static ValidateEmailParameter: RequestHandler = (req:Request,res:Response,next:NextFunction)=>{
@@ -30,17 +26,9 @@ export class ErrorHandler_Middleware{
             })
          }
          next();
-      }catch(error:any){
-         if(error instanceof ClientError){
-            const clientResponse:ClientErrorResponse = error.toClientResponse()
-            res.status(clientResponse.statusCode).json({...clientResponse});
-         };
-
-         if(error instanceof ValidationError){
-            const clientResponse:ClientErrorResponse = error.toClientResponse()
-            res.status(clientResponse.statusCode).json({...clientResponse});
-         };
-         res.json({...error.toClientResponse()});
+      }
+      catch(error:any){
+         next(error);
       }
    }
 
@@ -65,16 +53,7 @@ export class ErrorHandler_Middleware{
          };
          next();
       }catch(error:any){
-         if(error instanceof ClientError){
-            const clientResponse:ClientErrorResponse = error.toClientResponse()
-            res.status(clientResponse.statusCode).json({...clientResponse});
-         };
-
-         if(error instanceof ValidationError){
-            const clientResponse:ClientErrorResponse = error.toClientResponse()
-            res.status(clientResponse.statusCode).json({...clientResponse});
-         };
-         res.json({...error.toClientResponse()});
+         next(error);
       }
    }
 
@@ -97,16 +76,7 @@ export class ErrorHandler_Middleware{
          }
          next();
       }catch(error:any){
-         if(error instanceof ClientError){
-            const clientResponse:ClientErrorResponse = error.toClientResponse()
-            res.status(clientResponse.statusCode).json({...clientResponse});
-         };
-
-         if(error instanceof ValidationError){
-            const clientResponse:ClientErrorResponse = error.toClientResponse()
-            res.status(clientResponse.statusCode).json({...clientResponse});
-         };
-         res.json({...error.toClientResponse()});
+         next(error);
       }
    }
 
@@ -199,15 +169,7 @@ export class ErrorHandler_Middleware{
          }
          next();
       }catch(error:any){
-         if(error instanceof ClientError){
-            res.status(error.httpsStatusCode).send(error.toClientResponse());
-         }
-         if(error instanceof ValidationError){
-            res.status(error.httpsStatusCode).send(error.toClientResponse());
-         }
-         else{
-            res.send({error:error});
-         }
+         next(error);
       }
    }
 
@@ -268,19 +230,11 @@ export class ErrorHandler_Middleware{
             validators[param as keyof typeof validators](req.body[param] as string);
          }
          next()
-     } catch (error:any) {
-         if(error instanceof ClientError){
-            res.status(error.httpsStatusCode).send(error.toClientResponse());
-         }
-         if(error instanceof ValidationError){
-            res.status(error.httpsStatusCode).send(error.toClientResponse());
-         }
-         else{
-            res.send({error:error});
-         }
-     }
+      } catch (error:any){
+         next(error);
+      }
    }
-
+   
    public static ValidateMemberStatus: RequestHandler = (req:Request,res:Response,next:NextFunction)=>{
       try{
          let userData:UserJwtPayloadInterface = req.body.authorizedUser
@@ -290,12 +244,7 @@ export class ErrorHandler_Middleware{
          })
          next()
       }catch(error:any){
-         if(error instanceof ClientError){
-            res.status(error.httpsStatusCode).send(error.toClientResponse());
-         }
-         else{
-            res.send({error:error});
-         }
+         next(error);
       }
    }
 }

@@ -1,11 +1,11 @@
 import { RouterClass } from "../Ultils/RouterClass";
-import type { Request, Response,RequestHandler } from "express";
-import User, {UserRole} from "../../Controller/User/User";
+import type {Response,NextFunction } from "express";
+import User from "../../Controller/User/User";
 import { CreateUserRequest, DeleteUserRequest, GetUserRequest, LoginUserRequest, UpdateUserRequest} from "./UserRouter.types";
 import {ErrorHandler_Middleware } from "../../Middleware/ErrorHandler_Middleware";
 import Env from "../../Config/config";
 import Profile from "../../Controller/Profile/Profile";
-import { ClientError, ClientErrorFactory } from "../../Errors";
+import {ClientErrorFactory } from "../../Errors";
 
 export class UserRouter extends RouterClass {
    public constructor() {
@@ -17,8 +17,8 @@ export class UserRouter extends RouterClass {
       this.router.post("/create",
          ErrorHandler_Middleware.ValidateEmailParameter,
          ErrorHandler_Middleware.ValidatePasswordParameter,
-         (req: CreateUserRequest, res: Response) =>{
-            this.createUser(req, res)
+         (req: CreateUserRequest, res: Response, next:NextFunction) =>{
+            this.createUser(req, res,next);
          }
       );
 
@@ -26,23 +26,23 @@ export class UserRouter extends RouterClass {
          "/getUser",
          this.validateToken,
          ErrorHandler_Middleware.ValidateEmailParameter,
-         (req: GetUserRequest, res: Response) => {
-            this.getUser(req, res);
+         (req: GetUserRequest, res: Response, next:NextFunction) => {
+            this.getUser(req, res,next);
          },
       );
 
       this.router.post("/login",
          ErrorHandler_Middleware.ValidateEmailParameter,
          ErrorHandler_Middleware.ValidatePasswordParameter,
-         (req: LoginUserRequest, res: Response) => {
-         this.login(req, res);
+         (req: LoginUserRequest, res: Response, next:NextFunction) => {
+         this.login(req, res,next);
       });
 
       this.router.delete(
          "/delete",
          this.validateToken,
-         (req: DeleteUserRequest, res: Response) => {
-            this.deleteUser(req, res);
+         (req: DeleteUserRequest, res: Response, next:NextFunction) => {
+            this.deleteUser(req, res,next);
          },
       );
 
@@ -52,14 +52,14 @@ export class UserRouter extends RouterClass {
          ErrorHandler_Middleware.ValidateEmailParameter,
          ErrorHandler_Middleware.ValidatePasswordParameter,
          ErrorHandler_Middleware.ValidateUserRoleParameter,
-         (req: UpdateUserRequest, res: Response) => {
-            this.updateUser(req, res);
+         (req: UpdateUserRequest, res: Response, next:NextFunction) => {
+            this.updateUser(req, res,next);
          },
       );
    }
 
 
-   private async updateUser(req: UpdateUserRequest, res: Response) {
+   private async updateUser(req: UpdateUserRequest, res: Response, next:NextFunction) {
       try {
          const { authorizedUser } = req.body;
          const userInstance = await User.getUserByEmail({
@@ -70,19 +70,12 @@ export class UserRouter extends RouterClass {
          await userInstance.setRole(req.body.userRole);
          let newToken = Env.getGenerateJwtToken(userInstance);
          res.send({ token: newToken });
-      } catch (error: any) {
-         if(error instanceof ClientError){
-            res.status(error.httpsStatusCode).send(error.toClientResponse());
-         }
-         else{
-            res.status(400).send({
-               error: error.message,
-            });
-         }
+      } catch (error: any){
+         next(error);
       }
    }
 
-   private async createUser(req: CreateUserRequest, res: Response) {
+   private async createUser(req: CreateUserRequest, res: Response, next:NextFunction) {
       try {
          let cryptedPass: string = await Env.getGenerateBcrypt(req.body.password);
          let user: User = await User.createNewUser({
@@ -95,14 +88,12 @@ export class UserRouter extends RouterClass {
          res.json({
             token: token,
          });
-      } catch (err: any) {
-         res.status(400).json({
-            error: err.message,
-         });
+      } catch (error: any){
+         next(error);
       }
    }
 
-   private async login(req: LoginUserRequest, res: Response) {
+   private async login(req: LoginUserRequest, res: Response, next:NextFunction) {
       try {
          const user = await User.getUserByEmail({ email: req.body.email });
          const correctPassword = await Env.getValidatePassword(
@@ -119,17 +110,12 @@ export class UserRouter extends RouterClass {
          res.send({
             token: token,
          });
-      } catch (error: any) {
-         if(error instanceof ClientError){
-            res.status(error.httpsStatusCode).send(error.toClientResponse());
-         }
-         else{
-            res.status(400).send({ error: error.message });
-         }
+      } catch (error: any){
+         next(error);
       }
    }
 
-   private async getUser(req: GetUserRequest, res: Response) {
+   private async getUser(req: GetUserRequest, res: Response, next:NextFunction) {
       try {
          const userFound: User = await User.getUserByEmail({ email: req.body.email });
          res.send({
@@ -137,19 +123,12 @@ export class UserRouter extends RouterClass {
             email: userFound.getEmail(),
             role: userFound.getUserRole(),
          });
-      } catch (error: any) {
-         if(error instanceof ClientError){
-            res.status(error.httpsStatusCode).send(error.toClientResponse());
-         }
-         else{
-            res.status(400).send({
-               error: error.message,
-            });
-         }
+      } catch (error: any){
+         next(error);
       }
    }
 
-   private async deleteUser(req: DeleteUserRequest, res: Response) {
+   private async deleteUser(req: DeleteUserRequest, res: Response, next:NextFunction) {
       try {
          const { authorizedUser } = req.body;
          let userProfile:Profile = await Profile.GetByUserId({user_id:authorizedUser.userId});
@@ -161,10 +140,8 @@ export class UserRouter extends RouterClass {
          res.send({
             message: `User ${authorizedUser.userEmail} deleted`,
          });
-      } catch (err: any) {
-         res.status(400).send({
-            error: err.message,
-         });
+      } catch (error: any){
+         next(error);
       }
    }
 }

@@ -2,11 +2,9 @@ import { RouterClass } from "../Ultils/RouterClass";
 import { NextFunction, Request,Response } from "express";
 import Profile from "../../Controller/Profile/Profile";
 import User, {UserRole} from "../../Controller/User/User";
-import { ProfileStatus } from "../../Controller/Profile/Profile.interface";
-import { LibrarianUpdateProfileParam,UserUpdateProfileParam, } from "../../Controller/Profile/Profile.interface";
+import { UserUpdateProfileParam, } from "../../Controller/Profile/Profile.interface";
 import { ProfileUpdateRequest,LibrarianUpdateUserProfileRequest } from "./ProfileRouter.types";
 import { UserJwtPayloadInterface } from "../../Config/config.interface";
-import { ClientError } from "../../Errors";
 import { ErrorHandler_Middleware } from "../../Middleware";
 
 export class ProfileRouter extends RouterClass{
@@ -18,35 +16,35 @@ export class ProfileRouter extends RouterClass{
    protected initializeRoutes(){
       this.router.get("/getProfile",
          this.validateToken,
-         (req:Request,res:Response)=>{
-            this.getProfile(req,res);
+         (req:Request,res:Response,next:NextFunction)=>{
+            this.getProfile(req,res,next);
          })
 
       this.router.patch("/update",
          this.validateToken,
          ErrorHandler_Middleware.ValidatePofileUptadeInput,
-         (req:ProfileUpdateRequest,res:Response)=>{
-            this.updateUserProfile(req,res);
+         (req:ProfileUpdateRequest,res:Response,next:NextFunction)=>{
+            this.updateUserProfile(req,res,next);
          })
 
       this.router.patch("/subscribe",
          this.validateToken,
          ErrorHandler_Middleware.ValidateMemberStatus,
-         (req:Request,res:Response)=>{
-            this.subscribe(req,res);
+         (req:Request,res:Response,next:NextFunction)=>{
+            this.subscribe(req,res,next);
          }
       )
 
       this.router.patch("/librarian/update",
          this.validateLibrarianToken,
          ErrorHandler_Middleware.ValidateLibrarianUpdateProfileInput,
-         (req:Request,res:Response) =>{
-            this.librarianUpdateUserProfile(req,res);
+         (req:Request,res:Response,next:NextFunction) =>{
+            this.librarianUpdateUserProfile(req,res,next);
          }
       )
    }
 
-   private async getProfile(req:Request,res:Response){
+   private async getProfile(req:Request,res:Response,next:NextFunction){
       const userData:UserJwtPayloadInterface = req.body.authorizedUser;
       try {
          const userProfile:Profile = await Profile.GetByUserId({user_id:userData.userId});
@@ -63,16 +61,11 @@ export class ProfileRouter extends RouterClass{
             updated_at:userProfile.get_updatedAt(),
          })
       } catch (error:any) {
-         if(error instanceof ClientError){
-            res.status(error.httpsStatusCode).send(error.toClientResponse());
-         }
-         else{
-            res.send({error:error});
-         }
+         next(error);
       }
    }
    
-   private async updateUserProfile(req:ProfileUpdateRequest,res:Response){
+   private async updateUserProfile(req:ProfileUpdateRequest,res:Response,next:NextFunction){
       const userParam:(keyof UserUpdateProfileParam)[] = ["user_name","first_name","last_name","contact","address"];
       try{
          const userProfile:Profile = await Profile.GetByUserId({user_id:req.body.authorizedUser.userId});
@@ -104,16 +97,11 @@ export class ProfileRouter extends RouterClass{
          userProfile.set_updatedAt(updateDate);
          res.status(200).json({message:`Profile for user ${req.body.authorizedUser.userId} successfully updated on ${updateDate}`});
       }catch(error:any){
-         if(error instanceof ClientError){
-            res.status(error.httpsStatusCode).send(error.toClientResponse());
-         }
-         else{
-            res.send({error:error});
-         }
+         next(error);
       }
    }
 
-   private async librarianUpdateUserProfile(req:LibrarianUpdateUserProfileRequest,res:Response){
+   private async librarianUpdateUserProfile(req:LibrarianUpdateUserProfileRequest,res:Response,next:NextFunction){
       const userToUpdate:User = await User.getUserByEmail({email:req.body.email})
       const userProfile:Profile = await Profile.GetByUserId({user_id:userToUpdate.getId()});
       try{
@@ -121,16 +109,11 @@ export class ProfileRouter extends RouterClass{
          userProfile.set_status(req.body.status);
          res.status(200).json({message:"success"});
       }catch(error: any){
-         if(error instanceof ClientError){
-            res.status(error.httpsStatusCode).send(error.toClientResponse());
-         }
-         else{
-            res.send({error:error});
-         }
+         next(error);
       }
    }
 
-   private async subscribe(req:Request,res:Response){
+   private async subscribe(req:Request,res:Response,next:NextFunction){
       try{
          const userData:UserJwtPayloadInterface = req.body.authorizedUser;
          const user:User = await User.getUserByEmail({email:userData.userEmail});
@@ -139,13 +122,7 @@ export class ProfileRouter extends RouterClass{
          profile.set_memberDate(new Date);
          res.status(200).send({message:`User ${userData.userEmail} successfully subscribed`});
       }catch(error:any){
-         if(error instanceof ClientError){
-            res.status(error.httpsStatusCode).send(error.toClientResponse());
-         }
-         else{
-            res.send({error:error});
-         }
-         
+         next(error);
       }
    }
 }
