@@ -2,7 +2,7 @@ import { BaseError } from "./BaseError";
 import { ClientErrorConstructorParams, ClientErrorDevResponse, 
          EmailNotFoundParam, IncorrectPasswordParam,
          InvalidClientRequestParam,
-         MissingFieldParam, UnauthorizedCLientParam,
+         UnauthorizedCLientParam,
          UserIdNotFoundParam} from "./types";
 
 export class ClientError extends BaseError{

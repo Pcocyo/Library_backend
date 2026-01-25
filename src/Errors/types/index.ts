@@ -18,3 +18,4 @@ export type {
    UserIdNotFoundParam, InvalidClientRequestParam
 } from "./ClientError.types";
 
+export { DbErrorConstructorParams, DbErrorDevResponse } from "./DbError.types";
