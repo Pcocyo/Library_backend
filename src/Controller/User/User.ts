@@ -1,12 +1,12 @@
-import { ClientErrorFactory } from "../../Errors";
+import { ClientError, ClientErrorFactory } from "../../Errors";
 import prisma from "../../prismaClient";
+import { DbErrorMapper } from "../../Errors";
 import type {
     UserRegisterInterface,
     UserGetEmailInterface,
     UserDomainInterface,
     UserDeleteInterface,
-} from "./User.interface";
-
+} from "./User.interface"
 export enum UserRole {
     MEMBER = "MEMBER",
     LIBRARIAN = "LIBRARIAN",
@@ -18,7 +18,7 @@ export enum UserRole {
 //password   String   @db.VarChar(255)
 //role       String   @default("GUEST") @db.VarChar(255)
 //created_at DateTime @default(dbgenerated("CURRENT_TIMESTAMP(6)")) @db.Timestamptz(6)
-
+//
 export default class User {
     private userId: string;
     private email: string;
@@ -63,9 +63,8 @@ export default class User {
                data:{email:newEmail},
             })
          }catch(error){
-            throw error; 
+            throw DbErrorMapper(error,"email");
          }
-
          this.email = newEmail;
       }
       return;
@@ -80,7 +79,7 @@ export default class User {
                data:{password:newPassword},
             })
          }catch(error){
-            throw error; 
+            throw DbErrorMapper(error,"password");
          }
          this.password = newPassword;
       }
@@ -95,7 +94,7 @@ export default class User {
                data:{role:String(newRole)}
             }) 
          } catch (error) {
-            throw(error);
+            throw DbErrorMapper(error,"password");
          }
          this.role = newRole;
       }
@@ -104,7 +103,7 @@ export default class User {
 
     public static async createNewUser(
         userRegisterData: UserRegisterInterface,
-    ): Promise<User> {
+    ): Promise<User>{
         userRegisterData.role =
             userRegisterData.role == null
                 ? UserRole.GUEST
@@ -124,35 +123,38 @@ export default class User {
                 role: userRegisterData.role,
                 created_at: new Date(newDbUser.created_at),
             });
-        } catch (PrismaClientKnownRequestError) {
-            throw PrismaClientKnownRequestError;
-        }
-    }
-
-    public static async getUserByEmail(
-        userLoginData: UserGetEmailInterface,
-    ): Promise<User> {
-        try {
-            const userDbFound = await prisma.users.findUnique({
-                where: {
-                    email: userLoginData.email,
-                },
-            });
-
-            if (userDbFound == null) {
-               throw ClientErrorFactory.createEmailNotFoundError({context:{data_recieved:userLoginData}});
-            }
-            return new User({
-                id: userDbFound.user_id,
-                email: userDbFound.email,
-                password: userDbFound.password,
-                role: UserRole[userDbFound.role as keyof typeof UserRole],
-                created_at: new Date(userDbFound.created_at),
-            });
         } catch (error) {
-            throw error;
+            throw DbErrorMapper(error,"unknown")
         }
     }
+
+   public static async getUserByEmail(
+      userLoginData: UserGetEmailInterface,
+   ): Promise<User> {
+      try {
+         const userDbFound = await prisma.users.findUnique({
+            where: {
+               email: userLoginData.email,
+            },
+         });
+
+         if (userDbFound == null) {
+            throw ClientErrorFactory.createEmailNotFoundError({context:{data_recieved:userLoginData}});
+         }
+         return new User({
+            id: userDbFound.user_id,
+            email: userDbFound.email,
+            password: userDbFound.password,
+            role: UserRole[userDbFound.role as keyof typeof UserRole],
+            created_at: new Date(userDbFound.created_at),
+         });
+      } catch (error) {
+         if (error instanceof ClientError){
+            throw error;
+         }
+         throw DbErrorMapper(error,"unknown");
+      }
+   }
 
     public static async deleteUser(userData:UserDeleteInterface){
         try{
@@ -163,7 +165,7 @@ export default class User {
                 }
             })   
         }catch(error){
-            throw error;
+            throw DbErrorMapper(error,"unknown")
         }
     }
 

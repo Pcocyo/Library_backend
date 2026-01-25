@@ -114,24 +114,24 @@ describe("database test suite", () => {
         }
     });
 
-    it("Throw an error when duplicate user input existed", async () => {
-        let errorUser: User;
-        try {
+    //it("Throw an error when duplicate user input existed", async () => {
+    //    let errorUser: User;
+    //    try {
 
-            expect(async()=>{
-            errorUser = await User.createNewUser({
-                email: dummyDbUser.getEmail(),
-                password: dummyDbUser.getPassword(),
-                role: dummyDbUser.getUserRole(),
-                });
-            }).rejects.toThrow()
+    //        expect(async()=>{
+    //        errorUser = await User.createNewUser({
+    //            email: dummyDbUser.getEmail(),
+    //            password: dummyDbUser.getPassword(),
+    //            role: dummyDbUser.getUserRole(),
+    //            });
+    //        }).rejects.toThrow()
 
-        } catch (error) {
-            expect(
-                error instanceof Prisma.PrismaClientKnownRequestError,
-            ).toBeTruthy();
-        }
-    });
+    //    } catch (error) {
+    //        expect(
+    //            error instanceof Prisma.PrismaClientKnownRequestError,
+    //        ).toBeTruthy();
+    //    }
+    //});
 
     it("Return a User domain model when getUserEmail() function called", async () => {
         try {

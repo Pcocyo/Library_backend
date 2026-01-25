@@ -11,7 +11,7 @@
 //table.timestamp("updated_at"); // represent user data last profile updates
 //
 
-import { ClientErrorFactory } from "../../Errors";
+import { ClientError, ClientErrorFactory, DbErrorMapper } from "../../Errors";
 import prisma from "../../prismaClient";
 import {
     ProfileParam,
@@ -93,8 +93,8 @@ export default class Profile {
                     data: { user_name: new_userName },
                 });
                 this.user_name = new_userName;
-            } catch (err) {
-                throw err;
+            } catch (error) {
+               throw DbErrorMapper(error,"user_name")
             }
         }
     }
@@ -107,8 +107,8 @@ export default class Profile {
                     data: { first_name: new_firstName },
                 });
                 this.first_name = new_firstName;
-            } catch (err) {
-                throw err;
+            } catch (error) {
+               throw DbErrorMapper(error,"first_name")
             }
         }
     }
@@ -121,8 +121,8 @@ export default class Profile {
                     data: { last_name: new_lastName },
                 });
                 this.last_name = new_lastName;
-            } catch (err) {
-                throw err;
+            } catch (error) {
+               throw DbErrorMapper(error,"last_name")
             }
         }
     }
@@ -135,8 +135,8 @@ export default class Profile {
                     data: { contact: new_contact },
                 });
                 this.contact = new_contact;
-            } catch (err) {
-                throw err;
+            } catch (error) {
+               throw DbErrorMapper(error,"contact")
             }
         }
     }
@@ -149,8 +149,8 @@ export default class Profile {
                     data: { address: new_address },
                 });
                 this.address = new_address;
-            } catch (err) {
-                throw err;
+            } catch (error) {
+               throw DbErrorMapper(error,"address")
             }
         }
     }
@@ -163,8 +163,8 @@ export default class Profile {
                     data: { membership_date: new_memberDate.toISOString() },
                 });
                 this.membership_date = new_memberDate;
-            } catch (err) {
-                throw err;
+            } catch (error) {
+               throw DbErrorMapper(error,"membership_date")
             }
         }
     }
@@ -177,8 +177,8 @@ export default class Profile {
                     data: { status: new_status.toString() },
                 });
                 this.status = new_status;
-            } catch (err) {
-                throw err;
+            } catch (error) {
+               throw DbErrorMapper(error,"status")
             }
         }
     }
@@ -191,8 +191,8 @@ export default class Profile {
                     data: { total_fines: parseFloat(new_fines.toFixed(2)) },
                 });
                 this.total_fines = parseFloat(new_fines.toFixed(2));
-            } catch (err) {
-                throw err;
+            } catch (error) {
+               throw DbErrorMapper(error,"total_fines")
             }
         }
     }
@@ -205,8 +205,8 @@ export default class Profile {
                     data: { updated_at: new_updatedAt.toISOString() },
                 });
                 this.updated_at = new_updatedAt;
-            } catch (err) {
-                throw err;
+            } catch (error) {
+               throw DbErrorMapper(error,"updated_at")
             }
         }
     }
@@ -229,8 +229,7 @@ export default class Profile {
                 },
             });
         } catch (error) {
-            console.log(error);
-            throw error;
+               throw DbErrorMapper(error,"unknown");
         }
         const newProfileParam: ProfileParam = {
             user_id: profile.user_id,
@@ -252,8 +251,8 @@ export default class Profile {
             await prisma.profiles.delete({
                 where: { user_id: profile.get_userId() },
             });
-        } catch (err) {
-            throw err;
+        } catch (error) {
+            throw DbErrorMapper(error,"unknown");
         }
     }
 
@@ -278,8 +277,11 @@ export default class Profile {
             updated_at: profile.updated_at,
          };
          return new Profile(newProfileParam);
-      }catch(err:any){
-         throw err
+      }catch(error){
+         if(error instanceof ClientError){
+            throw error 
+         }
+         throw DbErrorMapper(error,"unknown");
       }
    }
 

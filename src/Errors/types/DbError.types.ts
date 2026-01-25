@@ -5,6 +5,7 @@ export interface DbErrorConstructorParams {
    message:string,
    httpsStatusCode: HttpsStatusCode,
    context? : Record<string,any>,
+   isOperational:boolean,
    code: string,
    field:string,
 }
