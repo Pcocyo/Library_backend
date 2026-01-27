@@ -43,7 +43,7 @@ describe("Profile Route GET and PATCH endpoint test",()=>{
       let dummyUserName = "dummyUserName";
       let dummyFirstName = "dummyFirstName";
       let dummyLastName = "dummyLastName";
-      let dummyContact = "dummyContact";
+      let dummyContact = "000000000000";
       let dummyAddress = "dummyAddress";
       let dummyMembershipDate = new Date;
       let dummyStatus = ProfileStatus.ACTIVE;
@@ -123,7 +123,7 @@ describe("Profile Route GET and PATCH endpoint test",()=>{
       jest.resetModules();
    })
 
-   // GET /profile/getProfile logic
+   // GET /profile/get logic
 
    it("GET /profile/get route should return error when request is unauthorized",async ()=>{
       const response = await request(serverApp).get("/profile/get");
@@ -482,6 +482,25 @@ describe("Profile Route GET and PATCH endpoint test",()=>{
       expect(profileSet_FirstName).toHaveBeenCalledWith(null);
       expect(profileSet_LastName).toHaveBeenCalledWith(null);
       expect(profileSet_Username).toHaveBeenCalledWith(null);
+   })
+
+   it("PATCH /profile/update should skip the update process if the input values match the existing database record",async()=>{
+      const updateData:UserUpdateProfileParam = {
+         user_name:'dummyUserName', 
+         first_name:'dummyFirstName', 
+         last_name: 'dummyLastName',
+         contact:'000000000000',
+         address:'dummyAddress',
+      }
+      const response = await request(serverApp).patch("/profile/update")
+          .set({"Authorization":dummyUserToken})
+          .send(updateData)
+      expect(profileSet_Address).not.toHaveBeenCalled();
+      expect(profileSet_Contact).not.toHaveBeenCalled()
+      expect(profileSet_FirstName).not.toHaveBeenCalled();
+      expect(profileSet_LastName).not.toHaveBeenCalled();
+      expect(profileSet_Username).not.toHaveBeenCalled();
+      expect(profileSet_UpdateAt).not.toHaveBeenCalled();
    })
 
 

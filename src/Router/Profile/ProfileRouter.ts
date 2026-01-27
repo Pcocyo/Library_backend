@@ -8,6 +8,7 @@ import { UserJwtPayloadInterface } from "../../Config/config.interface";
 import { LibrarianUpdateProfileRequestSchema, ProfileUpdateRequestSchema } from "../../Middleware/validation-handler/schema";
 import { ClientErrorFactory } from "../../Errors";
 import { validate } from "../../Middleware/validation-handler";
+import { keyof } from "zod";
 
 export class ProfileRouter extends RouterClass{
    public constructor(){
@@ -67,36 +68,60 @@ export class ProfileRouter extends RouterClass{
    }
    
    private async updateUserProfile(req:ProfileUpdateRequest,res:Response,next:NextFunction){
-      const userParam:(keyof UserUpdateProfileParam)[] = ["user_name","first_name","last_name","contact","address"];
       try{
          const userProfile:Profile = await Profile.GetByUserId({user_id:req.body.authorizedUser.userId});
 
-         const updates = {
+         const profileUpdateMapper:Record<keyof UserUpdateProfileParam, (value:string|null)=>void> = {
             "user_name":(input:string | null)=>{
+               if(input == userProfile.get_userName()){
+                  return
+               }
                userProfile.set_userName(input)
+               userProfile.set_updatedAt(new Date);
+               return
             },
-            "first_name":(input:string | null)=>{
+            "first_name":(input:string | null)=> {
+               if(input == userProfile.get_firstName()){
+                  return
+               }
                userProfile.set_firstName(input)
+               userProfile.set_updatedAt(new Date);
+               return
             },
-            "last_name":(input:string | null)=>{
+            "last_name":(input:string | null)=> {
+               if(input == userProfile.get_lastName()){
+                  return
+               }
                userProfile.set_lastName(input)
+               userProfile.set_updatedAt(new Date);
+               return
             },
-            "contact":(input:string | null)=>{
+            "contact":(input:string | null)=> {
+               if(input == userProfile.get_contact()){
+                  return
+               }
                userProfile.set_contact(input)
+               userProfile.set_updatedAt(new Date);
+               return
             },
-            "address":(input:string | null)=>{
+            "address":(input:string | null)=> {
+               if(input == userProfile.get_address()){
+                  return
+               }
                userProfile.set_address(input)
-            }
-         }
-         for(let param of userParam){
-            const input = req.body[param];
-            updates[param as keyof typeof updates ](input as string | null);
+               userProfile.set_updatedAt(new Date);
+               return
+            },
          }
 
-         //update profile.update_at data
-         const updateDate = new Date;
-         userProfile.set_updatedAt(updateDate);
-         res.status(200).json({message:`Profile for user ${req.body.authorizedUser.userId} successfully updated on ${updateDate}`});
+         for(const [field,setter] of Object.entries(profileUpdateMapper)){
+            if(field in req.body){
+               const value = req.body[field as keyof typeof req.body]
+               setter(value as string);
+            }
+         }
+
+         res.status(200).json({message:`Update success`});
       }catch(error:any){
          next(error);
       }
