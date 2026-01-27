@@ -125,8 +125,8 @@ describe("Profile Route GET and PATCH endpoint test",()=>{
 
    // GET /profile/getProfile logic
 
-   it("GET /profile/getProfile route should return error when request is unauthorized",async ()=>{
-      const response = await request(serverApp).get("/profile/getProfile");
+   it("GET /profile/get route should return error when request is unauthorized",async ()=>{
+      const response = await request(serverApp).get("/profile/get");
       expect(response.status).toBe(401);
       expect(response.body).toHaveProperty("name");
       expect(response.body.name).toBe("CLIENT_ERROR");
@@ -134,8 +134,8 @@ describe("Profile Route GET and PATCH endpoint test",()=>{
       expect(response.body.code).toBe(ClientErrorCode.Unauthorized_Request);
    })
 
-   it("GET /profile/getProfile route should return profile information",async ()=>{
-      const response = await request(serverApp).get("/profile/getProfile").set("Authorization",dummyUserToken)
+   it("GET /profile/get route should return profile information",async ()=>{
+      const response = await request(serverApp).get("/profile/get").set("Authorization",dummyUserToken)
       expect(response.body).toHaveProperty("user_id");
       expect(response.body).toHaveProperty("user_name");
       expect(response.body).toHaveProperty("first_name");

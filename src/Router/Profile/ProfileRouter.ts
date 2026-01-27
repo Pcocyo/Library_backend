@@ -16,7 +16,7 @@ export class ProfileRouter extends RouterClass{
    }
 
    protected initializeRoutes(){
-      this.router.get("/getProfile",
+      this.router.get("/get",
          this.validateToken,
          (req:Request,res:Response,next:NextFunction)=>{
             this.getProfile(req,res,next);

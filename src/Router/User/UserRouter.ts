@@ -22,7 +22,7 @@ export class UserRouter extends RouterClass {
       );
 
       this.router.get(
-         "/getUser",
+         "/get",
          this.validateToken,
          validate(GetUserRequestSchema),
          (req: GetUserRequest, res: Response, next:NextFunction) => {

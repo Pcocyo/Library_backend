@@ -361,20 +361,20 @@ describe("Create, Delete, Read Test Suite (Unit Test)", () => {
       expect(response.body).toHaveProperty("token")
    });
 
-   // get /user/getUser error logic
+   // get /user/get error logic
 
-   it("get /user/getUser respond with CLIENT_ERROR when request was unauthorized with jwtToken", async () => {
+   it("get /user/get respond with CLIENT_ERROR when request was unauthorized with jwtToken", async () => {
       const response = await request(serverApp)
-         .get("/user/getUser")
+         .get("/user/get")
          .send(getUserPayload);
       expect(response.status).toBe(401);
       expect(response.body).toHaveProperty("name");
       expect(response.body.name).toBe("CLIENT_ERROR");
    });
 
-   it("get /user/getUser return with error when requested without email parameter", async () => {
+   it("get /user/get return with error when requested without email parameter", async () => {
       const response = await request(serverApp)
-         .get("/user/getUser")
+         .get("/user/get")
          .set("Authorization", dummyToken)
          .send();
       expect(response.status).toBe(400);
@@ -382,9 +382,9 @@ describe("Create, Delete, Read Test Suite (Unit Test)", () => {
       expect(response.body.name).toBe("VALIDATION_ERROR");
    });
 
-   it("get /user/getUser return with error when have been called with invalid email", async () => {
+   it("get /user/get return with error when have been called with invalid email", async () => {
       const response = await request(serverApp)
-         .get("/user/getUser")
+         .get("/user/get")
          .set("Authorization", dummyToken)
          .send({email:invalidEmailPayload.email});
       expect(response.status).toBe(400);
@@ -393,11 +393,11 @@ describe("Create, Delete, Read Test Suite (Unit Test)", () => {
    });
 
 
-   // get /user/getUser success logic
+   // get /user/get success logic
    
-   it("get /user/getUser respond with valid user", async () => {
+   it("get /user/get respond with valid user", async () => {
       const response = await request(serverApp)
-         .get("/user/getUser")
+         .get("/user/get")
          .set("Authorization", dummyToken)
          .send(getUserPayload);
       expect(response.status).toBe(200);
