@@ -11,13 +11,13 @@ export const ProfileUpdateRequestSchema = z.object({
       .string()
       .min(3,"first name too short (min 3 characther)")
       .max(32,"first name too long (max 32 characther)")
-      .regex(/^\S+$/,"user name cannot contain any whitespace")
+      .regex(/^\S+$/,"user first name cannot contain any whitespace")
       .nullable(),
    last_name: z
       .string()
       .min(3,"last name too short (min 3 characther)")
       .max(32,"last name too long (max 32 characther)")
-      .regex(/^\S+$/,"user name cannot contain any whitespace")
+      .regex(/^\S+$/,"user last name cannot contain any whitespace")
       .nullable(),
    contact: z
       .string()
