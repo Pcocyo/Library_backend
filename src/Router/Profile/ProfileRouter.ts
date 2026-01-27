@@ -71,56 +71,51 @@ export class ProfileRouter extends RouterClass{
       try{
          const userProfile:Profile = await Profile.GetByUserId({user_id:req.body.authorizedUser.userId});
 
-         const profileUpdateMapper:Record<keyof UserUpdateProfileParam, (value:string|null)=>void> = {
-            "user_name":(input:string | null)=>{
-               if(input == userProfile.get_userName()){
-                  return
+         const profileUpdateConfig:Record<
+            keyof UserUpdateProfileParam, 
+            {
+               getter: (p:Profile)=>string | null,
+               setter: (p:Profile,value: string|null) => void
+            } > = {
+               "user_name":{
+                  getter: (p)=>{return p.get_userName()},
+                  setter: (p,value) => p.set_userName(value)
+               },
+               "first_name":{
+                  getter: (p)=>{return p.get_firstName()},
+                  setter: (p,value) => p.set_firstName(value)
+               },
+               "last_name":{
+                  getter: (p)=>{return p.get_lastName()},
+                  setter: (p,value) => p.set_lastName(value)
+               },
+               "contact":{
+                  getter: (p)=>{return p.get_contact()},
+                  setter: (p,value) => p.set_contact(value)
+               },
+               "address":{
+                  getter: (p)=>{return p.get_address()},
+                  setter: (p,value) => p.set_address(value)
                }
-               userProfile.set_userName(input)
-               userProfile.set_updatedAt(new Date);
-               return
-            },
-            "first_name":(input:string | null)=> {
-               if(input == userProfile.get_firstName()){
-                  return
-               }
-               userProfile.set_firstName(input)
-               userProfile.set_updatedAt(new Date);
-               return
-            },
-            "last_name":(input:string | null)=> {
-               if(input == userProfile.get_lastName()){
-                  return
-               }
-               userProfile.set_lastName(input)
-               userProfile.set_updatedAt(new Date);
-               return
-            },
-            "contact":(input:string | null)=> {
-               if(input == userProfile.get_contact()){
-                  return
-               }
-               userProfile.set_contact(input)
-               userProfile.set_updatedAt(new Date);
-               return
-            },
-            "address":(input:string | null)=> {
-               if(input == userProfile.get_address()){
-                  return
-               }
-               userProfile.set_address(input)
-               userProfile.set_updatedAt(new Date);
-               return
-            },
-         }
+            }
 
-         for(const [field,setter] of Object.entries(profileUpdateMapper)){
+        let hasChanges:boolean = false;
+
+        for(const [field,config] of Object.entries(profileUpdateConfig)){
             if(field in req.body){
-               const value = req.body[field as keyof typeof req.body]
-               setter(value as string);
+               const userInput = req.body[field as keyof typeof req.body]
+               const currentVal = config.getter(userProfile)
+               if(currentVal != userInput){
+                  hasChanges = true;
+                  config.setter(userProfile,userInput as string | null);
+               }
             }
          }
 
+        if(hasChanges){
+            userProfile.set_updatedAt(new Date);
+         }
+         
          res.status(200).json({message:`Update success`});
       }catch(error:any){
          next(error);
