@@ -10,8 +10,7 @@
 //table.decimal("total_fines",10,2).notNullable().defaultTo(0.00); // user total fines in usd
 //table.timestamp("updated_at"); // represent user data last profile updates
 //
-
-import { ClientError, ClientErrorFactory } from "../../Errors";
+import { ClientErrorFactory,ClientError } from "../../Errors/ErrorClass";
 import prisma from "../../prismaClient";
 import {
     ProfileParam,

@@ -7,8 +7,7 @@ import type {
 import type { UserRegisterInterface } from "../../../src/Controller/User/User.interface";
 import User, { UserRole } from "../../../src/Controller/User/User";
 import prisma from "../../../src/prismaClient";
-import { ClientError } from "../../../src/Errors";
-import { ClientErrorCode } from "../../../src/Errors/ClientError";
+import { ClientError,ClientErrorCode } from "../../../src/Errors/ErrorClass";
 describe("Class Tests", () => {
     const dummyId: string = "dummyId";
     const dummyUserName: string = "dummyUserName";

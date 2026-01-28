@@ -1,3 +1,5 @@
+import dotenv from "dotenv";
+dotenv.config({ quiet: true });
 import { Server } from "../../src/Server/Server.ts";
 import request from "supertest";
 import { App } from "supertest/types";
@@ -8,11 +10,8 @@ import { UserJwtPayloadInterface } from "../../src/Config/config.interface.ts";
 import Profile from "../../src/Controller/Profile/Profile.ts";
 import { ProfileStatus } from "../../src/Controller/Profile/Profile.interface.ts";
 import Env from "../../src/Config/config.ts";
-import dotenv from "dotenv";
-dotenv.config({ quiet: true });
 import jwt from "jsonwebtoken";
-import { ClientErrorCode } from "../../src/Errors/ClientError.ts";
-import { ValidationErrorCode } from "../../src/Errors/ValidationError.ts";
+import { ClientErrorCode } from "../../src/Errors/ErrorClass";
 
 describe("Update user test suite", () => {
    let dummyUserId = "dummyUseeId";

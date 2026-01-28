@@ -1,7 +1,6 @@
 import { beforeEach } from "node:test";
-import {BaseError} from "../../src/Errors"
-import { BaseErrorConstructorParams } from "../../src/Errors/types";
-
+import { BaseErrorConstructorParams } from "../../src/Errors/ErrorClass/types";
+import { BaseError } from "../../src/Errors/ErrorClass"
 class BaseErrorTest extends BaseError{};
 
    //message: string;

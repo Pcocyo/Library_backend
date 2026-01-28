@@ -5,11 +5,7 @@ import Profile from "../../src/Controller/Profile/Profile";
 import { ProfileStatus,UserUpdateProfileParam,LibrarianUpdateProfileParam } from "../../src/Controller/Profile/Profile.interface";
 import Env from "../../src/Config/config";
 import request from "supertest";
-import { ClientError, ClientErrorCode } from "../../src/Errors/ClientError";
-import { ValidationErrorCode } from "../../src/Errors";
-import { response } from "express";
-import { exit } from "process";
-
+import { ClientErrorCode } from "../../src/Errors/ErrorClass";
 describe("Profile Route GET and PATCH endpoint test",()=>{
    let initializeDummyUser = ()=>{
       let dummyEmail = "dummyEmail";

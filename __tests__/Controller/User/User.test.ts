@@ -1,9 +1,7 @@
 import User from "../../../src/Controller/User/User.ts";
 import { UserRole } from "../../../src/Controller/User/User";
 import prisma from "../../../src/prismaClient";
-import { Prisma } from "@prisma/client";
-import { resolve } from "path";
-import { ClientError, ClientErrorCode } from "../../../src/Errors/ClientError.ts";
+import { ClientError, ClientErrorCode } from "../../../src/Errors/ErrorClass";
 
 describe("User class test", () => {
     const dummyId = "dummyId";

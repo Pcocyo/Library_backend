@@ -1,7 +1,6 @@
 import jwt from "jsonwebtoken";
 import { ErrorMapperClass } from "./ErrorMapperClass.interface";
-import { ClientError,ClientErrorFactory } from "../../ClientError";
-
+import { ClientError,ClientErrorFactory } from "../../ErrorClass";
 type JwtError = jwt.NotBeforeError | jwt.JsonWebTokenError | jwt.TokenExpiredError;
 
 export class JwtErrorMapper implements ErrorMapperClass<JwtError,ClientError>{

@@ -4,7 +4,7 @@ import User from "../../Controller/User/User";
 import { CreateUserRequest, DeleteUserRequest, GetUserRequest, LoginUserRequest, UpdateUserRequest} from "./UserRouter.types";
 import Env from "../../Config/config";
 import Profile from "../../Controller/Profile/Profile";
-import {ClientErrorFactory } from "../../Errors";
+import { ClientErrorFactory } from "../../Errors/ErrorClass";
 import { validate } from "../../Middleware/validation-handler";
 import { CreateUserRequestSchema,GetUserRequestSchema,LoginUserRequestSchema, UpdateUserRequestSchema} from "../../Middleware/validation-handler/schema";
 export class UserRouter extends RouterClass {

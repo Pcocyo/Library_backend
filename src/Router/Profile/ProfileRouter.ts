@@ -6,9 +6,8 @@ import { UserUpdateProfileParam, } from "../../Controller/Profile/Profile.interf
 import { ProfileUpdateRequest,LibrarianUpdateUserProfileRequest } from "./ProfileRouter.types";
 import { UserJwtPayloadInterface } from "../../Config/config.interface";
 import { LibrarianUpdateProfileRequestSchema, ProfileUpdateRequestSchema } from "../../Middleware/validation-handler/schema";
-import { ClientErrorFactory } from "../../Errors";
+import { ClientErrorFactory } from "../../Errors/ErrorClass";
 import { validate } from "../../Middleware/validation-handler";
-import { keyof } from "zod";
 
 export class ProfileRouter extends RouterClass{
    public constructor(){
