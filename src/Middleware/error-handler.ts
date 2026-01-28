@@ -8,7 +8,6 @@ export const errorHandler = (
    next:NextFunction
 ) => 
    {
-   console.log(err);
    if(err instanceof ClientError){
       return res.status(err.httpsStatusCode).send(err.toClientResponse());
    }

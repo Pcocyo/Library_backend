@@ -1,4 +1,4 @@
-export type { ErrorMapper } from "./ErrorMapper.interface";
-export { JwtErrorMapper } from "./JwtErrorMapper";
-export { PrismaErrorMapper } from "./PrismaErrorMapper";
+export { PrismaErrorMapper } from "./ErrorMapperClass/PrismaErrorMapper";
 export { ErrorMapperGroup } from "./ErrorMapperGroup";
+export { JwtErrorMapper } from "./ErrorMapperClass/JwtErrorMapper";
+export type { ErrorMapperClass } from "./ErrorMapperClass/ErrorMapperClass.interface";

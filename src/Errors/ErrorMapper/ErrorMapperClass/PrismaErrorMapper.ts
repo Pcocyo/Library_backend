@@ -1,14 +1,14 @@
 import { PrismaClientInitializationError } from "@prisma/client/runtime/library";
-import { ErrorMapper } from "./ErrorMapper.interface";
+import { ErrorMapperClass } from "./ErrorMapperClass.interface";
 import { Prisma } from "@prisma/client";
-import { DbError, DbErrorFactory } from "../DbError";
+import { DbError,DbErrorFactory } from "../../DbError";
 
 type PrismaError = 
    Prisma.PrismaClientKnownRequestError | Prisma.PrismaClientUnknownRequestError |
    Prisma.PrismaClientRustPanicError | PrismaClientInitializationError | 
    Prisma.PrismaClientValidationError;
 
-export class PrismaErrorMapper implements ErrorMapper<PrismaError, DbError>{
+export class PrismaErrorMapper implements ErrorMapperClass<PrismaError, DbError>{
    handle(error:unknown): error is PrismaError{
       return error instanceof Prisma.PrismaClientKnownRequestError || error instanceof Prisma.PrismaClientUnknownRequestError ||
              error instanceof Prisma.PrismaClientRustPanicError || error instanceof PrismaClientInitializationError || 

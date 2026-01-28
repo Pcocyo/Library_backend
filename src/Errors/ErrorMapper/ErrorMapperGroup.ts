@@ -1,11 +1,11 @@
-import { JwtErrorMapper } from "./JwtErrorMapper";
-import { ErrorMapper } from "./ErrorMapper.interface";
-import { PrismaErrorMapper } from "./PrismaErrorMapper";
+import { JwtErrorMapper } from "./ErrorMapperClass/JwtErrorMapper";
+import { PrismaErrorMapper } from "./ErrorMapperClass/PrismaErrorMapper";
+import { ErrorMapperClass } from "./ErrorMapperClass/ErrorMapperClass.interface";
 import { BaseError } from "../BaseError";
 
 export class ErrorMapperGroup{
    private static instance:ErrorMapperGroup;
-   private errorMapper: ErrorMapper<any,any>[] = [];
+   private errorMapper: ErrorMapperClass<any,any>[] = [];
    constructor(){
       this.errorMapper.push(new JwtErrorMapper())
       this.errorMapper.push(new PrismaErrorMapper())
