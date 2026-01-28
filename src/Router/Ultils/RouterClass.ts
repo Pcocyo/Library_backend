@@ -3,6 +3,7 @@ import Env from "../../Config/config";
 import { UserJwtPayloadInterface } from "../../Config/config.interface";
 import { UserRole } from "../../Controller/User/User";
 import { BaseError, ClientError, ClientErrorFactory } from "../../Errors";
+import { ErrorMapperGroup  } from "../../Errors/ErrorMapper/";
 export abstract class RouterClass {
     protected router: Router;
 
@@ -14,7 +15,7 @@ export abstract class RouterClass {
         return this.router;
    }
 
-  protected validateToken(req: Request, res: Response, next: NextFunction) {
+  protected validateToken(req: Request, res: Response, next: NextFunction){
       try {
          const token = req.headers.authorization;
          if (!token) {
@@ -25,14 +26,14 @@ export abstract class RouterClass {
          };
          if (!req.body) req.body = {authorizedUser: Env.getValidateToken(token)};
          req.body.authorizedUser = Env.getValidateToken(token);
-         next();
+         return next();
       } catch (error: any) {
-         if(error instanceof ClientError) res.status(error.httpsStatusCode).send(error.toClientResponse());
-         res.send({error});
+         error = ErrorMapperGroup.getInstance().mapError(error);
+         next(error);
       }
    }
 
-   protected validateLibrarianToken(req: Request, res: Response, next: NextFunction) {
+   protected validateLibrarianToken(req: Request, res: Response, next: NextFunction){
       function isLibrarian(payloadToken:UserJwtPayloadInterface):boolean{
          if(payloadToken.userRole === UserRole.LIBRARIAN) return true;
          return false;
@@ -56,12 +57,8 @@ export abstract class RouterClass {
          req.body.authorizedUser = parsedToken;
          next();
       } catch (error: any) {
-         if(error instanceof ClientError){
-            res.status(error.httpsStatusCode).send(error.toClientResponse());
-         }
-         else{
-            res.status(400).send({ error: error });
-         }
+         error = ErrorMapperGroup.getInstance().mapError(error);
+         next(error);
       }
    }
    protected abstract initializeRoutes(): void;

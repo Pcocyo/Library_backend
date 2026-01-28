@@ -1,6 +1,6 @@
 import { ClientError, ClientErrorFactory } from "../../Errors";
 import prisma from "../../prismaClient";
-import { DbErrorMapper } from "../../Errors";
+import { ErrorMapperGroup } from "../../Errors/ErrorMapper/";
 import type {
     UserRegisterInterface,
     UserGetEmailInterface,
@@ -63,7 +63,7 @@ export default class User {
                data:{email:newEmail},
             })
          }catch(error){
-            throw DbErrorMapper(error,"email");
+            throw ErrorMapperGroup.getInstance().mapError(error);
          }
          this.email = newEmail;
       }
@@ -79,7 +79,7 @@ export default class User {
                data:{password:newPassword},
             })
          }catch(error){
-            throw DbErrorMapper(error,"password");
+            throw ErrorMapperGroup.getInstance().mapError(error);
          }
          this.password = newPassword;
       }
@@ -94,7 +94,7 @@ export default class User {
                data:{role:String(newRole)}
             }) 
          } catch (error) {
-            throw DbErrorMapper(error,"password");
+            throw ErrorMapperGroup.getInstance().mapError(error);
          }
          this.role = newRole;
       }
@@ -124,7 +124,7 @@ export default class User {
                 created_at: new Date(newDbUser.created_at),
             });
         } catch (error) {
-            throw DbErrorMapper(error,"unknown")
+            throw ErrorMapperGroup.getInstance().mapError(error);
         }
     }
 
@@ -149,10 +149,8 @@ export default class User {
             created_at: new Date(userDbFound.created_at),
          });
       } catch (error) {
-         if (error instanceof ClientError){
-            throw error;
-         }
-         throw DbErrorMapper(error,"unknown");
+         error = ErrorMapperGroup.getInstance().mapError(error);
+         throw error;
       }
    }
 
@@ -165,7 +163,7 @@ export default class User {
                 }
             })   
         }catch(error){
-            throw DbErrorMapper(error,"unknown")
+            throw ErrorMapperGroup.getInstance().mapError(error);
         }
     }
 

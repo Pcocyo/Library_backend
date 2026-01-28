@@ -11,7 +11,7 @@
 //table.timestamp("updated_at"); // represent user data last profile updates
 //
 
-import { ClientError, ClientErrorFactory, DbErrorMapper } from "../../Errors";
+import { ClientError, ClientErrorFactory } from "../../Errors";
 import prisma from "../../prismaClient";
 import {
     ProfileParam,
@@ -19,6 +19,7 @@ import {
     CreateProfileParam,
     GetByUserIdParam,
 } from "./Profile.interface";
+import { ErrorMapperGroup } from "../../Errors/ErrorMapper";
 
 export default class Profile {
     private user_id: string;
@@ -94,7 +95,7 @@ export default class Profile {
                 });
                 this.user_name = new_userName;
             } catch (error) {
-               throw DbErrorMapper(error,"user_name")
+               throw ErrorMapperGroup.getInstance().mapError(error);
             }
         }
     }
@@ -108,7 +109,7 @@ export default class Profile {
                 });
                 this.first_name = new_firstName;
             } catch (error) {
-               throw DbErrorMapper(error,"first_name")
+               throw ErrorMapperGroup.getInstance().mapError(error);
             }
         }
     }
@@ -122,7 +123,7 @@ export default class Profile {
                 });
                 this.last_name = new_lastName;
             } catch (error) {
-               throw DbErrorMapper(error,"last_name")
+               throw ErrorMapperGroup.getInstance().mapError(error);
             }
         }
     }
@@ -136,7 +137,7 @@ export default class Profile {
                 });
                 this.contact = new_contact;
             } catch (error) {
-               throw DbErrorMapper(error,"contact")
+               throw ErrorMapperGroup.getInstance().mapError(error);
             }
         }
     }
@@ -150,7 +151,7 @@ export default class Profile {
                 });
                 this.address = new_address;
             } catch (error) {
-               throw DbErrorMapper(error,"address")
+               throw ErrorMapperGroup.getInstance().mapError(error);
             }
         }
     }
@@ -164,7 +165,7 @@ export default class Profile {
                 });
                 this.membership_date = new_memberDate;
             } catch (error) {
-               throw DbErrorMapper(error,"membership_date")
+               throw ErrorMapperGroup.getInstance().mapError(error);
             }
         }
     }
@@ -178,7 +179,7 @@ export default class Profile {
                 });
                 this.status = new_status;
             } catch (error) {
-               throw DbErrorMapper(error,"status")
+               throw ErrorMapperGroup.getInstance().mapError(error);
             }
         }
     }
@@ -192,7 +193,7 @@ export default class Profile {
                 });
                 this.total_fines = parseFloat(new_fines.toFixed(2));
             } catch (error) {
-               throw DbErrorMapper(error,"total_fines")
+               throw ErrorMapperGroup.getInstance().mapError(error);
             }
         }
     }
@@ -206,7 +207,7 @@ export default class Profile {
                 });
                 this.updated_at = new_updatedAt;
             } catch (error) {
-               throw DbErrorMapper(error,"updated_at")
+               throw ErrorMapperGroup.getInstance().mapError(error);
             }
         }
     }
@@ -229,7 +230,7 @@ export default class Profile {
                 },
             });
         } catch (error) {
-               throw DbErrorMapper(error,"unknown");
+               throw ErrorMapperGroup.getInstance().mapError(error);
         }
         const newProfileParam: ProfileParam = {
             user_id: profile.user_id,
@@ -246,15 +247,15 @@ export default class Profile {
         return new Profile(newProfileParam);
     }
 
-    public static async DeleteProfile(profile: Profile) {
-        try {
-            await prisma.profiles.delete({
-                where: { user_id: profile.get_userId() },
-            });
-        } catch (error) {
-            throw DbErrorMapper(error,"unknown");
-        }
-    }
+   public static async DeleteProfile(profile: Profile) {
+      try {
+         await prisma.profiles.delete({
+            where: { user_id: profile.get_userId() },
+         });
+      } catch (error) {
+         throw ErrorMapperGroup.getInstance().mapError(error);
+      }
+   }
 
    public static async GetByUserId(param: GetByUserIdParam): Promise<Profile> {
       try{
@@ -281,7 +282,7 @@ export default class Profile {
          if(error instanceof ClientError){
             throw error 
          }
-         throw DbErrorMapper(error,"unknown");
+         throw ErrorMapperGroup.getInstance().mapError(error);
       }
    }
 
