@@ -15,7 +15,7 @@ export enum ProfileStatus {
 }
 
 export interface ProfileParam {
-    user_id : string;
+    user_id: string;
     user_name: string | null;
     first_name: string | null;
     last_name: string | null;
@@ -27,8 +27,8 @@ export interface ProfileParam {
     updated_at: Date | null;
 }
 
-export interface CreateProfileParam{
-    user_id:string;
+export interface CreateProfileParam {
+    user_id: string;
     user_name?: string | null;
     first_name?: string | null;
     last_name?: string | null;
@@ -38,7 +38,7 @@ export interface CreateProfileParam{
     updated_at?: Date | null;
 }
 
-export interface UserUpdateProfileParam{
+export interface UserUpdateProfileParam {
     user_name?: string | null;
     first_name?: string | null;
     last_name?: string | null;
@@ -46,12 +46,12 @@ export interface UserUpdateProfileParam{
     address?: string | null;
 }
 
-export interface LibrarianUpdateProfileParam{
-    email:string;
-    total_fines: number| null| undefined;
-    status: string | null| undefined;
+export interface LibrarianUpdateProfileParam {
+    email: string;
+    total_fines: number | null | undefined;
+    status: string | null | undefined;
 }
 
-export interface GetByUserIdParam{
-   user_id:string;
+export interface GetByUserIdParam {
+    user_id: string;
 }

@@ -1,142 +1,184 @@
 import { RouterClass } from "../Ultils/RouterClass";
-import type {Response,NextFunction } from "express";
+import type { Response, NextFunction } from "express";
 import User from "../../Controller/User/User";
-import { CreateUserRequest, DeleteUserRequest, GetUserRequest, LoginUserRequest, UpdateUserRequest} from "./UserRouter.types";
+import {
+    CreateUserRequest,
+    DeleteUserRequest,
+    GetUserRequest,
+    LoginUserRequest,
+    UpdateUserRequest,
+} from "./UserRouter.types";
 import Env from "../../Config/config";
 import Profile from "../../Controller/Profile/Profile";
 import { ClientErrorFactory } from "../../Errors/ErrorClass";
 import { validate } from "../../Middleware/validation-handler";
-import { CreateUserRequestSchema,GetUserRequestSchema,LoginUserRequestSchema, UpdateUserRequestSchema} from "../../Middleware/validation-handler/schema";
+import {
+    CreateUserRequestSchema,
+    GetUserRequestSchema,
+    LoginUserRequestSchema,
+    UpdateUserRequestSchema,
+} from "../../Middleware/validation-handler/schema";
+
 export class UserRouter extends RouterClass {
-   public constructor() {
-      super();
-      this.initializeRoutes();
-   }
+    public constructor() {
+        super();
+        this.initializeRoutes();
+    }
 
-   protected initializeRoutes() {
-      this.router.post("/create",
-         validate(CreateUserRequestSchema),
-         (req: CreateUserRequest, res: Response, next:NextFunction) =>{
-            this.createUser(req, res,next);
-         }
-      );
+    protected initializeRoutes() {
+        this.router.post(
+            "/create",
+            validate(CreateUserRequestSchema),
+            (req: CreateUserRequest, res: Response, next: NextFunction) => {
+                this.createUser(req, res, next);
+            },
+        );
 
-      this.router.get(
-         "/get",
-         this.validateToken,
-         validate(GetUserRequestSchema),
-         (req: GetUserRequest, res: Response, next:NextFunction) => {
-            this.getUser(req, res,next);
-         },
-      );
+        this.router.get(
+            "/get",
+            this.validateToken,
+            validate(GetUserRequestSchema),
+            (req: GetUserRequest, res: Response, next: NextFunction) => {
+                this.getUser(req, res, next);
+            },
+        );
 
-      this.router.post("/login",
-         validate(LoginUserRequestSchema),
-         (req: LoginUserRequest, res: Response, next:NextFunction) => {
-         this.login(req, res,next);
-      });
+        this.router.post(
+            "/login",
+            validate(LoginUserRequestSchema),
+            (req: LoginUserRequest, res: Response, next: NextFunction) => {
+                this.login(req, res, next);
+            },
+        );
 
-      this.router.delete(
-         "/delete",
-         this.validateToken,
-         (req: DeleteUserRequest, res: Response, next:NextFunction) => {
-            this.deleteUser(req, res,next);
-         },
-      );
+        this.router.delete(
+            "/delete",
+            this.validateToken,
+            (req: DeleteUserRequest, res: Response, next: NextFunction) => {
+                this.deleteUser(req, res, next);
+            },
+        );
 
-      this.router.put(
-         "/update",
-         this.validateToken,
-         validate(UpdateUserRequestSchema),
-         (req: UpdateUserRequest, res: Response, next:NextFunction) => {
-            this.updateUser(req, res,next);
-         },
-      );
-   }
+        this.router.put(
+            "/update",
+            this.validateToken,
+            validate(UpdateUserRequestSchema),
+            (req: UpdateUserRequest, res: Response, next: NextFunction) => {
+                this.updateUser(req, res, next);
+            },
+        );
+    }
 
-
-   private async updateUser(req: UpdateUserRequest, res: Response, next:NextFunction) {
-      try {
-         const { authorizedUser } = req.body;
-         const userInstance = await User.getUserByEmail({
-            email: authorizedUser.userEmail,
-         });
-         await userInstance.setEmail(req.body.email);
-         await userInstance.setPassword(await Env.getGenerateBcrypt(req.body.password));
-         let newToken = Env.getGenerateJwtToken(userInstance);
-         res.send({ token: newToken });
-      } catch (error: any){
-         next(error);
-      }
-   }
-
-   private async createUser(req: CreateUserRequest, res: Response, next:NextFunction) {
-      try {
-         let cryptedPass: string = await Env.getGenerateBcrypt(req.body.password);
-         let user: User = await User.createNewUser({
-            email: String(req.body.email),
-            password: String(cryptedPass),
-            role: null,
-         });
-         await Profile.CreateProfile({user_id:user.getId()});
-         const token = Env.getGenerateJwtToken(user);
-         res.json({
-            token: token,
-         });
-      } catch (error: any){
-         next(error);
-      }
-   }
-
-   private async login(req: LoginUserRequest, res: Response, next:NextFunction) {
-      try {
-         const user = await User.getUserByEmail({ email: req.body.email });
-         const correctPassword = await Env.getValidatePassword(
-            req.body.password,
-            user.getPassword(),
-         );
-         if (!correctPassword) {
-            throw ClientErrorFactory.createIncorrectPasswordError({
-               field:req.body.password,
-               context:{user_request_info:req.body}
+    private async updateUser(
+        req: UpdateUserRequest,
+        res: Response,
+        next: NextFunction,
+    ) {
+        try {
+            const { authorizedUser } = req.body;
+            const userInstance = await User.getUserByEmail({
+                email: authorizedUser.userEmail,
             });
-         }
-         const token = Env.getGenerateJwtToken(user);
-         res.send({
-            token: token,
-         });
-      } catch (error: any){
-         next(error);
-      }
-   }
+            await userInstance.setEmail(req.body.email);
+            await userInstance.setPassword(
+                await Env.getGenerateBcrypt(req.body.password),
+            );
+            let newToken = Env.getGenerateJwtToken(userInstance);
+            res.send({ token: newToken });
+        } catch (error: any) {
+            next(error);
+        }
+    }
 
-   private async getUser(req: GetUserRequest, res: Response, next:NextFunction) {
-      try {
-         const userFound: User = await User.getUserByEmail({ email: req.body.email });
-         res.send({
-            id: userFound.getId(),
-            email: userFound.getEmail(),
-            role: userFound.getUserRole(),
-         });
-      } catch (error: any){
-         next(error);
-      }
-   }
+    private async createUser(
+        req: CreateUserRequest,
+        res: Response,
+        next: NextFunction,
+    ) {
+        try {
+            let cryptedPass: string = await Env.getGenerateBcrypt(
+                req.body.password,
+            );
+            let user: User = await User.createNewUser({
+                email: String(req.body.email),
+                password: String(cryptedPass),
+                role: null,
+            });
+            await Profile.CreateProfile({ user_id: user.getId() });
+            const token = Env.getGenerateJwtToken(user);
+            res.json({
+                token: token,
+            });
+        } catch (error: any) {
+            next(error);
+        }
+    }
 
-   private async deleteUser(req: DeleteUserRequest, res: Response, next:NextFunction) {
-      try {
-         const { authorizedUser } = req.body;
-         let userProfile:Profile = await Profile.GetByUserId({user_id:authorizedUser.userId});
-         await Profile.DeleteProfile(userProfile);
-         await User.deleteUser({
-            id: authorizedUser.userId,
-            email: authorizedUser.userEmail,
-         });
-         res.send({
-            message: `User ${authorizedUser.userEmail} deleted`,
-         });
-      } catch (error: any){
-         next(error);
-      }
-   }
+    private async login(
+        req: LoginUserRequest,
+        res: Response,
+        next: NextFunction,
+    ) {
+        try {
+            const user = await User.getUserByEmail({ email: req.body.email });
+            const correctPassword = await Env.getValidatePassword(
+                req.body.password,
+                user.getPassword(),
+            );
+            if (!correctPassword) {
+                throw ClientErrorFactory.createIncorrectPasswordError({
+                    field: req.body.password,
+                    context: { user_request_info: req.body },
+                });
+            }
+            const token = Env.getGenerateJwtToken(user);
+            res.send({
+                token: token,
+            });
+        } catch (error: any) {
+            next(error);
+        }
+    }
+
+    private async getUser(
+        req: GetUserRequest,
+        res: Response,
+        next: NextFunction,
+    ) {
+        try {
+            const userFound: User = await User.getUserByEmail({
+                email: req.body.email,
+            });
+            res.send({
+                id: userFound.getId(),
+                email: userFound.getEmail(),
+                role: userFound.getUserRole(),
+            });
+        } catch (error: any) {
+            next(error);
+        }
+    }
+
+    private async deleteUser(
+        req: DeleteUserRequest,
+        res: Response,
+        next: NextFunction,
+    ) {
+        try {
+            const { authorizedUser } = req.body;
+            let userProfile: Profile = await Profile.GetByUserId({
+                user_id: authorizedUser.userId,
+            });
+            await Profile.DeleteProfile(userProfile);
+            await User.deleteUser({
+                id: authorizedUser.userId,
+                email: authorizedUser.userEmail,
+            });
+            res.send({
+                message: `User ${authorizedUser.userEmail} deleted`,
+            });
+        } catch (error: any) {
+            next(error);
+        }
+    }
 }

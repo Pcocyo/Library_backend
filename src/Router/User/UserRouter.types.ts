@@ -1,39 +1,37 @@
 import { UserJwtPayloadInterface } from "../../Config/config.interface";
 import { Request } from "express";
-import { UserRole } from "../../Controller/User/User";
 
-interface BasicUserData{
-   email:string,
-   password:string
+interface BasicUserData {
+    email: string;
+    password: string;
 }
 
-interface GetUserRequestBody extends UserJwtPayloadInterface{
-   email:string,
+interface GetUserRequestBody extends UserJwtPayloadInterface {
+    email: string;
 }
 
-export interface CreateUserRequest extends Request{
-   body: BasicUserData;
+export interface CreateUserRequest extends Request {
+    body: BasicUserData;
 }
 
-export interface GetUserRequest extends Request{
-   body: GetUserRequestBody
+export interface GetUserRequest extends Request {
+    body: GetUserRequestBody;
 }
 
-export interface UpdateUserRequest extends Request{
-   body:{
-      email:string,
-      password:string,
-      authorizedUser: UserJwtPayloadInterface
-   }
+export interface UpdateUserRequest extends Request {
+    body: {
+        email: string;
+        password: string;
+        authorizedUser: UserJwtPayloadInterface;
+    };
 }
 
-export interface DeleteUserRequest extends Request{
-   body:{
-      authorizedUser: UserJwtPayloadInterface
-   }
+export interface DeleteUserRequest extends Request {
+    body: {
+        authorizedUser: UserJwtPayloadInterface;
+    };
 }
 
-export interface LoginUserRequest extends Request{
-   body: BasicUserData
+export interface LoginUserRequest extends Request {
+    body: BasicUserData;
 }
-

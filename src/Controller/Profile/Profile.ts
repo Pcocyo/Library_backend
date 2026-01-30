@@ -9,8 +9,8 @@
 //table.string("status",10).notNullable().defaultTo("ACTIVE"); // represent user status, (active, suspended, banned)
 //table.decimal("total_fines",10,2).notNullable().defaultTo(0.00); // user total fines in usd
 //table.timestamp("updated_at"); // represent user data last profile updates
-//
-import { ClientErrorFactory,ClientError } from "../../Errors/ErrorClass";
+
+import { ClientErrorFactory, ClientError } from "../../Errors/ErrorClass";
 import prisma from "../../prismaClient";
 import {
     ProfileParam,
@@ -94,7 +94,7 @@ export default class Profile {
                 });
                 this.user_name = new_userName;
             } catch (error) {
-               throw ErrorMapperGroup.getInstance().mapError(error);
+                throw ErrorMapperGroup.getInstance().mapError(error);
             }
         }
     }
@@ -108,7 +108,7 @@ export default class Profile {
                 });
                 this.first_name = new_firstName;
             } catch (error) {
-               throw ErrorMapperGroup.getInstance().mapError(error);
+                throw ErrorMapperGroup.getInstance().mapError(error);
             }
         }
     }
@@ -122,7 +122,7 @@ export default class Profile {
                 });
                 this.last_name = new_lastName;
             } catch (error) {
-               throw ErrorMapperGroup.getInstance().mapError(error);
+                throw ErrorMapperGroup.getInstance().mapError(error);
             }
         }
     }
@@ -136,7 +136,7 @@ export default class Profile {
                 });
                 this.contact = new_contact;
             } catch (error) {
-               throw ErrorMapperGroup.getInstance().mapError(error);
+                throw ErrorMapperGroup.getInstance().mapError(error);
             }
         }
     }
@@ -150,7 +150,7 @@ export default class Profile {
                 });
                 this.address = new_address;
             } catch (error) {
-               throw ErrorMapperGroup.getInstance().mapError(error);
+                throw ErrorMapperGroup.getInstance().mapError(error);
             }
         }
     }
@@ -164,7 +164,7 @@ export default class Profile {
                 });
                 this.membership_date = new_memberDate;
             } catch (error) {
-               throw ErrorMapperGroup.getInstance().mapError(error);
+                throw ErrorMapperGroup.getInstance().mapError(error);
             }
         }
     }
@@ -178,7 +178,7 @@ export default class Profile {
                 });
                 this.status = new_status;
             } catch (error) {
-               throw ErrorMapperGroup.getInstance().mapError(error);
+                throw ErrorMapperGroup.getInstance().mapError(error);
             }
         }
     }
@@ -192,7 +192,7 @@ export default class Profile {
                 });
                 this.total_fines = parseFloat(new_fines.toFixed(2));
             } catch (error) {
-               throw ErrorMapperGroup.getInstance().mapError(error);
+                throw ErrorMapperGroup.getInstance().mapError(error);
             }
         }
     }
@@ -206,7 +206,7 @@ export default class Profile {
                 });
                 this.updated_at = new_updatedAt;
             } catch (error) {
-               throw ErrorMapperGroup.getInstance().mapError(error);
+                throw ErrorMapperGroup.getInstance().mapError(error);
             }
         }
     }
@@ -229,7 +229,7 @@ export default class Profile {
                 },
             });
         } catch (error) {
-               throw ErrorMapperGroup.getInstance().mapError(error);
+            throw ErrorMapperGroup.getInstance().mapError(error);
         }
         const newProfileParam: ProfileParam = {
             user_id: profile.user_id,
@@ -246,44 +246,48 @@ export default class Profile {
         return new Profile(newProfileParam);
     }
 
-   public static async DeleteProfile(profile: Profile) {
-      try {
-         await prisma.profiles.delete({
-            where: { user_id: profile.get_userId() },
-         });
-      } catch (error) {
-         throw ErrorMapperGroup.getInstance().mapError(error);
-      }
-   }
+    public static async DeleteProfile(profile: Profile) {
+        try {
+            await prisma.profiles.delete({
+                where: { user_id: profile.get_userId() },
+            });
+        } catch (error) {
+            throw ErrorMapperGroup.getInstance().mapError(error);
+        }
+    }
 
-   public static async GetByUserId(param: GetByUserIdParam): Promise<Profile> {
-      try{
-         let profile = await prisma.profiles.findUnique({
-            where: { user_id: param.user_id },
-         });
-         if (!profile) {
-            throw ClientErrorFactory.createUserIdNotFoundError({context:{data_recieved:param}})
-         }
-         let newProfileParam: ProfileParam = {
-            user_id: profile.user_id,
-            user_name: profile.user_name,
-            first_name: profile.first_name,
-            last_name: profile.last_name,
-            contact: profile.contact,
-            address: profile.address,
-            membership_date: profile.membership_date,
-            status: ProfileStatus[profile.status as keyof typeof ProfileStatus],
-            total_fines: profile.total_fines.toNumber(),
-            updated_at: profile.updated_at,
-         };
-         return new Profile(newProfileParam);
-      }catch(error){
-         if(error instanceof ClientError){
-            throw error 
-         }
-         throw ErrorMapperGroup.getInstance().mapError(error);
-      }
-   }
+    public static async GetByUserId(param: GetByUserIdParam): Promise<Profile> {
+        try {
+            let profile = await prisma.profiles.findUnique({
+                where: { user_id: param.user_id },
+            });
+            if (!profile) {
+                throw ClientErrorFactory.createUserIdNotFoundError({
+                    context: { data_recieved: param },
+                });
+            }
+            let newProfileParam: ProfileParam = {
+                user_id: profile.user_id,
+                user_name: profile.user_name,
+                first_name: profile.first_name,
+                last_name: profile.last_name,
+                contact: profile.contact,
+                address: profile.address,
+                membership_date: profile.membership_date,
+                status: ProfileStatus[
+                    profile.status as keyof typeof ProfileStatus
+                ],
+                total_fines: profile.total_fines.toNumber(),
+                updated_at: profile.updated_at,
+            };
+            return new Profile(newProfileParam);
+        } catch (error) {
+            if (error instanceof ClientError) {
+                throw error;
+            }
+            throw ErrorMapperGroup.getInstance().mapError(error);
+        }
+    }
 
     static Tests__CreateProfile__(params: ProfileParam): Profile {
         return new Profile(params);

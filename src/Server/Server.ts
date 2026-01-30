@@ -4,6 +4,7 @@ import Env from "../Config/config";
 import { UserRouter } from "../Router/User";
 import { ProfileRouter } from "../Router/Profile";
 import { errorHandler } from "../Middleware";
+
 export class Server {
     private app: Application;
     private static instance: Server | null;
@@ -17,7 +18,7 @@ export class Server {
 
     private routes(): void {
         this.app.use("/user", this.userRouter.getRouter());
-        this.app.use("/profile",this.profileRouter.getRouter());
+        this.app.use("/profile", this.profileRouter.getRouter());
         this.app.use(errorHandler);
     }
 
@@ -31,10 +32,8 @@ export class Server {
         if (!Server.instance) {
             Server.instance = new Server();
             return Server.instance;
-        }
-        else {
+        } else {
             return Server.instance;
         }
     }
 }
-

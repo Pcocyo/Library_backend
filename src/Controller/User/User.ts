@@ -1,4 +1,4 @@
-import { ClientError, ClientErrorFactory } from "../../Errors/ErrorClass";
+import { ClientErrorFactory } from "../../Errors/ErrorClass";
 import prisma from "../../prismaClient";
 import { ErrorMapperGroup } from "../../Errors/ErrorMapper/";
 import type {
@@ -6,7 +6,7 @@ import type {
     UserGetEmailInterface,
     UserDomainInterface,
     UserDeleteInterface,
-} from "./User.interface"
+} from "./User.interface";
 export enum UserRole {
     MEMBER = "MEMBER",
     LIBRARIAN = "LIBRARIAN",
@@ -56,54 +56,53 @@ export default class User {
 
     // set basic user data
     public async setEmail(newEmail: string | null) {
-      if(newEmail){
-         try{
-            await prisma.users.update({
-               where:{user_id:this.userId},
-               data:{email:newEmail},
-            })
-         }catch(error){
-            throw ErrorMapperGroup.getInstance().mapError(error);
-         }
-         this.email = newEmail;
-      }
-      return;
-
+        if (newEmail) {
+            try {
+                await prisma.users.update({
+                    where: { user_id: this.userId },
+                    data: { email: newEmail },
+                });
+            } catch (error) {
+                throw ErrorMapperGroup.getInstance().mapError(error);
+            }
+            this.email = newEmail;
+        }
+        return;
     }
 
-    public async setPassword(newPassword:string | null) {
-      if(newPassword){
-         try{
-            await prisma.users.update({
-               where:{user_id:this.userId},
-               data:{password:newPassword},
-            })
-         }catch(error){
-            throw ErrorMapperGroup.getInstance().mapError(error);
-         }
-         this.password = newPassword;
-      }
-      return
+    public async setPassword(newPassword: string | null) {
+        if (newPassword) {
+            try {
+                await prisma.users.update({
+                    where: { user_id: this.userId },
+                    data: { password: newPassword },
+                });
+            } catch (error) {
+                throw ErrorMapperGroup.getInstance().mapError(error);
+            }
+            this.password = newPassword;
+        }
+        return;
     }
 
     public async setRole(newRole: UserRole | null) {
-      if (newRole != null){
-         try {
-            await prisma.users.update({
-               where:{user_id:this.userId},
-               data:{role:String(newRole)}
-            }) 
-         } catch (error) {
-            throw ErrorMapperGroup.getInstance().mapError(error);
-         }
-         this.role = newRole;
-      }
-      return
+        if (newRole != null) {
+            try {
+                await prisma.users.update({
+                    where: { user_id: this.userId },
+                    data: { role: String(newRole) },
+                });
+            } catch (error) {
+                throw ErrorMapperGroup.getInstance().mapError(error);
+            }
+            this.role = newRole;
+        }
+        return;
     }
 
     public static async createNewUser(
         userRegisterData: UserRegisterInterface,
-    ): Promise<User>{
+    ): Promise<User> {
         userRegisterData.role =
             userRegisterData.role == null
                 ? UserRole.GUEST
@@ -128,46 +127,46 @@ export default class User {
         }
     }
 
-   public static async getUserByEmail(
-      userLoginData: UserGetEmailInterface,
-   ): Promise<User> {
-      try {
-         const userDbFound = await prisma.users.findUnique({
-            where: {
-               email: userLoginData.email,
-            },
-         });
+    public static async getUserByEmail(
+        userLoginData: UserGetEmailInterface,
+    ): Promise<User> {
+        try {
+            const userDbFound = await prisma.users.findUnique({
+                where: {
+                    email: userLoginData.email,
+                },
+            });
 
-         if (userDbFound == null) {
-            throw ClientErrorFactory.createEmailNotFoundError({context:{data_recieved:userLoginData}});
-         }
-         return new User({
-            id: userDbFound.user_id,
-            email: userDbFound.email,
-            password: userDbFound.password,
-            role: UserRole[userDbFound.role as keyof typeof UserRole],
-            created_at: new Date(userDbFound.created_at),
-         });
-      } catch (error) {
-         error = ErrorMapperGroup.getInstance().mapError(error);
-         throw error;
-      }
-   }
-
-    public static async deleteUser(userData:UserDeleteInterface){
-        try{
-            await prisma.users.delete({
-                where:{
-                    user_id:userData.id,
-                    email:userData.email 
-                }
-            })   
-        }catch(error){
-            throw ErrorMapperGroup.getInstance().mapError(error);
+            if (userDbFound == null) {
+                throw ClientErrorFactory.createEmailNotFoundError({
+                    context: { data_recieved: userLoginData },
+                });
+            }
+            return new User({
+                id: userDbFound.user_id,
+                email: userDbFound.email,
+                password: userDbFound.password,
+                role: UserRole[userDbFound.role as keyof typeof UserRole],
+                created_at: new Date(userDbFound.created_at),
+            });
+        } catch (error) {
+            error = ErrorMapperGroup.getInstance().mapError(error);
+            throw error;
         }
     }
 
-
+    public static async deleteUser(userData: UserDeleteInterface) {
+        try {
+            await prisma.users.delete({
+                where: {
+                    user_id: userData.id,
+                    email: userData.email,
+                },
+            });
+        } catch (error) {
+            throw ErrorMapperGroup.getInstance().mapError(error);
+        }
+    }
 
     // Test only
     static tests__createTestUser(
@@ -175,7 +174,7 @@ export default class User {
         dummyEmail: string,
         password: string,
         role: UserRole,
-        created_at: Date
+        created_at: Date,
     ): User {
         return new User({
             id: dummyId,

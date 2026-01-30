@@ -1,6 +1,6 @@
 import type { Application } from "express";
 import { App } from "./AppInterface";
-import express from 'express';
+import express from "express";
 import helmet from "helmet";
 import cors from "cors";
 
@@ -29,8 +29,7 @@ export class DevApp extends App {
         if (!DevApp.instance) {
             DevApp.instance = new DevApp();
             return DevApp.instance;
-        }
-        else {
+        } else {
             return DevApp.instance;
         }
     }
