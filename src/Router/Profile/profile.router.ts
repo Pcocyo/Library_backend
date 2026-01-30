@@ -3,10 +3,7 @@ import { NextFunction, Request, Response } from "express";
 import Profile from "../../Controller/Profile/Profile";
 import User, { UserRole } from "../../Controller/User/User";
 import { UserUpdateProfileParam } from "../../Controller/Profile/Profile.interface";
-import {
-    ProfileUpdateRequest,
-    LibrarianUpdateUserProfileRequest,
-} from "./ProfileRouter.types";
+import { LibrarianUpdateUserProfileRequest, ProfileUpdateRequest } from ".";
 import { UserJwtPayloadInterface } from "../../Config/config.interface";
 import {
     LibrarianUpdateProfileRequestSchema,

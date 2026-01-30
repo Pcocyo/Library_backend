@@ -1,6 +1,6 @@
-export { ProfileRouter } from "./ProfileRouter";
-
-export type { 
-   ProfileUpdateRequest, ProfileSubscribeRequest, 
-   LibrarianUpdateUserProfileRequest,
-} from "./ProfileRouter.types"
+export { ProfileRouter } from "./profile.router";
+export type {
+    ProfileUpdateRequest,
+    ProfileSubscribeRequest,
+    LibrarianUpdateUserProfileRequest,
+} from "./profile-router.types";
