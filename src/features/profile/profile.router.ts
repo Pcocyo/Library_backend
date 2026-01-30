@@ -1,9 +1,12 @@
 import { BaseRouter } from "../../Router/Ultils/base.router";
 import { NextFunction, Request, Response } from "express";
-import Profile from "../../Controller/Profile/Profile";
+import { ProfileService } from "./profile.service";
 import User, { UserRole } from "../../Controller/User/User";
-import { UserUpdateProfileParam } from "../../Controller/Profile/Profile.interface";
-import { LibrarianUpdateUserProfileRequest, ProfileUpdateRequest } from "./types/profile-router.types";
+import { UserUpdateProfileParam } from "./types/profile-service.types";
+import {
+    LibrarianUpdateUserProfileRequest,
+    ProfileUpdateRequest,
+} from "./types/profile-router.types";
 import { UserJwtPayloadInterface } from "../../Config/config.interface";
 import {
     LibrarianUpdateProfileRequestSchema,
@@ -57,9 +60,10 @@ export class ProfileRouter extends BaseRouter {
     private async getProfile(req: Request, res: Response, next: NextFunction) {
         const userData: UserJwtPayloadInterface = req.body.authorizedUser;
         try {
-            const userProfile: Profile = await Profile.GetByUserId({
-                user_id: userData.userId,
-            });
+            const userProfile: ProfileService =
+                await ProfileService.GetByUserId({
+                    user_id: userData.userId,
+                });
             res.send({
                 user_id: userData.userId,
                 user_name: userProfile.get_userName(),
@@ -83,15 +87,16 @@ export class ProfileRouter extends BaseRouter {
         next: NextFunction,
     ) {
         try {
-            const userProfile: Profile = await Profile.GetByUserId({
-                user_id: req.body.authorizedUser.userId,
-            });
+            const userProfile: ProfileService =
+                await ProfileService.GetByUserId({
+                    user_id: req.body.authorizedUser.userId,
+                });
 
             const profileUpdateConfig: Record<
                 keyof UserUpdateProfileParam,
                 {
-                    getter: (p: Profile) => string | null;
-                    setter: (p: Profile, value: string | null) => void;
+                    getter: (p: ProfileService) => string | null;
+                    setter: (p: ProfileService, value: string | null) => void;
                 }
             > = {
                 user_name: {
@@ -157,7 +162,7 @@ export class ProfileRouter extends BaseRouter {
         const userToUpdate: User = await User.getUserByEmail({
             email: req.body.email,
         });
-        const userProfile: Profile = await Profile.GetByUserId({
+        const userProfile: ProfileService = await ProfileService.GetByUserId({
             user_id: userToUpdate.getId(),
         });
         try {
@@ -180,7 +185,7 @@ export class ProfileRouter extends BaseRouter {
             const user: User = await User.getUserByEmail({
                 email: userData.userEmail,
             });
-            const profile: Profile = await Profile.GetByUserId({
+            const profile: ProfileService = await ProfileService.GetByUserId({
                 user_id: userData.userId,
             });
             user.setRole(UserRole.MEMBER);

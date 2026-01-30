@@ -17,10 +17,11 @@ import {
     ProfileStatus,
     CreateProfileParam,
     GetByUserIdParam,
-} from "./Profile.interface";
+} from "./types/profile-service.types";
+
 import { ErrorMapperGroup } from "../../Errors/ErrorMapper";
 
-export default class Profile {
+export class ProfileService {
     private user_id: string;
     private user_name: string | null;
     private first_name: string | null;
@@ -213,7 +214,7 @@ export default class Profile {
 
     public static async CreateProfile(
         params: CreateProfileParam,
-    ): Promise<Profile> {
+    ): Promise<ProfileService> {
         let profile;
         try {
             profile = await prisma.profiles.create({
@@ -243,10 +244,10 @@ export default class Profile {
             total_fines: profile.total_fines.toNumber(),
             updated_at: profile.updated_at,
         };
-        return new Profile(newProfileParam);
+        return new ProfileService(newProfileParam);
     }
 
-    public static async DeleteProfile(profile: Profile) {
+    public static async DeleteProfile(profile: ProfileService) {
         try {
             await prisma.profiles.delete({
                 where: { user_id: profile.get_userId() },
@@ -256,7 +257,7 @@ export default class Profile {
         }
     }
 
-    public static async GetByUserId(param: GetByUserIdParam): Promise<Profile> {
+    public static async GetByUserId(param: GetByUserIdParam): Promise<ProfileService> {
         try {
             let profile = await prisma.profiles.findUnique({
                 where: { user_id: param.user_id },
@@ -280,7 +281,7 @@ export default class Profile {
                 total_fines: profile.total_fines.toNumber(),
                 updated_at: profile.updated_at,
             };
-            return new Profile(newProfileParam);
+            return new ProfileService(newProfileParam);
         } catch (error) {
             if (error instanceof ClientError) {
                 throw error;
@@ -289,7 +290,7 @@ export default class Profile {
         }
     }
 
-    static Tests__CreateProfile__(params: ProfileParam): Profile {
-        return new Profile(params);
+    static Tests__CreateProfile__(params: ProfileParam): ProfileService {
+        return new ProfileService(params);
     }
 }

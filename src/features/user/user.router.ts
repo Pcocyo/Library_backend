@@ -1,4 +1,4 @@
-import { BaseRouter } from "../Ultils/base.router";
+import { BaseRouter } from "../../Router/Ultils/base.router";
 import type { Response, NextFunction } from "express";
 import User from "../../Controller/User/User";
 import {
@@ -7,9 +7,9 @@ import {
     GetUserRequest,
     LoginUserRequest,
     UpdateUserRequest,
-} from "./UserRouter.types";
+} from  "./types/user-router.types";
 import Env from "../../Config/config";
-import Profile from "../../Controller/Profile/Profile";
+import { ProfileService } from "../../features/profile";
 import { ClientErrorFactory } from "../../Errors/ErrorClass";
 import { validate } from "../../Middleware/validation-handler";
 import {
@@ -104,7 +104,7 @@ export class UserRouter extends BaseRouter {
                 password: String(cryptedPass),
                 role: null,
             });
-            await Profile.CreateProfile({ user_id: user.getId() });
+            await ProfileService.CreateProfile({ user_id: user.getId() });
             const token = Env.getGenerateJwtToken(user);
             res.json({
                 token: token,
@@ -166,10 +166,10 @@ export class UserRouter extends BaseRouter {
     ) {
         try {
             const { authorizedUser } = req.body;
-            let userProfile: Profile = await Profile.GetByUserId({
+            let userProfile: ProfileService = await ProfileService.GetByUserId({
                 user_id: authorizedUser.userId,
             });
-            await Profile.DeleteProfile(userProfile);
+            await ProfileService.DeleteProfile(userProfile);
             await User.deleteUser({
                 id: authorizedUser.userId,
                 email: authorizedUser.userEmail,

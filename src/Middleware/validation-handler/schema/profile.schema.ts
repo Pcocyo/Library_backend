@@ -1,5 +1,5 @@
 import z from "zod";
-import { ProfileStatus } from "../../../Controller/Profile/Profile.interface";
+import { ProfileStatus } from "../../../features/profile/types/profile-service.types";
 export const ProfileUpdateRequestSchema = z.object({
     user_name: z
         .string()

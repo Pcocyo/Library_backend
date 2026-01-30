@@ -7,8 +7,8 @@ import bcrypt from "bcrypt";
 import { jest } from "@jest/globals";
 import User, { UserRole } from "../../src/Controller/User/User.ts";
 import { UserJwtPayloadInterface } from "../../src/Config/config.interface.ts";
-import Profile from "../../src/Controller/Profile/Profile.ts";
-import { ProfileStatus } from "../../src/Controller/Profile/Profile.interface.ts";
+import { ProfileService } from "../../src/features/profile/profile.service.ts";
+import { ProfileStatus } from "../../src/features/profile/types/profile-service.types.ts";
 import Env from "../../src/Config/config.ts";
 import jwt from "jsonwebtoken";
 import { ClientErrorCode } from "../../src/Errors/ErrorClass";
@@ -202,7 +202,7 @@ describe("Create, Delete, Read Test Suite (Unit Test)", () => {
       let dummyTotalFines = 0.0;
       let dummyUpdatedAt = new Date;
 
-      return Profile.Tests__CreateProfile__(
+      return ProfileService.Tests__CreateProfile__(
          {
             user_id : dummyId,
             user_name: dummyUserName,
@@ -218,7 +218,7 @@ describe("Create, Delete, Read Test Suite (Unit Test)", () => {
       )
    }
    let dummyUser: User;
-   let dummyProfile:Profile = initializeDummyProfile();
+   let dummyProfile:ProfileService = initializeDummyProfile();
 
    let decodeToken = (jwtToken: string): UserJwtPayloadInterface => {
       return jwt.verify(
@@ -247,9 +247,9 @@ describe("Create, Delete, Read Test Suite (Unit Test)", () => {
          createNewUserSpy = jest.spyOn(User, "createNewUser");
          getUserSpy = jest.spyOn(User, "getUserByEmail");
          deleteUserSpy = jest.spyOn(User, "deleteUser");
-         createProfileSpy = jest.spyOn(Profile,"CreateProfile");
-         getProfileSpy = jest.spyOn(Profile,"GetByUserId");
-         deleteProfileSpy = jest.spyOn(Profile,"DeleteProfile");
+         createProfileSpy = jest.spyOn(ProfileService,"CreateProfile");
+         getProfileSpy = jest.spyOn(ProfileService,"GetByUserId");
+         deleteProfileSpy = jest.spyOn(ProfileService,"DeleteProfile");
          createNewUserSpy.mockResolvedValue(dummyUser);
          getUserSpy.mockResolvedValue(dummyUser);
          deleteUserSpy.mockResolvedValue(dummyUser);

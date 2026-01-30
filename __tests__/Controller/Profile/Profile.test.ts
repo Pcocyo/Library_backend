@@ -1,13 +1,10 @@
-import Profile from "../../../src/Controller/Profile/Profile";
-import { ProfileStatus } from "../../../src/Controller/Profile/Profile.interface";
-import type {
-    CreateProfileParam,
-    ProfileParam,
-} from "../../../src/Controller/Profile/Profile.interface";
+import { ProfileService } from "../../../src/features/profile";
+import { ProfileStatus } from "../../../src/features/profile/types/profile-service.types";
+import { CreateProfileParam, ProfileParam } from "../../../src/features/profile/types/profile-service.types";
 import type { UserRegisterInterface } from "../../../src/Controller/User/User.interface";
 import User, { UserRole } from "../../../src/Controller/User/User";
 import prisma from "../../../src/prismaClient";
-import { ClientError,ClientErrorCode } from "../../../src/Errors/ErrorClass";
+import { ClientError, ClientErrorCode } from "../../../src/Errors/ErrorClass";
 describe("Class Tests", () => {
     const dummyId: string = "dummyId";
     const dummyUserName: string = "dummyUserName";
@@ -33,13 +30,15 @@ describe("Class Tests", () => {
         updated_at: dummyUpdated_At,
     };
 
-    let dummyProfile: Profile;
+    let dummyProfile: ProfileService;
     beforeEach(() => {
-        dummyProfile = Profile.Tests__CreateProfile__(dummyProfileParams);
+        dummyProfile =
+            ProfileService.Tests__CreateProfile__(dummyProfileParams);
     });
 
     it("Should create a new profile when called", () => {
-        let newProfile = Profile.Tests__CreateProfile__(dummyProfileParams);
+        let newProfile =
+            ProfileService.Tests__CreateProfile__(dummyProfileParams);
         expect(newProfile.get_userId()).toBe(dummyId);
         expect(newProfile.get_userName()).toBe(dummyUserName);
         expect(newProfile.get_firstName()).toBe(dummyFirstName);
@@ -54,7 +53,7 @@ describe("Class Tests", () => {
 
 describe("Profile table tests", () => {
     let dummyCreateProfileParams: CreateProfileParam;
-    let dummyProfile: Profile;
+    let dummyProfile: ProfileService;
     const dummyProfile_UserName: string = "dummyUserName";
     const dummyProfile_FirstName: string = "dummyFirstName";
     const dummyProfile_LastName: string = "dummyLastName";
@@ -93,7 +92,7 @@ describe("Profile table tests", () => {
             updated_at: dummyProfile_Updated_At,
         };
         try {
-            dummyProfile = await Profile.CreateProfile(
+            dummyProfile = await ProfileService.CreateProfile(
                 dummyCreateProfileParams,
             );
         } catch (err) {
@@ -133,7 +132,7 @@ describe("Profile table tests", () => {
         expect(profile?.total_fines).not.toBeNull();
     });
     it("Profile.CreateProfile should return Profile object", () => {
-        expect(dummyProfile).toBeInstanceOf(Profile);
+        expect(dummyProfile).toBeInstanceOf(ProfileService);
     });
 
     it("Profile.DeleteProfile should delete a record when user_id input", async () => {
@@ -142,11 +141,11 @@ describe("Profile table tests", () => {
             password: "dummyUserPassword",
             role: null,
         });
-        let dummyProfile2 = await Profile.CreateProfile({
+        let dummyProfile2 = await ProfileService.CreateProfile({
             user_id: newDummyUser.getId(),
         });
 
-        await Profile.DeleteProfile(dummyProfile2);
+        await ProfileService.DeleteProfile(dummyProfile2);
         let profile = await prisma.profiles.findUnique({
             where: { user_id: dummyProfile2.get_userId() },
         });
@@ -157,8 +156,8 @@ describe("Profile table tests", () => {
     //Get Profile by user id tests
 
     it("Profile.GetByUserId should return the correct profile records and Profile object", async () => {
-        let dbDummyProfile: Profile;
-        dbDummyProfile = await Profile.GetByUserId({
+        let dbDummyProfile: ProfileService;
+        dbDummyProfile = await ProfileService.GetByUserId({
             user_id: dummyUser.getId(),
         });
 
@@ -166,16 +165,16 @@ describe("Profile table tests", () => {
         expect(dbDummyProfile.get_firstName()).toBe(
             dummyProfile.get_firstName(),
         );
-        expect(dbDummyProfile).toBeInstanceOf(Profile);
+        expect(dbDummyProfile).toBeInstanceOf(ProfileService);
     });
 
     it("Profile.GetByUserId should return ClientError class with CLIENT_ERROR_005 code when profile records did not exists", async () => {
         try {
-            await Profile.GetByUserId({
+            await ProfileService.GetByUserId({
                 user_id: "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
             });
-        } catch (err:any) {
-            const clientError:ClientError = err as ClientError;
+        } catch (err: any) {
+            const clientError: ClientError = err as ClientError;
             expect(clientError instanceof ClientError).toBeTruthy();
             expect(clientError.httpsStatusCode).toBe(400);
             expect(clientError.code).toBe(ClientErrorCode.User_Id_Not_Found);

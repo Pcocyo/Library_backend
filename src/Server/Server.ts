@@ -1,7 +1,7 @@
 import type { Request, Response, Application } from "express";
 import { DevApp } from "./App/DevApp";
 import Env from "../Config/config";
-import { UserRouter } from "../Router/User";
+import { UserRouter } from "../features/user";
 import { ProfileRouter } from "../features/profile";
 import { errorHandler } from "../Middleware";
 
