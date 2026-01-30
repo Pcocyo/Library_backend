@@ -1,6 +1,6 @@
 import { Request } from "express";
-import { UserJwtPayloadInterface } from "../../Config/config.interface";
-import { ProfileStatus } from "../../Controller/Profile/Profile.interface";
+import { UserJwtPayloadInterface } from "../../../Config/config.interface";
+import { ProfileStatus } from "../../../Controller/Profile/Profile.interface";
 
 export interface ProfileUpdateRequest extends Request {
     body: {

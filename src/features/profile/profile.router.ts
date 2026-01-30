@@ -1,9 +1,9 @@
-import { BaseRouter } from "../Ultils/base.router";
+import { BaseRouter } from "../../Router/Ultils/base.router";
 import { NextFunction, Request, Response } from "express";
 import Profile from "../../Controller/Profile/Profile";
 import User, { UserRole } from "../../Controller/User/User";
 import { UserUpdateProfileParam } from "../../Controller/Profile/Profile.interface";
-import { LibrarianUpdateUserProfileRequest, ProfileUpdateRequest } from ".";
+import { LibrarianUpdateUserProfileRequest, ProfileUpdateRequest } from "./types/profile-router.types";
 import { UserJwtPayloadInterface } from "../../Config/config.interface";
 import {
     LibrarianUpdateProfileRequestSchema,

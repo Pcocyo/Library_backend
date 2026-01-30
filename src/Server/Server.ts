@@ -2,7 +2,7 @@ import type { Request, Response, Application } from "express";
 import { DevApp } from "./App/DevApp";
 import Env from "../Config/config";
 import { UserRouter } from "../Router/User";
-import { ProfileRouter } from "../Router/Profile";
+import { ProfileRouter } from "../features/profile";
 import { errorHandler } from "../Middleware";
 
 export class Server {
