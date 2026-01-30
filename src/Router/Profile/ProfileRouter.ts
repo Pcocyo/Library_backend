@@ -1,4 +1,4 @@
-import { RouterClass } from "../Ultils/RouterClass";
+import { BaseRouter } from "../Ultils/base.router";
 import { NextFunction, Request, Response } from "express";
 import Profile from "../../Controller/Profile/Profile";
 import User, { UserRole } from "../../Controller/User/User";
@@ -15,7 +15,7 @@ import {
 import { ClientErrorFactory } from "../../Errors/ErrorClass";
 import { validate } from "../../Middleware/validation-handler";
 
-export class ProfileRouter extends RouterClass {
+export class ProfileRouter extends BaseRouter {
     public constructor() {
         super();
         this.initializeRoutes();

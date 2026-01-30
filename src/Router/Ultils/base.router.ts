@@ -4,7 +4,8 @@ import { UserJwtPayloadInterface } from "../../Config/config.interface";
 import { UserRole } from "../../Controller/User/User";
 import { ClientErrorFactory } from "../../Errors/ErrorClass";
 import { ErrorMapperGroup } from "../../Errors/ErrorMapper/";
-export abstract class RouterClass {
+
+export abstract class BaseRouter {
     protected router: Router;
 
     public constructor() {

@@ -1,4 +1,4 @@
-import { RouterClass } from "../Ultils/RouterClass";
+import { BaseRouter } from "../Ultils/base.router";
 import type { Response, NextFunction } from "express";
 import User from "../../Controller/User/User";
 import {
@@ -19,7 +19,7 @@ import {
     UpdateUserRequestSchema,
 } from "../../Middleware/validation-handler/schema";
 
-export class UserRouter extends RouterClass {
+export class UserRouter extends BaseRouter {
     public constructor() {
         super();
         this.initializeRoutes();
