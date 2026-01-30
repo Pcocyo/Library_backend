@@ -1,4 +1,4 @@
-import { BaseRouter } from "../../Router/Ultils/base.router";
+import { BaseRouter } from "../../core/base/base.router";
 import type { Response, NextFunction } from "express";
 import User from "../../Controller/User/User";
 import {
