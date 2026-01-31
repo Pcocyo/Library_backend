@@ -1,5 +1,5 @@
 import { App } from "supertest/types";
-import { Server } from "../../src/Server/Server";
+import { Server } from "../../src/server/server.ts"; 
 import { UserService } from "../../src/features/user";
 import { UserRole } from "../../src/features/user/types/user-service.types";
 import { ProfileService } from "../../src/features/profile";

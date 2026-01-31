@@ -1,10 +1,10 @@
 import type { Application } from "express";
-import { App } from "./AppInterface";
+import { BaseApp } from "../../core/base/base.app";
 import express from "express";
 import helmet from "helmet";
 import cors from "cors";
 
-export class DevApp extends App {
+export class DevApp extends BaseApp {
     protected app: Application | null = null;
     private static instance: DevApp;
 

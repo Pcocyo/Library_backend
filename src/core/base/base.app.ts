@@ -1,6 +1,6 @@
 import type { Application } from "express";
 
-export abstract class App {
+export abstract class BaseApp {
     protected abstract app: Application | null;
 
     protected abstract setSettings(app: Application | null): Application;

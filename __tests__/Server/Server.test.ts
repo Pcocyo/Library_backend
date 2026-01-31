@@ -1,4 +1,4 @@
-import { Server } from "../../src/Server/Server"
+import { Server } from "../../src/server/server.ts"
 
 describe("Server class test", () => {
     let instance: Server;
