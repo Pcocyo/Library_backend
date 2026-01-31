@@ -1,16 +1,16 @@
 import { App } from "supertest/types";
-import { Server } from "../../src/server/server.ts"; 
-import { UserService } from "../../src/features/user";
-import { UserRole } from "../../src/features/user/types/user-service.types";
-import { ProfileService } from "../../src/features/profile";
+import { Server } from "../../../src/server/server.ts"; 
+import { UserService } from "../../../src/features/user";
+import { UserRole } from "../../../src/features/user/types/user-service.types";
+import { ProfileService } from "../../../src/features/profile";
 import {
     ProfileStatus,
     UserUpdateProfileParam,
     LibrarianUpdateProfileParam,
-} from "../../src/features/profile/types/profile-service.types";
-import Env from "../../src/config/config.ts";
+} from "../../../src/features/profile/types/profile-service.types";
+import Env from "../../../src/config/config.ts";
 import request from "supertest";
-import { ClientErrorCode } from "../../src/core/error/exceptions/ClientError.ts";
+import { ClientErrorCode } from "../../../src/core/error/exceptions/ClientError.ts";
 describe("Profile Route GET and PATCH endpoint test", () => {
     let initializeDummyUser = () => {
         let dummyEmail = "dummyEmail";

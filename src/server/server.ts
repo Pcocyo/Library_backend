@@ -1,4 +1,4 @@
-import type { Request, Response, Application } from "express";
+import type { Application } from "express";
 import { DevApp } from "./app/dev-app";
 import Env from "../config/config";
 import { UserRouter } from "../features/user";

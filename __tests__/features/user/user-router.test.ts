@@ -1,18 +1,18 @@
 import dotenv from "dotenv";
 dotenv.config({ quiet: true });
-import { Server } from "../../src/server/server.ts";
+import { Server } from "../../../src/server/server.ts";
 import request from "supertest";
 import { App } from "supertest/types";
 import bcrypt from "bcrypt";
 import { jest } from "@jest/globals";
-import { UserService} from "../../src/features/user";
-import { UserRole } from "../../src/features/user/types/user-service.types.ts";
-import {UserJwtPayloadInterface} from "../../src/config/config.types.ts"
-import { ProfileService } from "../../src/features/profile";
-import { ProfileStatus } from "../../src/features/profile/types/profile-service.types.ts";
-import Env from "../../src/config/config.ts"
+import { UserService} from "../../../src/features/user";
+import { UserRole } from "../../../src/features/user/types/user-service.types.ts";
+import {UserJwtPayloadInterface} from "../../../src/config/config.types.ts"
+import { ProfileService } from "../../../src/features/profile";
+import { ProfileStatus } from "../../../src/features/profile/types/profile-service.types.ts";
+import Env from "../../../src/config/config.ts"
 import jwt from "jsonwebtoken";
-import { ClientErrorCode } from "../../src/core/error/exceptions";
+import { ClientErrorCode } from "../../../src/core/error/exceptions";
 
 describe("Update user test suite", () => {
     let dummyUserId = "dummyUseeId";
