@@ -1,4 +1,4 @@
-import { UserJwtPayloadInterface } from "../../../Config/config.interface";
+import { UserJwtPayloadInterface } from "../../../config/config.types";
 import { Request } from "express";
 
 interface BasicUserData {

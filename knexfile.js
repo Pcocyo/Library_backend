@@ -1,4 +1,4 @@
-const Env = require("./dist/Config/config").default;
+const Env = require("./dist/config/config").default;
 const DB_URL = Env.getDB_URL();
 
 const common = {

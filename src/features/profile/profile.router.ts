@@ -8,7 +8,7 @@ import {
     LibrarianUpdateUserProfileRequest,
     ProfileUpdateRequest,
 } from "./types/profile-router.types";
-import { UserJwtPayloadInterface } from "../../Config/config.interface";
+import { UserJwtPayloadInterface } from "../../config/config.types";
 import {
     LibrarianUpdateProfileRequestSchema,
     ProfileUpdateRequestSchema,

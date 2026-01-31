@@ -1,7 +1,7 @@
-import Env from "../../src/Config/config";
+import Env from "../../src/config/config";
 import { UserService } from "../../src/features/user";
 import { UserRole } from "../../src/features/user/types/user-service.types";
-import type { UserJwtPayloadInterface } from "../../src/Config/config.interface";
+import { UserJwtPayloadInterface } from "../../src/config/config.types";
 
 import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";

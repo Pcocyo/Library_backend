@@ -1,5 +1,5 @@
 import { Request } from "express";
-import { UserJwtPayloadInterface } from "../../../Config/config.interface";
+import { UserJwtPayloadInterface } from "../../../config/config.types";
 import { ProfileStatus } from "./profile-service.types";
 
 export interface ProfileUpdateRequest extends Request {
