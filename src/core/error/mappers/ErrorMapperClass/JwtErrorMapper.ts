@@ -1,6 +1,6 @@
 import jwt from "jsonwebtoken";
 import { ErrorMapperClass } from "./ErrorMapperClass.interface";
-import { ClientError, ClientErrorFactory } from "../../ErrorClass";
+import { ClientError,ClientErrorFactory } from "../../exceptions";
 type JwtError =
     | jwt.NotBeforeError
     | jwt.JsonWebTokenError

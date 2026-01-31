@@ -10,7 +10,7 @@ import {
 } from  "./types/user-router.types";
 import Env from "../../Config/config";
 import { ProfileService } from "../../features/profile";
-import { ClientErrorFactory } from "../../Errors/ErrorClass";
+import { ClientErrorFactory } from "../../../src/core/error/exceptions";
 import { validate } from "../../core/middleware/validation-handler/validation-handler.middleware";
 import {
     CreateUserRequestSchema,

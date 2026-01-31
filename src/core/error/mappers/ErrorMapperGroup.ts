@@ -1,7 +1,7 @@
 import { JwtErrorMapper } from "./ErrorMapperClass/JwtErrorMapper";
 import { PrismaErrorMapper } from "./ErrorMapperClass/PrismaErrorMapper";
 import { ErrorMapperClass } from "./ErrorMapperClass/ErrorMapperClass.interface";
-import { BaseError } from "../ErrorClass";
+import { BaseError } from "../exceptions";
 
 export class ErrorMapperGroup {
     private static instance: ErrorMapperGroup;

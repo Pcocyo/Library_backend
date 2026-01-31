@@ -10,7 +10,7 @@
 //table.decimal("total_fines",10,2).notNullable().defaultTo(0.00); // user total fines in usd
 //table.timestamp("updated_at"); // represent user data last profile updates
 
-import { ClientErrorFactory, ClientError } from "../../Errors/ErrorClass";
+import { ClientErrorFactory, ClientError } from "../../core/error/exceptions";
 import prisma from "../../prismaClient";
 import {
     ProfileParam,
@@ -19,7 +19,7 @@ import {
     GetByUserIdParam,
 } from "./types/profile-service.types";
 
-import { ErrorMapperGroup } from "../../Errors/ErrorMapper";
+import { ErrorMapperGroup } from "../../core/error/mappers";
 
 export class ProfileService {
     private user_id: string;
@@ -257,7 +257,9 @@ export class ProfileService {
         }
     }
 
-    public static async GetByUserId(param: GetByUserIdParam): Promise<ProfileService> {
+    public static async GetByUserId(
+        param: GetByUserIdParam,
+    ): Promise<ProfileService> {
         try {
             let profile = await prisma.profiles.findUnique({
                 where: { user_id: param.user_id },

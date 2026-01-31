@@ -13,7 +13,7 @@ import {
     LibrarianUpdateProfileRequestSchema,
     ProfileUpdateRequestSchema,
 } from "../../core/middleware/validation-handler/schema";
-import { ClientErrorFactory } from "../../Errors/ErrorClass";
+import { ClientErrorFactory } from "../../core/error/exceptions";
 import { validate } from "../../core/middleware/validation-handler/validation-handler.middleware";
 
 export class ProfileRouter extends BaseRouter {

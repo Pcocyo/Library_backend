@@ -10,7 +10,7 @@ import {
 } from "../../src/features/profile/types/profile-service.types";
 import Env from "../../src/Config/config";
 import request from "supertest";
-import { ClientErrorCode } from "../../src/Errors/ErrorClass";
+import { ClientErrorCode } from "../../src/core/error/exceptions/ClientError.ts";
 describe("Profile Route GET and PATCH endpoint test", () => {
     let initializeDummyUser = () => {
         let dummyEmail = "dummyEmail";

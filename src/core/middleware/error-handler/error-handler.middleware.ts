@@ -1,6 +1,5 @@
 import { Request, Response, NextFunction } from "express";
-import {  ClientError, DbError, ValidationError } from "../../../Errors/ErrorClass";
-
+import { ClientError,ValidationError,DbError } from "../../error/exceptions";
 export const errorHandler = (
     err: Error,
     req: Request,

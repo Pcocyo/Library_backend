@@ -5,7 +5,7 @@ import { UserRegisterInterface } from "../../../src/features/user/types/user-ser
 import { UserService } from "../../../src/features/user/user.service";
 import { UserRole } from "../../../src/features/user/types/user-service.types";
 import prisma from "../../../src/prismaClient";
-import { ClientError, ClientErrorCode } from "../../../src/Errors/ErrorClass";
+import { ClientError,ClientErrorCode } from "../../../src/core/error/exceptions";
 
 describe("Class Tests", () => {
     const dummyId: string = "dummyId";

@@ -1,7 +1,7 @@
 import { PrismaClientInitializationError } from "@prisma/client/runtime/library";
 import { ErrorMapperClass } from "./ErrorMapperClass.interface";
 import { Prisma } from "@prisma/client";
-import { DbError, DbErrorFactory } from "../../ErrorClass";
+import { DbError,DbErrorFactory } from "../../exceptions";
 
 type PrismaError =
     | Prisma.PrismaClientKnownRequestError

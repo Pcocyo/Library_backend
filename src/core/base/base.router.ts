@@ -2,8 +2,8 @@ import { Router, Response, Request, NextFunction } from "express";
 import Env from "../../Config/config";
 import { UserJwtPayloadInterface } from "../../Config/config.interface";
 import { UserRole } from "../../features/user/types/user-service.types";
-import { ClientErrorFactory } from "../../Errors/ErrorClass";
-import { ErrorMapperGroup } from "../../Errors/ErrorMapper/";
+import { ClientErrorFactory } from "../error/exceptions";
+import { ErrorMapperGroup } from "../error/mappers";
 
 export abstract class BaseRouter {
     protected router: Router;
