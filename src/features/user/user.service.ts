@@ -1,25 +1,20 @@
 import { ClientErrorFactory } from "../../Errors/ErrorClass";
 import prisma from "../../prismaClient";
 import { ErrorMapperGroup } from "../../Errors/ErrorMapper/";
-import type {
+import { 
     UserRegisterInterface,
     UserGetEmailInterface,
     UserDomainInterface,
     UserDeleteInterface,
-} from "./User.interface";
-export enum UserRole {
-    MEMBER = "MEMBER",
-    LIBRARIAN = "LIBRARIAN",
-    GUEST = "GUEST",
-}
-
+} from "./types/user-service.types";
+import { UserRole } from "./types/user-service.types";
 //user_id    String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
 //email      String   @unique(map: "users_email_unique") @db.VarChar(255)
 //password   String   @db.VarChar(255)
 //role       String   @default("GUEST") @db.VarChar(255)
 //created_at DateTime @default(dbgenerated("CURRENT_TIMESTAMP(6)")) @db.Timestamptz(6)
-//
-export default class User {
+
+export class UserService {
     private userId: string;
     private email: string;
     private password: string;
@@ -102,7 +97,7 @@ export default class User {
 
     public static async createNewUser(
         userRegisterData: UserRegisterInterface,
-    ): Promise<User> {
+    ): Promise<UserService> {
         userRegisterData.role =
             userRegisterData.role == null
                 ? UserRole.GUEST
@@ -115,7 +110,7 @@ export default class User {
                     role: String(userRegisterData.role),
                 },
             });
-            return new User({
+            return new UserService({
                 id: newDbUser.user_id,
                 email: newDbUser.email,
                 password: newDbUser.password,
@@ -129,7 +124,7 @@ export default class User {
 
     public static async getUserByEmail(
         userLoginData: UserGetEmailInterface,
-    ): Promise<User> {
+    ): Promise<UserService> {
         try {
             const userDbFound = await prisma.users.findUnique({
                 where: {
@@ -142,7 +137,7 @@ export default class User {
                     context: { data_recieved: userLoginData },
                 });
             }
-            return new User({
+            return new UserService({
                 id: userDbFound.user_id,
                 email: userDbFound.email,
                 password: userDbFound.password,
@@ -175,8 +170,8 @@ export default class User {
         password: string,
         role: UserRole,
         created_at: Date,
-    ): User {
-        return new User({
+    ): UserService {
+        return new UserService({
             id: dummyId,
             email: dummyEmail,
             password: password,
@@ -188,7 +183,7 @@ export default class User {
     // Test only
     static async tests__createDbTestUser(
         dummyUserData: UserRegisterInterface,
-    ): Promise<User> {
+    ): Promise<UserService> {
         try {
             dummyUserData.role =
                 dummyUserData.role == null
@@ -202,7 +197,7 @@ export default class User {
                     role: String(dummyUserData.role),
                 },
             });
-            return new User({
+            return new UserService({
                 id: testUser.user_id,
                 email: testUser.email,
                 password: testUser.password,

@@ -1,5 +1,8 @@
-import { UserRole } from "./User"
-
+export enum UserRole {
+    MEMBER = "MEMBER",
+    LIBRARIAN = "LIBRARIAN",
+    GUEST = "GUEST",
+}
 export interface UserRegisterInterface {
     email:string,
     password: string,

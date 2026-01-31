@@ -1,7 +1,8 @@
 import { BaseRouter } from "../../core/base/base.router";
 import { NextFunction, Request, Response } from "express";
 import { ProfileService } from "./profile.service";
-import User, { UserRole } from "../../Controller/User/User";
+import { UserService } from "../user";
+import { UserRole } from "../user/types/user-service.types";
 import { UserUpdateProfileParam } from "./types/profile-service.types";
 import {
     LibrarianUpdateUserProfileRequest,
@@ -159,7 +160,7 @@ export class ProfileRouter extends BaseRouter {
         res: Response,
         next: NextFunction,
     ) {
-        const userToUpdate: User = await User.getUserByEmail({
+        const userToUpdate: UserService = await UserService.getUserByEmail({
             email: req.body.email,
         });
         const userProfile: ProfileService = await ProfileService.GetByUserId({
@@ -182,7 +183,7 @@ export class ProfileRouter extends BaseRouter {
                     message: "User status is not a guest",
                 });
             const userData: UserJwtPayloadInterface = req.body.authorizedUser;
-            const user: User = await User.getUserByEmail({
+            const user: UserService = await UserService.getUserByEmail({
                 email: userData.userEmail,
             });
             const profile: ProfileService = await ProfileService.GetByUserId({

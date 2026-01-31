@@ -1,6 +1,7 @@
 import { App } from "supertest/types";
 import { Server } from "../../src/Server/Server";
-import User, { UserRole } from "../../src/Controller/User/User";
+import { UserService } from "../../src/features/user";
+import { UserRole } from "../../src/features/user/types/user-service.types";
 import { ProfileService } from "../../src/features/profile";
 import {
     ProfileStatus,
@@ -17,7 +18,7 @@ describe("Profile Route GET and PATCH endpoint test", () => {
         let dummyPassword = "dummyPassword";
         let dummyRole = UserRole.GUEST;
         let dummyCreatedAt = new Date();
-        return User.tests__createTestUser(
+        return UserService.tests__createTestUser(
             dummyId,
             dummyEmail,
             dummyPassword,
@@ -32,7 +33,7 @@ describe("Profile Route GET and PATCH endpoint test", () => {
         let dummyPassword = "dummyPassword";
         let dummyRole = UserRole.MEMBER;
         let dummyCreatedAt = new Date();
-        return User.tests__createTestUser(
+        return UserService.tests__createTestUser(
             dummyId,
             dummyEmail,
             dummyPassword,
@@ -47,7 +48,7 @@ describe("Profile Route GET and PATCH endpoint test", () => {
         let dummyPassword = "dummyPassword";
         let dummyRole = UserRole.LIBRARIAN;
         let dummyCreatedAt = new Date();
-        return User.tests__createTestUser(
+        return UserService.tests__createTestUser(
             dummyId,
             dummyEmail,
             dummyPassword,
@@ -85,9 +86,9 @@ describe("Profile Route GET and PATCH endpoint test", () => {
 
     let serverApp: App;
     // User object variable
-    let dummyUser: User = initializeDummyUser();
-    let dummyLibrarian: User = initializeDummyLibrarian();
-    let dummyMemberUser: User = initializeMemberDummyUser();
+    let dummyUser: UserService = initializeDummyUser();
+    let dummyLibrarian: UserService = initializeDummyLibrarian();
+    let dummyMemberUser: UserService = initializeMemberDummyUser();
     //token variable
     let dummyUserToken = Env.getGenerateJwtToken(dummyUser);
     let dummyLibrarianToken = Env.getGenerateJwtToken(dummyLibrarian);
@@ -116,7 +117,7 @@ describe("Profile Route GET and PATCH endpoint test", () => {
 
     beforeEach(() => {
         profileMock = jest.spyOn(ProfileService, "GetByUserId");
-        userMock = jest.spyOn(User, "getUserByEmail");
+        userMock = jest.spyOn(UserService, "getUserByEmail");
         // profile mocked funciton
         dummyProfile.set_userName = profileSet_Username;
         dummyProfile.set_firstName = profileSet_FirstName;

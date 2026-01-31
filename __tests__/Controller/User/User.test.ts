@@ -1,5 +1,5 @@
-import User from "../../../src/Controller/User/User.ts";
-import { UserRole } from "../../../src/Controller/User/User";
+import { UserService } from "../../../src/features/user/user.service.ts";
+import { UserRole } from "../../../src/features/user/types/user-service.types.ts";
 import prisma from "../../../src/prismaClient";
 import { ClientError, ClientErrorCode } from "../../../src/Errors/ErrorClass";
 
@@ -9,10 +9,10 @@ describe("User class test", () => {
     const dummyPassword: string = "dummyPassword";
     const dummyRole: UserRole = UserRole.GUEST;
     const dummyDate: Date = new Date();
-    let dummyUser: User;
+    let dummyUser: UserService;
 
     beforeEach(() => {
-        dummyUser = User.tests__createTestUser(
+        dummyUser = UserService.tests__createTestUser(
             dummyId,
             dummyEmail,
             dummyPassword,
@@ -43,12 +43,12 @@ describe("database test suite", () => {
     const dummyEmail = "dummyEmail";
     const dummyPassword = "dummyPassword";
     const dummyRole = null;
-    let newUser: User;
-    let dummyDbUser: User;
+    let newUser: UserService;
+    let dummyDbUser: UserService;
 
     beforeEach(async () => {
         try {
-            dummyDbUser = await User.tests__createDbTestUser({
+            dummyDbUser = await UserService.tests__createDbTestUser({
                 email: dummyEmail,
                 password: dummyPassword,
                 role: dummyRole,
@@ -78,7 +78,7 @@ describe("database test suite", () => {
     });
     it("creates a user in DB with email, password, role, ID, and creation date", async () => {
         try {
-            newUser = await User.createNewUser({
+            newUser = await UserService.createNewUser({
                 email: "dummyEmail2",
                 password: dummyPassword,
                 role: dummyRole,
@@ -133,20 +133,20 @@ describe("database test suite", () => {
 
     it("Return a User domain model when getUserEmail() function called", async () => {
         try {
-            let userGot: User = await User.getUserByEmail({
+            let userGot: UserService = await UserService.getUserByEmail({
                 email: dummyDbUser.getEmail(),
             });
             expect(userGot).not.toBeNull();
-            expect(userGot).toBeInstanceOf(User);
+            expect(userGot).toBeInstanceOf(UserService);
         } catch (error) {
             console.log(error);
         }
     });
 
     it("Return ClientError CLIENT_ERROR_004 when getUserEmail() does not found a user", async () => {
-        let userGot: User;
+        let userGot: UserService;
         try {
-            userGot = await User.getUserByEmail({
+            userGot = await UserService.getUserByEmail({
                     email: "invalidEmail",
             });
         } catch (error) {
@@ -164,7 +164,7 @@ describe("database test suite", () => {
                 password: "dummyUserPassword",
             }})
             expect(
-                User.deleteUser({id:newDummyUser.user_id,email:newDummyUser.email})
+                UserService.deleteUser({id:newDummyUser.user_id,email:newDummyUser.email})
             ).resolves.not.toThrow();
         }catch(error){
             console.log(error);
@@ -174,7 +174,7 @@ describe("database test suite", () => {
     it("Throw error when deleteUser() method called with invalid data", async () => {
         try{
              expect(
-                await User.deleteUser({id:"Unexist id",email:"Unexist email"})
+                await UserService.deleteUser({id:"Unexist id",email:"Unexist email"})
             ).resolves.toThrow();
         }catch(error){
         }

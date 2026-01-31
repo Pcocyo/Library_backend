@@ -1,6 +1,6 @@
 import Env from "../../src/Config/config";
-import User from "../../src/Controller/User/User";
-import { UserRole } from "../../src/Controller/User/User";
+import { UserService } from "../../src/features/user";
+import { UserRole } from "../../src/features/user/types/user-service.types";
 import type { UserJwtPayloadInterface } from "../../src/Config/config.interface";
 
 import jwt from "jsonwebtoken";
@@ -31,7 +31,7 @@ describe("Env Test", () => {
         const dummyPassword = "dummyPassword";
         const dummyRole = "GUEST";
         const dummyDate = new Date();
-        const dummyUser: User = User.tests__createTestUser(
+        const dummyUser: UserService = UserService.tests__createTestUser(
             dummyId,
             dummyEmail,
             dummyPassword,

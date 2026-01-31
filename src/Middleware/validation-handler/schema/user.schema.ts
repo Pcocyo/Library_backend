@@ -1,5 +1,4 @@
 import z from "zod";
-import { UserRole } from "../../../Controller/User/User";
 
 export const CreateUserRequestSchema = z.object({
     email: z

@@ -1,6 +1,6 @@
 import { BaseRouter } from "../../core/base/base.router";
 import type { Response, NextFunction } from "express";
-import User from "../../Controller/User/User";
+import { UserService } from "./user.service";
 import {
     CreateUserRequest,
     DeleteUserRequest,
@@ -76,7 +76,7 @@ export class UserRouter extends BaseRouter {
     ) {
         try {
             const { authorizedUser } = req.body;
-            const userInstance = await User.getUserByEmail({
+            const userInstance = await UserService.getUserByEmail({
                 email: authorizedUser.userEmail,
             });
             await userInstance.setEmail(req.body.email);
@@ -99,7 +99,7 @@ export class UserRouter extends BaseRouter {
             let cryptedPass: string = await Env.getGenerateBcrypt(
                 req.body.password,
             );
-            let user: User = await User.createNewUser({
+            let user: UserService = await UserService.createNewUser({
                 email: String(req.body.email),
                 password: String(cryptedPass),
                 role: null,
@@ -120,7 +120,7 @@ export class UserRouter extends BaseRouter {
         next: NextFunction,
     ) {
         try {
-            const user = await User.getUserByEmail({ email: req.body.email });
+            const user = await UserService.getUserByEmail({ email: req.body.email });
             const correctPassword = await Env.getValidatePassword(
                 req.body.password,
                 user.getPassword(),
@@ -146,7 +146,7 @@ export class UserRouter extends BaseRouter {
         next: NextFunction,
     ) {
         try {
-            const userFound: User = await User.getUserByEmail({
+            const userFound: UserService = await UserService.getUserByEmail({
                 email: req.body.email,
             });
             res.send({
@@ -170,7 +170,7 @@ export class UserRouter extends BaseRouter {
                 user_id: authorizedUser.userId,
             });
             await ProfileService.DeleteProfile(userProfile);
-            await User.deleteUser({
+            await UserService.deleteUser({
                 id: authorizedUser.userId,
                 email: authorizedUser.userEmail,
             });

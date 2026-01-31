@@ -1,10 +1,12 @@
 import { ProfileService } from "../../../src/features/profile";
 import { ProfileStatus } from "../../../src/features/profile/types/profile-service.types";
 import { CreateProfileParam, ProfileParam } from "../../../src/features/profile/types/profile-service.types";
-import type { UserRegisterInterface } from "../../../src/Controller/User/User.interface";
-import User, { UserRole } from "../../../src/Controller/User/User";
+import { UserRegisterInterface } from "../../../src/features/user/types/user-service.types";
+import { UserService } from "../../../src/features/user/user.service";
+import { UserRole } from "../../../src/features/user/types/user-service.types";
 import prisma from "../../../src/prismaClient";
 import { ClientError, ClientErrorCode } from "../../../src/Errors/ErrorClass";
+
 describe("Class Tests", () => {
     const dummyId: string = "dummyId";
     const dummyUserName: string = "dummyUserName";
@@ -71,11 +73,11 @@ describe("Profile table tests", () => {
         password: dummyUserPassword,
         role: dummyUserRole,
     };
-    let dummyUser: User;
+    let dummyUser: UserService;
 
     beforeAll(async () => {
         try {
-            dummyUser = await User.createNewUser(dummyUserData);
+            dummyUser = await UserService.createNewUser(dummyUserData);
         } catch (err) {
             console.log(err);
         }
@@ -136,7 +138,7 @@ describe("Profile table tests", () => {
     });
 
     it("Profile.DeleteProfile should delete a record when user_id input", async () => {
-        let newDummyUser = await User.createNewUser({
+        let newDummyUser = await UserService.createNewUser({
             email: "dummyUser2email",
             password: "dummyUserPassword",
             role: null,

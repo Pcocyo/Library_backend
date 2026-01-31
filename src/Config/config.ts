@@ -1,7 +1,7 @@
 import dotenv from "dotenv";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
-import User from "../Controller/User/User";
+import { UserService } from "../features/user";
 import type { UserJwtPayloadInterface } from "./config.interface";
 
 dotenv.config({ quiet: true });
@@ -33,7 +33,7 @@ class Env {
         return Env.JWT_SECRET;
     }
 
-    public static getGenerateJwtToken(user: User): string {
+    public static getGenerateJwtToken(user: UserService): string {
         const newToken = jwt.sign(
             {
                 userEmail: user.getEmail(),
