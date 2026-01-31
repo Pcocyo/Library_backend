@@ -12,9 +12,9 @@ import { UserJwtPayloadInterface } from "../../Config/config.interface";
 import {
     LibrarianUpdateProfileRequestSchema,
     ProfileUpdateRequestSchema,
-} from "../../Middleware/validation-handler/schema";
+} from "../../core/middleware/validation-handler/schema";
 import { ClientErrorFactory } from "../../Errors/ErrorClass";
-import { validate } from "../../Middleware/validation-handler";
+import { validate } from "../../core/middleware/validation-handler/validation-handler.middleware";
 
 export class ProfileRouter extends BaseRouter {
     public constructor() {

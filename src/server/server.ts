@@ -3,7 +3,8 @@ import { DevApp } from "./app/dev-app";
 import Env from "../Config/config";
 import { UserRouter } from "../features/user";
 import { ProfileRouter } from "../features/profile";
-import { errorHandler } from "../Middleware";
+import { errorHandler } from "../core/middleware/error-handler/error-handler.middleware";
+
 
 export class Server {
     private app: Application;

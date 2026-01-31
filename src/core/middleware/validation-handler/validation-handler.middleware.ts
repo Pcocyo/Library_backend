@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from "express";
 import z, { ZodError } from "zod";
-import { ValidationErrorFactory } from "../../Errors/ErrorClass";
+import { ValidationErrorFactory } from "../../../Errors/ErrorClass";
 
 export const validate = <T extends z.ZodSchema>(schema: T) => {
     return (req: Request, res: Response, next: NextFunction): void => {

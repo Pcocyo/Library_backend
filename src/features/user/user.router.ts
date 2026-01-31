@@ -11,13 +11,13 @@ import {
 import Env from "../../Config/config";
 import { ProfileService } from "../../features/profile";
 import { ClientErrorFactory } from "../../Errors/ErrorClass";
-import { validate } from "../../Middleware/validation-handler";
+import { validate } from "../../core/middleware/validation-handler/validation-handler.middleware";
 import {
     CreateUserRequestSchema,
     GetUserRequestSchema,
     LoginUserRequestSchema,
     UpdateUserRequestSchema,
-} from "../../Middleware/validation-handler/schema";
+} from "../../core/middleware/validation-handler/schema";
 
 export class UserRouter extends BaseRouter {
     public constructor() {
