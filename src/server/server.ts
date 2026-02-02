@@ -5,15 +5,15 @@ import { UserRouter } from "../features/user";
 import { ProfileRouter } from "../features/profile";
 import { errorHandler } from "../core/middleware/error-handler/error-handler.middleware";
 
-
 export class Server {
     private app: Application;
-    private static instance: Server | null;
-    private userRouter = new UserRouter();
-    private profileRouter = new ProfileRouter();
+    private userRouter: UserRouter;
+    private profileRouter: ProfileRouter;
 
-    private constructor() {
+    private constructor(userRouter: UserRouter, profileRouter: ProfileRouter) {
         this.app = DevApp.getInstance().getApp();
+        this.userRouter = userRouter;
+        this.profileRouter = profileRouter;
         this.routes();
     }
 
@@ -29,12 +29,7 @@ export class Server {
         });
     }
 
-    public static getInstance(): Server {
-        if (!Server.instance) {
-            Server.instance = new Server();
-            return Server.instance;
-        } else {
-            return Server.instance;
-        }
+    public static create(): Server {
+        return new Server(new UserRouter(), new ProfileRouter());
     }
 }

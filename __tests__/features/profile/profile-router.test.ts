@@ -111,7 +111,7 @@ describe("Profile Route GET and PATCH endpoint test", () => {
     let userSet_role = jest.fn();
 
     beforeAll(() => {
-        const serverInstance: Server = Server.getInstance();
+        const serverInstance: Server = Server.create();
         serverApp = (serverInstance as any).app;
     });
 

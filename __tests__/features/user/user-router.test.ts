@@ -44,7 +44,7 @@ describe("Update user test suite", () => {
     };
 
     beforeAll(() => {
-        serverInstance = Server.getInstance();
+        serverInstance = Server.create();
         serverApp = (serverInstance as any).app;
     });
 
@@ -238,7 +238,7 @@ describe("Create, Delete, Read Test Suite (Unit Test)", () => {
             dummyCreated_at,
         );
         dummyToken = Env.getGenerateJwtToken(dummyUser);
-        serverInstance = Server.getInstance();
+        serverInstance = Server.create();
         serverApp = (serverInstance as any).app;
     });
 

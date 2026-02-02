@@ -1,4 +1,4 @@
-import { ClientErrorFactory } from "../../../src/core/error/exceptions";
+import { ClientErrorFactory } from "../../core/error/exceptions";
 import prisma from "../../prismaClient";
 import { ErrorMapperGroup } from "../../core/error/mappers";
 import { 

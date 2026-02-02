@@ -1,3 +1,3 @@
-import { Server } from "./server/server";
-const serverInstance: Server = Server.getInstance();
-serverInstance.start();
+import { Server, } from "./server/server";
+const server: Server = Server.create();
+server.start();
