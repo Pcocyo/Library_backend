@@ -1,25 +1,26 @@
 import type { Application } from "express";
 import { DevApp } from "./app/dev-app";
 import Env from "../config/config";
-import { UserRouter } from "../features/user";
 import { ProfileRouter } from "../features/profile";
 import { errorHandler } from "../core/middleware/error-handler/error-handler.middleware";
+import { UserModule } from "../features/user/user.module";
+import { ProfileModule } from "../features/profile/profile.module";
 
 export class Server {
     private app: Application;
-    private userRouter: UserRouter;
-    private profileRouter: ProfileRouter;
+    private userModule: UserModule;
+    private profileModule: ProfileModule;
 
-    private constructor(userRouter: UserRouter, profileRouter: ProfileRouter) {
+    private constructor(userModule: UserModule, profileModule: ProfileModule) {
         this.app = DevApp.getInstance().getApp();
-        this.userRouter = userRouter;
-        this.profileRouter = profileRouter;
+        this.userModule = userModule;
+        this.profileModule = profileModule;
         this.routes();
     }
 
     private routes(): void {
-        this.app.use("/user", this.userRouter.getRouter());
-        this.app.use("/profile", this.profileRouter.getRouter());
+        this.app.use("/user", this.userModule.getRouter());
+        this.app.use("/profile", this.profileModule.getRouter());
         this.app.use(errorHandler);
     }
 
@@ -30,6 +31,6 @@ export class Server {
     }
 
     public static create(): Server {
-        return new Server(new UserRouter(), new ProfileRouter());
+        return new Server(new UserModule(), new ProfileModule());
     }
 }
