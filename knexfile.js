@@ -1,39 +1,37 @@
-const Env = require("./dist/config/config").default;
-const DB_URL = Env.getDB_URL();
+require("dotenv").config({quiet:true});
 
 const common = {
-    client: 'pg',
+    client: "pg",
     migrations: {
-        directory: './db/migrations',
-        extension: [".js",".mjs"]
+        directory: "./db/migrations",
+        extension: [".js", ".mjs"],
     },
     seeds: {
-        directory: './db/seeds'
-    }
-}
+        directory: "./db/seeds",
+    },
+};
 
 const development = {
     ...common,
     connection: {
-        host: DB_URL.host,
-        port: DB_URL.port,
-        database: DB_URL.databaseName,
-        user: DB_URL.user,
-        password: DB_URL.password
-    }
-}
+        host: process.env.DB_HOST,
+        port: process.env.DB_PORT,
+        database: process.env.DB_DATABASE_NAME,
+        user: process.env.DB_USER,
+        password: process.env.DB_PASSWORD,
+    },
+};
 const test = {
     ...common,
     connection: {
-        host: DB_URL.host,
-        port: DB_URL.port,
-        database: DB_URL.databaseName,
-        user: DB_URL.user,
-        password: DB_URL.password
-    }
-}
+        host: process.env.DB_HOST,
+        port: process.env.DB_PORT,
+        database: process.env.DB_DATABASE_NAME,
+        user: process.env.DB_USER,
+        password: process.env.DB_PASSWORD,
+    },
+};
 module.exports = {
     development,
-    test
-}
-
+    test,
+};
