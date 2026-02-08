@@ -1,0 +1,16 @@
+import { JwtPayload } from "jsonwebtoken";
+
+export interface UserPayload {
+    email: string;
+    role: string;
+    id: string;
+}
+
+export interface AccessTokenPayload extends JwtPayload {
+    UserPayload: UserPayload;
+}
+
+export interface IJwtService {
+    generateJwtToken(UserPayload: UserPayload): string;
+    validateJwtToken(JwtToken: string): AccessTokenPayload;
+}
