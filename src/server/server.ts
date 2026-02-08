@@ -1,20 +1,25 @@
 import type { Application } from "express";
 import { DevApp } from "./app/dev-app";
-import Env from "../config/config";
-import { ProfileRouter } from "../features/profile";
 import { errorHandler } from "../core/middleware/error-handler/error-handler.middleware";
 import { UserModule } from "../features/user/user.module";
 import { ProfileModule } from "../features/profile/profile.module";
+import { IAppConfig } from "../config/config.interface";
 
-export class Server {
+export default class Server {
     private app: Application;
     private userModule: UserModule;
     private profileModule: ProfileModule;
+    private appConfig: IAppConfig;
 
-    private constructor(userModule: UserModule, profileModule: ProfileModule) {
+    private constructor(
+        userModule: UserModule,
+        profileModule: ProfileModule,
+        appConfig: IAppConfig,
+    ) {
         this.app = DevApp.getInstance().getApp();
         this.userModule = userModule;
         this.profileModule = profileModule;
+        this.appConfig = appConfig;
         this.routes();
     }
 
@@ -25,12 +30,16 @@ export class Server {
     }
 
     public start(): void {
-        this.app.listen(Env.getPORT(), () => {
-            console.log(`listening on port ${Env.getPORT()}`);
+        this.app.listen(this.appConfig.ServerConfig.PORT, () => {
+            console.log(`listening on port ${this.appConfig.getServerConfig().PORT}`);
         });
     }
 
-    public static create(): Server {
-        return new Server(new UserModule(), new ProfileModule());
+    public static create(application_configuration: IAppConfig): Server {
+        return new Server(
+            new UserModule(),
+            new ProfileModule(),
+            application_configuration,
+        );
     }
 }
