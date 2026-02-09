@@ -7,7 +7,9 @@ export interface UserPayload {
 }
 
 export interface AccessTokenPayload extends JwtPayload {
-    UserPayload: UserPayload;
+    email: string;
+    role: string;
+    id: string;
 }
 
 export interface IJwtService {
