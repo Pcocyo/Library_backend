@@ -1,4 +1,4 @@
-import { BaseRouter } from "../../core/base/base.router";
+import { BaseRouter } from "../../../core/base/base.router";
 import type { Response, NextFunction } from "express";
 import { UserService } from "./user.service";
 import {
@@ -7,21 +7,24 @@ import {
     GetUserRequest,
     LoginUserRequest,
     UpdateUserRequest,
-} from  "./types/user-router.types";
-import Env from "../../config/config";
-import { ProfileService } from "../../features/profile";
-import { ClientErrorFactory } from "../../core/error/exceptions/ClientError";
-import { validate } from "../../core/middleware/validation-handler/validation-handler.middleware";
+} from "./types/user-router.types";
+import Env from "../../../config/config";
+import { ProfileService } from "../../../features/profile";
+import { ClientErrorFactory } from "../../../core/error/exceptions/ClientError";
+import { validate } from "../../../core/middleware/validation-handler/validation-handler.middleware";
 import {
     CreateUserRequestSchema,
     GetUserRequestSchema,
     LoginUserRequestSchema,
     UpdateUserRequestSchema,
-} from "../../core/middleware/validation-handler/schema";
+} from "../../../core/middleware/validation-handler/schema";
+import { IAuthMiddleware } from "../../../core/middleware/types";
 
 export class UserRouter extends BaseRouter {
-    public constructor() {
+    private readonly authMiddleware: IAuthMiddleware;
+    public constructor(authMiddleware: IAuthMiddleware) {
         super();
+        this.authMiddleware = authMiddleware;
         this.initializeRoutes();
     }
 
@@ -36,7 +39,7 @@ export class UserRouter extends BaseRouter {
 
         this.router.get(
             "/get",
-            this.validateToken,
+            this.authMiddleware.CreateValidateTokenMiddleware(undefined),
             validate(GetUserRequestSchema),
             (req: GetUserRequest, res: Response, next: NextFunction) => {
                 this.getUser(req, res, next);
@@ -53,7 +56,7 @@ export class UserRouter extends BaseRouter {
 
         this.router.delete(
             "/delete",
-            this.validateToken,
+            this.authMiddleware.CreateValidateTokenMiddleware(undefined),
             (req: DeleteUserRequest, res: Response, next: NextFunction) => {
                 this.deleteUser(req, res, next);
             },
@@ -61,7 +64,7 @@ export class UserRouter extends BaseRouter {
 
         this.router.put(
             "/update",
-            this.validateToken,
+            this.authMiddleware.CreateValidateTokenMiddleware(undefined),
             validate(UpdateUserRequestSchema),
             (req: UpdateUserRequest, res: Response, next: NextFunction) => {
                 this.updateUser(req, res, next);
@@ -120,7 +123,9 @@ export class UserRouter extends BaseRouter {
         next: NextFunction,
     ) {
         try {
-            const user = await UserService.getUserByEmail({ email: req.body.email });
+            const user = await UserService.getUserByEmail({
+                email: req.body.email,
+            });
             const correctPassword = await Env.getValidatePassword(
                 req.body.password,
                 user.getPassword(),

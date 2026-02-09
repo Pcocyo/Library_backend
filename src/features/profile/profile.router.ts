@@ -1,8 +1,8 @@
 import { BaseRouter } from "../../core/base/base.router";
 import { NextFunction, Request, Response } from "express";
 import { ProfileService } from "./profile.service";
-import { UserService } from "../user";
-import { UserRole } from "../user/types/user-service.types";
+import { UserService } from "../v1/user/user.service";
+import { UserRole } from "../v1/user/types/user-service.types";
 import { UserUpdateProfileParam } from "./types/profile-service.types";
 import {
     LibrarianUpdateUserProfileRequest,

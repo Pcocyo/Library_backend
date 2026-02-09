@@ -1,7 +1,7 @@
 import dotenv from "dotenv";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
-import { UserService } from "../features/user";
+import { UserService } from "../features/v1/user";
 import { UserJwtPayloadInterface } from "./config.types";
 
 dotenv.config({ quiet: true });

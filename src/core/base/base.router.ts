@@ -1,7 +1,7 @@
 import { Router, Response, Request, NextFunction } from "express";
 import Env from "../../config/config";
 import { UserJwtPayloadInterface } from "../../config/config.types";
-import { UserRole } from "../../features/user/types/user-service.types";
+import { UserRole } from "../../features/v1/user/types/user-service.types";
 import { ClientErrorFactory } from "../error/exceptions";
 import { ErrorMapperGroup } from "../error/mappers";
 

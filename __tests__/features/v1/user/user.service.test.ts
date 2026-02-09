@@ -1,7 +1,7 @@
-import { UserService } from "../../../src/features/user/user.service.ts";
-import { UserRole } from "../../../src/features/user/types/user-service.types.ts";
-import prisma from "../../../src/prismaClient";
-import { ClientError,ClientErrorCode } from "../../../src/core/error/exceptions";
+import {UserService} from "../../../../src/features/v1/user/user.service.ts";
+import { UserRole } from "../../../../src/features/v1/user/types/user-service.types.ts";
+import prisma from "../../../../src/prismaClient.ts";
+import { ClientError,ClientErrorCode } from "../../../../src/core/error/exceptions/ClientError.ts";
 
 describe("User class test", () => {
     const dummyId = "dummyId";

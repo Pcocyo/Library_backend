@@ -1,6 +1,6 @@
-import { ClientErrorFactory } from "../../core/error/exceptions";
-import prisma from "../../prismaClient";
-import { ErrorMapperGroup } from "../../core/error/mappers";
+import { ClientErrorFactory } from "../../../core/error/exceptions";
+import prisma from "../../../prismaClient";
+import { ErrorMapperGroup } from "../../../core/error/mappers";
 import { 
     UserRegisterInterface,
     UserGetEmailInterface,
