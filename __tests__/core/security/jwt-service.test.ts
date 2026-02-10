@@ -2,7 +2,6 @@ import { IJwtService } from "../../../src/core/security/interfaces";
 import JwtService from "../../../src/core/security/jwt.service";
 import { ISecurityConfig } from "../../../src/config/config.interface";
 import jwt from "jsonwebtoken";
-import { afterEach } from "node:test";
 
 describe("Jwt Service Test", () => {
     let jwtService: IJwtService;

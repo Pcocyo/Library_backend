@@ -3,7 +3,7 @@ import { DevApp } from "./app/dev-app";
 import { errorHandler } from "../core/middleware/error-handler/error-handler.middleware";
 import  UserModule  from "../features/v1/user/user.module";
 import AuthMiddleware from "../core/middleware/auth.middleware";
-import { ProfileModule } from "../features/profile/profile.module";
+import { ProfileModule } from "../features/v1/profile/profile.module";
 import { IAppConfig } from "../config/config.interface";
 import JwtService from "../core/security/jwt.service";
 
@@ -42,7 +42,7 @@ export default class Server {
 
         return new Server(
             new UserModule(new AuthMiddleware(jwtService)),
-            new ProfileModule(),
+            new ProfileModule(new AuthMiddleware(jwtService)),
             application_configuration,
         );
     }

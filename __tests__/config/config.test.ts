@@ -1,6 +1,6 @@
 import Env from "../../src/config/config";
-import { UserService } from "../../src/features/user";
-import { UserRole } from "../../src/features/user/types/user-service.types";
+import { UserService } from "../../src/features/v1/user";
+import { UserRole } from "../../src/features/v1/user/types/user-service.types";
 import { UserJwtPayloadInterface } from "../../src/config/config.types";
 
 import jwt from "jsonwebtoken";
