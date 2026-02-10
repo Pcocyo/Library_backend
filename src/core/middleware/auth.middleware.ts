@@ -67,7 +67,7 @@ export default class AuthMiddleware implements IAuthMiddleware {
             ) {
                 throw ClientErrorFactory.createUnauthorizedRequestError({
                     context: { user_request_info: req.body },
-                    message: "Unauthorized Request (User is not a librarian)",
+                    message: "Unauthorized Request (unauthorized role)",
                 });
             }
             parameter.option.required_role;
