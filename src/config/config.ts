@@ -1,9 +1,5 @@
 import dotenv from "dotenv";
-import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
-import { UserService } from "../features/v1/user";
-import { UserJwtPayloadInterface } from "./config.types";
-
 dotenv.config({ quiet: true });
 
 class Env {
@@ -26,32 +22,6 @@ class Env {
 
     public static getPORT(): Number {
         return Env.PORT;
-    }
-
-    // jwt token logic
-    public static getJWTOKEN(): string {
-        return Env.JWT_SECRET;
-    }
-
-    public static getGenerateJwtToken(user: UserService): string {
-        const newToken = jwt.sign(
-            {
-                userEmail: user.getEmail(),
-                userRole: user.getUserRole(),
-                userId: user.getId(),
-            },
-            Env.JWT_SECRET,
-            { expiresIn: "1h" },
-        );
-        return newToken;
-    }
-
-    public static getValidateToken(jwtToken: string): UserJwtPayloadInterface {
-        const userPayload: UserJwtPayloadInterface = jwt.verify(
-            jwtToken,
-            Env.JWT_SECRET,
-        ) as UserJwtPayloadInterface;
-        return userPayload;
     }
 
     // bcrypt logic

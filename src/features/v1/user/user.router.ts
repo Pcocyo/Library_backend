@@ -7,6 +7,7 @@ import {
     GetUserRequest,
     LoginUserRequest,
     UpdateUserRequest,
+    UserRouterConstructorParams,
 } from "./types/user-router.types";
 import Env from "../../../config/config";
 import { ProfileService } from "../profile";
@@ -19,12 +20,15 @@ import {
     UpdateUserRequestSchema,
 } from "../../../core/middleware/validation-handler/schema";
 import { IAuthMiddleware } from "../../../core/middleware/types";
+import { IJwtService } from "../../../core/security/interfaces";
 
 export class UserRouter extends BaseRouter {
     private readonly authMiddleware: IAuthMiddleware;
-    public constructor(authMiddleware: IAuthMiddleware) {
+    private readonly jwtService: IJwtService;
+    public constructor(userRouterParam: UserRouterConstructorParams) {
         super();
-        this.authMiddleware = authMiddleware;
+        this.authMiddleware = userRouterParam.authMiddleware;
+        this.jwtService = userRouterParam.jwtService;
         this.initializeRoutes();
     }
 
@@ -86,7 +90,8 @@ export class UserRouter extends BaseRouter {
             await userInstance.setPassword(
                 await Env.getGenerateBcrypt(req.body.password),
             );
-            let newToken = Env.getGenerateJwtToken(userInstance);
+            
+            let newToken = this.jwtService.generateJwtToken({email:userInstance.getEmail(),id:userInstance.getId(),role:userInstance.getUserRole()});
             res.send({ token: newToken });
         } catch (error: any) {
             next(error);
@@ -108,10 +113,17 @@ export class UserRouter extends BaseRouter {
                 role: null,
             });
             await ProfileService.CreateProfile({ user_id: user.getId() });
-            const token = Env.getGenerateJwtToken(user);
+
+            const token = this.jwtService.generateJwtToken({
+                email: user.getEmail(),
+                id: user.getId(),
+                role: user.getUserRole(),
+            });
+
             res.json({
                 token: token,
             });
+
         } catch (error: any) {
             next(error);
         }
@@ -136,7 +148,7 @@ export class UserRouter extends BaseRouter {
                     context: { user_request_info: req.body },
                 });
             }
-            const token = Env.getGenerateJwtToken(user);
+            const token = this.jwtService.generateJwtToken({email:user.getUserRole(),id:user.getId(),role:user.getUserRole()});
             res.send({
                 token: token,
             });

@@ -1,6 +1,5 @@
-import { IAuthMiddleware } from "../../../core/middleware/types";
-import { ProfileRouter } from "./profile.router";
-import { ProfileService } from "./profile.service";
+import { IAuthMiddleware } from "../core/middleware/types";
+import { ProfileRouter } from "./v1/profile/";
 
 export class ProfileModule {
     private profileRouter: ProfileRouter;

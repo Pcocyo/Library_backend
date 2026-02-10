@@ -8,7 +8,6 @@ import {
     LibrarianUpdateUserProfileRequest,
     ProfileUpdateRequest,
 } from "./types/profile-router.types";
-import { UserJwtPayloadInterface } from "../../../config/config.types";
 import {
     LibrarianUpdateProfileRequestSchema,
     ProfileUpdateRequestSchema,
@@ -64,7 +63,7 @@ export class ProfileRouter extends BaseRouter {
     }
 
     private async getProfile(req: Request, res: Response, next: NextFunction) {
-        const userData: UserJwtPayloadInterface = req.body.authorizedUser;
+        const userData = req.body.authorizedUser;
         try {
             const userProfile: ProfileService =
                 await ProfileService.GetByUserId({
@@ -187,7 +186,7 @@ export class ProfileRouter extends BaseRouter {
                     context: req.body,
                     message: "User status is not a guest",
                 });
-            const userData: UserJwtPayloadInterface = req.body.authorizedUser;
+            const userData = req.body.authorizedUser;
             const user: UserService = await UserService.getUserByEmail({
                 email: userData.email,
             });

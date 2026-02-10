@@ -6,11 +6,11 @@ import { App } from "supertest/types";
 import bcrypt from "bcrypt";
 import { jest } from "@jest/globals";
 import { UserService } from "../../../../src/features/v1/user/user.service.ts";
+import Env from "../../../../src/config/config.ts";
+import JwtService from "../../../../src/core/security/jwt.service.ts";
 import { UserRole } from "../../../../src/features/v1/user/types/user-service.types.ts";
-
 import {ProfileService} from "../../../../src/features/v1/profile"
 import { ProfileStatus } from "../../../../src/features/v1/profile/types/profile-service.types.ts";
-import Env from "../../../../src/config/config.ts"
 import { ClientErrorCode } from "../../../../src/core/error/exceptions";
 import AppConfig from "../../../../src/config/app.config.ts"
 
@@ -29,7 +29,7 @@ describe("Update user test suite", () => {
         dummyUserRole,
         dummyUserDate,
     );
-    let dummyToken = Env.getGenerateJwtToken(dummyUserInstance);
+    let dummyToken:string;
     let setEmailMock = jest.fn();
     let setPasswordMock = jest.fn();
     let setRoleMock = jest.fn();
@@ -40,7 +40,10 @@ describe("Update user test suite", () => {
     let payload: any;
 
     beforeAll(() => {
-        serverInstance = Server.create(new AppConfig());
+        let appConfig = new AppConfig();
+        serverInstance = Server.create(appConfig);
+        let jwtservice = new JwtService(appConfig.getSecurityConfig());
+        dummyToken = jwtservice.generateJwtToken({email: dummyUserEmail, id:dummyUserId,role: dummyUserRole});
         serverApp = (serverInstance as any).app;
     });
 
@@ -217,8 +220,10 @@ describe("Create, Delete, Read Test Suite (Unit Test)", () => {
             dummyRole,
             dummyCreated_at,
         );
-        dummyToken = Env.getGenerateJwtToken(dummyUser);
-        serverInstance = Server.create(new AppConfig());
+       const appConfig = new AppConfig();
+      serverInstance = Server.create(appConfig);
+      const jwtservice = new JwtService(appConfig.getSecurityConfig());
+        dummyToken = jwtservice.generateJwtToken({email:dummyEmail,id:dummyId,role:dummyRole});
         serverApp = (serverInstance as any).app;
     });
 
