@@ -33,7 +33,7 @@ export default class AuthMiddleware implements IAuthMiddleware {
 
     private extractToken(req: Request): string {
         const token = req.headers.authorization;
-        if (!token) {
+        if (token === undefined) {
             throw ClientErrorFactory.createUnauthorizedRequestError({
                 context: { user_request_info: req.body },
                 message: "Unauthorized Request",

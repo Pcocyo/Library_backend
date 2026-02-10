@@ -5,6 +5,7 @@ import { ErrorMapperGroup } from "../../../src/core/error/mappers/ErrorMapperGro
 import { Request, Response } from "express";
 import JwtService from "../../../src/core/security/jwt.service";
 import { IJwtService } from "../../../src/core/security/interfaces";
+import { afterEach } from "node:test";
 
 function createMockJwt(): IJwtService {
     let jwtService: JwtService = new JwtService({
@@ -44,9 +45,14 @@ describe("Authorization middleware", () => {
     beforeEach(() => {
         jwtAuthMiddleware =
             authInstance.CreateValidateTokenMiddleware(undefined);
-        jest.clearAllMocks();
-        jest.resetModules();
+        unauthorizedRequestError.mockClear();
+        errorMapperGroup.mockClear();
     });
+
+    afterEach(() => {
+      jest.clearAllMocks();
+      mockReq = { headers: {}, body: {} };
+   });
 
     it("Middleware Should insert the AccessTokenPayload into the User request object.", async () => {
         mockReq.headers = { authorization: "valid token" };
@@ -73,6 +79,7 @@ describe("Authorization middleware", () => {
     });
 
     it("Middleware should throw an UnauthorizedRequestError when an unauthorized access request / request without token detected", async () => {
+        mockReq.headers = {};
         await jwtAuthMiddleware(mockReq, mockRes, nextFunction);
         expect(unauthorizedRequestError).toHaveBeenCalled();
     });
