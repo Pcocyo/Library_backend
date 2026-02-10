@@ -14,6 +14,7 @@ describe("Jwt Service Test", () => {
     beforeEach(() => {
         mockConfig = {
             JWT_SECRET: "test-jwt-secret",
+            BCRYPT_SALT:1,
         };
         jwtService = new JwtService(mockConfig);
     });

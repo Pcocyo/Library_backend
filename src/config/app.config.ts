@@ -9,7 +9,7 @@ export default class AppConfig implements IAppConfig {
 
     constructor() {
         this.ServerConfig = {PORT: parseInt(process.env.Port || "3000")};
-        this.SecurityConfig = {JWT_SECRET: process.env.JWT_SECRET || "test secret"}
+        this.SecurityConfig = {JWT_SECRET: process.env.JWT_SECRET || "test secret", BCRYPT_SALT: parseInt(process.env.BCRYPT_SALT || "10")};
         this.DatabaseConfig = {
             HOST: `${process.env.DB_HOST}`,
             PORT: `${process.env.DB_PORT}`,

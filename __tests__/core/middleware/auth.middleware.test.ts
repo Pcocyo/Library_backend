@@ -10,6 +10,7 @@ import { afterEach } from "node:test";
 function createMockJwt(): IJwtService {
     let jwtService: JwtService = new JwtService({
         JWT_SECRET: "test-secrets",
+        BCRYPT_SALT:1,
     });
     jwtService.validateJwtToken = jest.fn().mockResolvedValue({
         email: "userEmail",

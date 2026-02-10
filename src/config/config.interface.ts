@@ -4,6 +4,7 @@ export interface IServerConfig{
 
 export interface ISecurityConfig{
     readonly JWT_SECRET: string;
+    readonly BCRYPT_SALT: number;
 }
 
 export interface IDataBaseConfig{
