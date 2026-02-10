@@ -9,7 +9,7 @@ import {
     UpdateUserRequest,
 } from "./types/user-router.types";
 import Env from "../../../config/config";
-import { ProfileService } from "../../../features/profile";
+import { ProfileService } from "../profile";
 import { ClientErrorFactory } from "../../../core/error/exceptions/ClientError";
 import { validate } from "../../../core/middleware/validation-handler/validation-handler.middleware";
 import {
@@ -80,7 +80,7 @@ export class UserRouter extends BaseRouter {
         try {
             const { authorizedUser } = req.body;
             const userInstance = await UserService.getUserByEmail({
-                email: authorizedUser.userEmail,
+                email: authorizedUser.email,
             });
             await userInstance.setEmail(req.body.email);
             await userInstance.setPassword(
@@ -172,15 +172,15 @@ export class UserRouter extends BaseRouter {
         try {
             const { authorizedUser } = req.body;
             let userProfile: ProfileService = await ProfileService.GetByUserId({
-                user_id: authorizedUser.userId,
+                user_id: authorizedUser.id,
             });
             await ProfileService.DeleteProfile(userProfile);
             await UserService.deleteUser({
-                id: authorizedUser.userId,
-                email: authorizedUser.userEmail,
+                id: authorizedUser.id,
+                email: authorizedUser.email,
             });
             res.send({
-                message: `User ${authorizedUser.userEmail} deleted`,
+                message: `User ${authorizedUser.id} deleted`,
             });
         } catch (error: any) {
             next(error);
