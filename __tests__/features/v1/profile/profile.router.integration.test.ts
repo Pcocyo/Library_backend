@@ -109,7 +109,7 @@ describe("Profile Route GET and PATCH endpoint test", () => {
     let userSet_role = jest.fn();
 
     beforeAll(() => {
-        const appConfig = new AppConfig();
+        const appConfig = AppConfig.__genTestAppConfig();
         const serverInstance: Server = Server.create(appConfig);
 
         const jwtService: JwtService = new JwtService(

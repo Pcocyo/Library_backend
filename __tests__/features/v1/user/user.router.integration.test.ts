@@ -1,18 +1,19 @@
 import dotenv from "dotenv";
 dotenv.config({ quiet: true });
-import  Server  from "../../../../src/server/server.ts";
+import Server from "../../../../src/server/server.ts";
 import request from "supertest";
 import { App } from "supertest/types";
 import bcrypt from "bcrypt";
 import { jest } from "@jest/globals";
 import { UserService } from "../../../../src/features/v1/user/user.service.ts";
-import Env from "../../../../src/config/config.ts";
 import JwtService from "../../../../src/core/security/jwt.service.ts";
 import { UserRole } from "../../../../src/features/v1/user/types/user-service.types.ts";
-import {ProfileService} from "../../../../src/features/v1/profile"
+import { ProfileService } from "../../../../src/features/v1/profile";
 import { ProfileStatus } from "../../../../src/features/v1/profile/types/profile-service.types.ts";
 import { ClientErrorCode } from "../../../../src/core/error/exceptions";
-import AppConfig from "../../../../src/config/app.config.ts"
+import AppConfig from "../../../../src/config/app.config.ts";
+import BcryptService from "../../../../src/core/security/bcrypt.service.ts";
+import { IBcryptService } from "../../../../src/core/security/interfaces/bcrypt.interface.ts";
 
 describe("Update user test suite", () => {
     let dummyUserId = "dummyUseeId";
@@ -29,7 +30,7 @@ describe("Update user test suite", () => {
         dummyUserRole,
         dummyUserDate,
     );
-    let dummyToken:string;
+    let dummyToken: string;
     let setEmailMock = jest.fn();
     let setPasswordMock = jest.fn();
     let setRoleMock = jest.fn();
@@ -39,11 +40,18 @@ describe("Update user test suite", () => {
     let getUserByEmailMock: any;
     let payload: any;
 
+    let jwt_service 
+    let bcrypt_service:IBcryptService;
     beforeAll(() => {
-        let appConfig = new AppConfig();
+        let appConfig = AppConfig.__genTestAppConfig(); 
         serverInstance = Server.create(appConfig);
-        let jwtservice = new JwtService(appConfig.getSecurityConfig());
-        dummyToken = jwtservice.generateJwtToken({email: dummyUserEmail, id:dummyUserId,role: dummyUserRole});
+        jwt_service = new JwtService(appConfig.getSecurityConfig());
+        bcrypt_service =  new BcryptService(appConfig.getSecurityConfig());
+        dummyToken = jwt_service.generateJwtToken({
+            email: dummyUserEmail,
+            id: dummyUserId,
+            role: dummyUserRole,
+        });
         serverApp = (serverInstance as any).app;
     });
 
@@ -131,7 +139,7 @@ describe("Update user test suite", () => {
         const setPasswordCalls = setPasswordMock.mock.calls[0][0];
         expect(setPasswordCalls).not.toBe(payload.password);
         expect(
-            await Env.getValidatePassword(
+            await bcrypt_service.comparePassword(
                 payload.password,
                 setPasswordCalls as string,
             ),
@@ -211,20 +219,24 @@ describe("Create, Delete, Read Test Suite (Unit Test)", () => {
     let dummyUser: UserService;
     let dummyProfile: ProfileService = initializeDummyProfile();
 
-
     beforeAll(async () => {
+        const appConfig = AppConfig.__genTestAppConfig();
+        serverInstance = Server.create(appConfig);
+        const jwtservice = new JwtService(appConfig.getSecurityConfig());
+        const bcrypt = new BcryptService(appConfig.getSecurityConfig());
+        dummyToken = jwtservice.generateJwtToken({
+            email: dummyEmail,
+            id: dummyId,
+            role: dummyRole,
+        });
+        serverApp = (serverInstance as any).app;
         dummyUser = UserService.tests__createTestUser(
             dummyId,
             dummyEmail,
-            await Env.getGenerateBcrypt(dummyPassword),
+            await bcrypt.hashPassword(dummyPassword),
             dummyRole,
             dummyCreated_at,
         );
-       const appConfig = new AppConfig();
-      serverInstance = Server.create(appConfig);
-      const jwtservice = new JwtService(appConfig.getSecurityConfig());
-        dummyToken = jwtservice.generateJwtToken({email:dummyEmail,id:dummyId,role:dummyRole});
-        serverApp = (serverInstance as any).app;
     });
 
     beforeEach(async () => {
