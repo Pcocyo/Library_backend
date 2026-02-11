@@ -1,12 +1,7 @@
 import { BaseRouter } from "../../../core/base/base.router";
-import type { Response, NextFunction } from "express";
+import type { Response, NextFunction ,Request} from "express";
 import { UserService } from "./user.service";
 import {
-    CreateUserRequest,
-    DeleteUserRequest,
-    GetUserRequest,
-    LoginUserRequest,
-    UpdateUserRequest,
     UserRouterConstructorParams,
 } from "./types/user-router.types";
 import Env from "../../../config/config";
@@ -20,15 +15,18 @@ import {
     UpdateUserRequestSchema,
 } from "../../../core/middleware/validation-handler/schema";
 import { IAuthMiddleware } from "../../../core/middleware/types";
-import { IJwtService } from "../../../core/security/interfaces";
+import { IBcryptService, IJwtService } from "../../../core/security/interfaces";
 
 export class UserRouter extends BaseRouter {
     private readonly authMiddleware: IAuthMiddleware;
     private readonly jwtService: IJwtService;
+    private readonly bcryptService: IBcryptService;
+
     public constructor(userRouterParam: UserRouterConstructorParams) {
         super();
         this.authMiddleware = userRouterParam.authMiddleware;
         this.jwtService = userRouterParam.jwtService;
+        this.bcryptService = userRouterParam.bcryptService;
         this.initializeRoutes();
     }
 
@@ -36,7 +34,7 @@ export class UserRouter extends BaseRouter {
         this.router.post(
             "/create",
             validate(CreateUserRequestSchema),
-            (req: CreateUserRequest, res: Response, next: NextFunction) => {
+            (req: Request, res: Response, next: NextFunction) => {
                 this.createUser(req, res, next);
             },
         );
@@ -45,7 +43,7 @@ export class UserRouter extends BaseRouter {
             "/get",
             this.authMiddleware.CreateValidateTokenMiddleware(undefined),
             validate(GetUserRequestSchema),
-            (req: GetUserRequest, res: Response, next: NextFunction) => {
+            (req: Request, res: Response, next: NextFunction) => {
                 this.getUser(req, res, next);
             },
         );
@@ -53,7 +51,7 @@ export class UserRouter extends BaseRouter {
         this.router.post(
             "/login",
             validate(LoginUserRequestSchema),
-            (req: LoginUserRequest, res: Response, next: NextFunction) => {
+            (req: Request, res: Response, next: NextFunction) => {
                 this.login(req, res, next);
             },
         );
@@ -61,7 +59,7 @@ export class UserRouter extends BaseRouter {
         this.router.delete(
             "/delete",
             this.authMiddleware.CreateValidateTokenMiddleware(undefined),
-            (req: DeleteUserRequest, res: Response, next: NextFunction) => {
+            (req: Request, res: Response, next: NextFunction) => {
                 this.deleteUser(req, res, next);
             },
         );
@@ -70,14 +68,14 @@ export class UserRouter extends BaseRouter {
             "/update",
             this.authMiddleware.CreateValidateTokenMiddleware(undefined),
             validate(UpdateUserRequestSchema),
-            (req: UpdateUserRequest, res: Response, next: NextFunction) => {
+            (req: Request, res: Response, next: NextFunction) => {
                 this.updateUser(req, res, next);
             },
         );
     }
 
     private async updateUser(
-        req: UpdateUserRequest,
+        req: Request,
         res: Response,
         next: NextFunction,
     ) {
@@ -88,7 +86,7 @@ export class UserRouter extends BaseRouter {
             });
             await userInstance.setEmail(req.body.email);
             await userInstance.setPassword(
-                await Env.getGenerateBcrypt(req.body.password),
+                await this.bcryptService.hashPassword(req.body.password),
             );
             
             let newToken = this.jwtService.generateJwtToken({email:userInstance.getEmail(),id:userInstance.getId(),role:userInstance.getUserRole()});
@@ -99,12 +97,12 @@ export class UserRouter extends BaseRouter {
     }
 
     private async createUser(
-        req: CreateUserRequest,
+        req: Request,
         res: Response,
         next: NextFunction,
     ) {
         try {
-            let cryptedPass: string = await Env.getGenerateBcrypt(
+            let cryptedPass: string = await this.bcryptService.hashPassword(
                 req.body.password,
             );
             let user: UserService = await UserService.createNewUser({
@@ -130,7 +128,7 @@ export class UserRouter extends BaseRouter {
     }
 
     private async login(
-        req: LoginUserRequest,
+        req: Request,
         res: Response,
         next: NextFunction,
     ) {
@@ -138,7 +136,7 @@ export class UserRouter extends BaseRouter {
             const user = await UserService.getUserByEmail({
                 email: req.body.email,
             });
-            const correctPassword = await Env.getValidatePassword(
+            const correctPassword = await this.bcryptService.comparePassword(
                 req.body.password,
                 user.getPassword(),
             );
@@ -158,7 +156,7 @@ export class UserRouter extends BaseRouter {
     }
 
     private async getUser(
-        req: GetUserRequest,
+        req: Request,
         res: Response,
         next: NextFunction,
     ) {
@@ -177,7 +175,7 @@ export class UserRouter extends BaseRouter {
     }
 
     private async deleteUser(
-        req: DeleteUserRequest,
+        req: Request,
         res: Response,
         next: NextFunction,
     ) {

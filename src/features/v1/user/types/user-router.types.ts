@@ -1,37 +1,10 @@
-import { UserJwtPayloadInterface } from "../../../../config/config.types";
 import { Request } from "express";
 import { IAuthMiddleware } from "../../../../core/middleware/types";
-import { IJwtService } from "../../../../core/security/interfaces";
+import { IBcryptService, IJwtService } from "../../../../core/security/interfaces";
 
 interface BasicUserData {
     email: string;
     password: string;
-}
-
-interface GetUserRequestBody extends UserJwtPayloadInterface {
-    email: string;
-}
-
-export interface CreateUserRequest extends Request {
-    body: BasicUserData;
-}
-
-export interface GetUserRequest extends Request {
-    body: GetUserRequestBody;
-}
-
-export interface UpdateUserRequest extends Request {
-    body: {
-        email: string;
-        password: string;
-        authorizedUser: UserJwtPayloadInterface;
-    };
-}
-
-export interface DeleteUserRequest extends Request {
-    body: {
-        authorizedUser: UserJwtPayloadInterface;
-    };
 }
 
 export interface LoginUserRequest extends Request {
@@ -41,4 +14,5 @@ export interface LoginUserRequest extends Request {
 export interface UserRouterConstructorParams{
     authMiddleware: IAuthMiddleware,
     jwtService: IJwtService
+    bcryptService: IBcryptService
 }

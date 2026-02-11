@@ -6,6 +6,8 @@ import { ProfileModule } from "../features/profile.module";
 import { IAppConfig } from "../config/config.interface";
 import JwtService from "../core/security/jwt.service";
 import UserModule from "../features/user.module";
+import { IBcryptService, IJwtService } from "../core/security/interfaces";
+import BcryptService from "../core/security/bcrypt.service";
 
 export default class Server {
     private app: Application;
@@ -38,10 +40,12 @@ export default class Server {
     }
 
     public static create(application_configuration: IAppConfig): Server {
-        let jwtService: JwtService = new JwtService(application_configuration.getSecurityConfig());
+        let securityConfig = application_configuration.getSecurityConfig()
+        let jwtService: IJwtService = new JwtService(securityConfig);
+        let bcryptService: IBcryptService = new BcryptService(securityConfig);
 
         return new Server(
-            new UserModule(new AuthMiddleware(jwtService),jwtService),
+            new UserModule(new AuthMiddleware(jwtService),jwtService,bcryptService),
             new ProfileModule(new AuthMiddleware(jwtService)),
             application_configuration,
         );

@@ -1,7 +1,8 @@
 import { IBcryptService } from "./interfaces";
 import { ISecurityConfig } from "../../config/config.interface";
 import bcrypt from "bcrypt";
-export class BcryptService implements IBcryptService {
+
+export default class BcryptService implements IBcryptService {
     private readonly securityConfig: ISecurityConfig;
     public constructor(securityConfig: ISecurityConfig) {
         this.securityConfig = securityConfig;

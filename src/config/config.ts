@@ -1,5 +1,4 @@
 import dotenv from "dotenv";
-import bcrypt from "bcrypt";
 dotenv.config({ quiet: true });
 
 class Env {
@@ -22,28 +21,6 @@ class Env {
 
     public static getPORT(): Number {
         return Env.PORT;
-    }
-
-    // bcrypt logic
-    public static async getGenerateBcrypt(
-        strPassword: string,
-    ): Promise<string> {
-        const bcryptStr: string = await bcrypt.hash(
-            strPassword,
-            Env.__Bcrypt_Config.salt,
-        );
-        return bcryptStr;
-    }
-
-    public static async getValidatePassword(
-        strPassword: string,
-        hashPassword: string,
-    ): Promise<boolean> {
-        const isValid: boolean = await bcrypt.compare(
-            strPassword,
-            hashPassword,
-        );
-        return isValid;
     }
 }
 export default Env;
