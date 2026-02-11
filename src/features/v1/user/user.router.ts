@@ -4,7 +4,6 @@ import { UserService } from "./user.service";
 import {
     UserRouterConstructorParams,
 } from "./types/user-router.types";
-import Env from "../../../config/config";
 import { ProfileService } from "../profile";
 import { ClientErrorFactory } from "../../../core/error/exceptions/ClientError";
 import { validate } from "../../../core/middleware/validation-handler/validation-handler.middleware";
