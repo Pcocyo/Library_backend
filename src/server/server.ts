@@ -35,18 +35,32 @@ export default class Server {
 
     public start(): void {
         this.app.listen(this.appConfig.ServerConfig.PORT, () => {
-            console.log(`listening on port ${this.appConfig.getServerConfig().PORT}`);
+            console.log(
+                `listening on port ${this.appConfig.getServerConfig().PORT}`,
+            );
         });
     }
 
     public static create(application_configuration: IAppConfig): Server {
-        let securityConfig = application_configuration.getSecurityConfig()
-        let jwtService: IJwtService = new JwtService(securityConfig);
-        let bcryptService: IBcryptService = new BcryptService(securityConfig);
+        const serviceDict = {
+            jwtService: new JwtService(
+                application_configuration.getSecurityConfig(),
+            ),
+            bcryptService: new BcryptService(
+                application_configuration.getSecurityConfig(),
+            ),
+        };
+        const middlewareDict = {
+            authMiddleware: new AuthMiddleware(serviceDict.jwtService),
+        };
 
         return new Server(
-            new UserModule(new AuthMiddleware(jwtService),jwtService,bcryptService),
-            new ProfileModule(new AuthMiddleware(jwtService)),
+            new UserModule(
+                middlewareDict.authMiddleware,
+                serviceDict.jwtService,
+                serviceDict.bcryptService,
+            ),
+            new ProfileModule(middlewareDict.authMiddleware),
             application_configuration,
         );
     }
