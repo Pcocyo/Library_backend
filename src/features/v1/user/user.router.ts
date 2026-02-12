@@ -12,14 +12,8 @@ import {
     UpdateUserRequestSchema,
 } from "./user.schema";
 import { IAuthMiddleware } from "../../../core/middleware/types";
-import { AccessTokenPayload, IBcryptService, IJwtService } from "../../../core/security/interfaces";
-
-import {
-    UpdateUserRequestDto,
-    LoginUserRequestDto,
-    GetUserRequestDto,
-    CreateUserRequestDto,
-} from "./dto/request/user.request.dto";
+import { IBcryptService, IJwtService } from "../../../core/security/interfaces";
+import { UpdateUserDto,LoginUserDto,CreateUserDto,DeleteUserDto,GetUserDto } from "./dto";
 import { UserRole } from "./types/user-service.types";
 
 export class UserRouter extends BaseRouter {
@@ -81,16 +75,16 @@ export class UserRouter extends BaseRouter {
 
     private async updateUser(req: Request, res: Response, next: NextFunction) {
         try {
-            const updateUserDto: UpdateUserRequestDto =
-                UpdateUserRequestDto.fromRequest(req);
+            const payload: UpdateUserDto =
+                UpdateUserDto.fromRequest(req);
             const userInstance = await UserService.getUserByEmail({
-                email: updateUserDto.token.email,
+                email: payload.token.email,
             });
-            await userInstance.setEmail(updateUserDto.data.email);
-            updateUserDto.data.password &&
+            await userInstance.setEmail(payload.data.email);
+            payload.data.password &&
                 (await userInstance.setPassword(
                     await this.bcryptService.hashPassword(
-                        updateUserDto.data.password,
+                        payload.data.password,
                     ),
                 ));
 
@@ -107,12 +101,12 @@ export class UserRouter extends BaseRouter {
 
     private async createUser(req: Request, res: Response, next: NextFunction) {
         try {
-            const createUserDto: CreateUserRequestDto = req.body;
+            const payload: CreateUserDto = req.body;
             let cryptedPass: string = await this.bcryptService.hashPassword(
-                createUserDto.password,
+                payload.password,
             );
             let user: UserService = await UserService.createNewUser({
-                email: String(createUserDto.email),
+                email: String(payload.email),
                 password: String(cryptedPass),
                 role: UserRole.GUEST,
             });
@@ -134,20 +128,20 @@ export class UserRouter extends BaseRouter {
 
     private async login(req: Request, res: Response, next: NextFunction) {
         try {
-            const loginUserDto: LoginUserRequestDto = req.body;
+            const payload: LoginUserDto = req.body;
 
             const user = await UserService.getUserByEmail({
-                email: loginUserDto.email,
+                email: payload.email,
             });
 
             const correctPassword = await this.bcryptService.comparePassword(
-                loginUserDto.password,
+                payload.password,
                 user.getPassword(),
             );
 
             if (!correctPassword) {
                 throw ClientErrorFactory.createIncorrectPasswordError({
-                    field: loginUserDto.password,
+                    field: payload.password,
                     context: { user_request_info: req.body },
                 });
             }
@@ -168,9 +162,9 @@ export class UserRouter extends BaseRouter {
 
     private async getUser(req: Request, res: Response, next: NextFunction) {
         try {
-            const getUserDto: GetUserRequestDto = req.body;
+            const payload: GetUserDto = GetUserDto.fromRequest(req);
             const userFound: UserService = await UserService.getUserByEmail({
-                email: getUserDto.email,
+                email: payload.data.email,
             });
             res.send({
                 id: userFound.getId(),
@@ -184,17 +178,17 @@ export class UserRouter extends BaseRouter {
 
     private async deleteUser(req: Request, res: Response, next: NextFunction) {
         try {
-            const token:AccessTokenPayload = req.body.authorizedUser;
+            const payload = DeleteUserDto.fromRequest(req);
             let userProfile: ProfileService = await ProfileService.GetByUserId({
-                user_id: token.id,
+                user_id: payload.token.id,
             });
             await ProfileService.DeleteProfile(userProfile);
             await UserService.deleteUser({
-                id: token.id,
-                email: token.email,
+                id: payload.token.id,
+                email: payload.token.email,
             });
             res.send({
-                message: `User ${token.id} deleted`,
+                message: `User ${payload.token.id} deleted`,
             });
         } catch (error: any) {
             next(error);
