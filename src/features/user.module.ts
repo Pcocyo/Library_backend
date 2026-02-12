@@ -1,24 +1,31 @@
 import { UserRouter } from "./v1/user/";
-import { IAuthMiddleware } from "../core/middleware/types";
+import { IAuthMiddleware,IValidationMiddleware } from "../core/middleware/types";
 import { IBcryptService, IJwtService } from "../core/security/interfaces";
-import BcryptService from "../core/security/bcrypt.service";
-
+ 
 export default class UserModule {
-    private userRouter: UserRouter;
-    private authMiddleware: IAuthMiddleware;
-    private jwtService: IJwtService;
-    private bcryptService: IBcryptService;
+    private readonly userRouter: UserRouter;
+    
+    //middleware used
+    private readonly authMiddleware: IAuthMiddleware;
+    private readonly validationMiddleware: IValidationMiddleware;
+      
+    //service used
+    private readonly jwtService: IJwtService;
+    private readonly bcryptService: IBcryptService;
     constructor(
         authMiddleware: IAuthMiddleware,
+        validationMiddleware:IValidationMiddleware,
         jwtService: IJwtService,
         bcryptService: IBcryptService,
     ) {
         this.jwtService = jwtService;
         this.authMiddleware = authMiddleware;
         this.bcryptService = bcryptService;
+        this.validationMiddleware = validationMiddleware;
 
         this.userRouter = new UserRouter({
             authMiddleware: this.authMiddleware,
+            validationMiddleware: this.validationMiddleware,
             jwtService: this.jwtService,
             bcryptService: this.bcryptService,
         });

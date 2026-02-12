@@ -1,2 +1,2 @@
 export type {IAuthMiddleware,ValidateTokenOption} from "./auth.interface"
-import type { IValidationMiddleware } from "./validation.interface"
+export type { IValidationMiddleware } from "./validation.interface"

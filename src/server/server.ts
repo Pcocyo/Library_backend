@@ -8,6 +8,7 @@ import JwtService from "../core/security/jwt.service";
 import UserModule from "../features/user.module";
 import { IBcryptService, IJwtService } from "../core/security/interfaces";
 import BcryptService from "../core/security/bcrypt.service";
+import ValidationMiddleware from "../core/middleware/validation.middleware";
 
 export default class Server {
     private app: Application;
@@ -52,11 +53,13 @@ export default class Server {
         };
         const middlewareDict = {
             authMiddleware: new AuthMiddleware(serviceDict.jwtService),
+            validationMiddleware: new ValidationMiddleware()
         };
 
         return new Server(
             new UserModule(
                 middlewareDict.authMiddleware,
+                middlewareDict.validationMiddleware,
                 serviceDict.jwtService,
                 serviceDict.bcryptService,
             ),

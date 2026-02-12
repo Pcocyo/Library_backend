@@ -1,5 +1,5 @@
 import { Request } from "express";
-import { IAuthMiddleware } from "../../../../core/middleware/types";
+import { IAuthMiddleware, IValidationMiddleware } from "../../../../core/middleware/types";
 import { IBcryptService, IJwtService } from "../../../../core/security/interfaces";
 
 interface BasicUserData {
@@ -13,6 +13,7 @@ export interface LoginUserRequest extends Request {
 
 export interface UserRouterConstructorParams{
     authMiddleware: IAuthMiddleware,
+    validationMiddleware: IValidationMiddleware,
     jwtService: IJwtService
     bcryptService: IBcryptService
 }
