@@ -9,7 +9,6 @@ import {
     ProfileUpdateRequestSchema,
 } from "./profile.schema";
 import { ClientErrorFactory } from "../../../core/error/exceptions";
-import { validate } from "../../../core/middleware/validation-handler/validation-handler.middleware";
 import {
     IAuthMiddleware,
     IValidationMiddleware,
