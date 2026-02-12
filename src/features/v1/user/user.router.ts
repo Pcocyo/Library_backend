@@ -12,7 +12,7 @@ import {
     GetUserRequestSchema,
     LoginUserRequestSchema,
     UpdateUserRequestSchema,
-} from "../../../core/middleware/validation-handler/schema";
+} from "./user.schema";
 import { IAuthMiddleware } from "../../../core/middleware/types";
 import { IBcryptService, IJwtService } from "../../../core/security/interfaces";
 

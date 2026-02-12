@@ -8,10 +8,11 @@ import {
     LibrarianUpdateUserProfileRequest,
     ProfileUpdateRequest,
 } from "./types/profile-router.types";
+
 import {
     LibrarianUpdateProfileRequestSchema,
     ProfileUpdateRequestSchema,
-} from "../../../core/middleware/validation-handler/schema";
+} from "./profile.schema";
 import { ClientErrorFactory } from "../../../core/error/exceptions";
 import { validate } from "../../../core/middleware/validation-handler/validation-handler.middleware";
 import { IAuthMiddleware } from "../../../core/middleware/types";
