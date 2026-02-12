@@ -10,14 +10,26 @@ import {
 } from "./profile.schema";
 import { ClientErrorFactory } from "../../../core/error/exceptions";
 import { validate } from "../../../core/middleware/validation-handler/validation-handler.middleware";
-import { IAuthMiddleware } from "../../../core/middleware/types";
-import { GetProfileDto,ProfileUpdateDto,LibrarianUpdateProfileDto,SubscribeDto } from "./dto";
-
+import {
+    IAuthMiddleware,
+    IValidationMiddleware,
+} from "../../../core/middleware/types";
+import {
+    GetProfileDto,
+    ProfileUpdateDto,
+    LibrarianUpdateProfileDto,
+    SubscribeDto,
+} from "./dto";
 export class ProfileRouter extends BaseRouter {
     private readonly authMiddleware: IAuthMiddleware;
-    public constructor(authMiddleware: IAuthMiddleware) {
+    private readonly validationMiddleware: IValidationMiddleware;
+    public constructor(
+        authMiddleware: IAuthMiddleware,
+        validationMiddleware: IValidationMiddleware,
+    ) {
         super();
         this.authMiddleware = authMiddleware;
+        this.validationMiddleware = validationMiddleware;
         this.initializeRoutes();
     }
 
@@ -33,7 +45,7 @@ export class ProfileRouter extends BaseRouter {
         this.router.patch(
             "/update",
             this.authMiddleware.CreateValidateTokenMiddleware(undefined),
-            validate(ProfileUpdateRequestSchema),
+            this.validationMiddleware.validate(ProfileUpdateRequestSchema),
             (req: Request, res: Response, next: NextFunction) => {
                 this.updateUserProfile(req, res, next);
             },
@@ -52,7 +64,7 @@ export class ProfileRouter extends BaseRouter {
             this.authMiddleware.CreateValidateTokenMiddleware({
                 option: { required_role: UserRole.LIBRARIAN },
             }),
-            validate(LibrarianUpdateProfileRequestSchema),
+            this.validationMiddleware.validate(LibrarianUpdateProfileRequestSchema),
             (req: Request, res: Response, next: NextFunction) => {
                 this.librarianUpdateUserProfile(req, res, next);
             },
@@ -60,7 +72,7 @@ export class ProfileRouter extends BaseRouter {
     }
 
     private async getProfile(req: Request, res: Response, next: NextFunction) {
-        const payload:GetProfileDto = GetProfileDto.fromRequest(req);
+        const payload: GetProfileDto = GetProfileDto.fromRequest(req);
         try {
             const userProfile: ProfileService =
                 await ProfileService.GetByUserId({
@@ -139,9 +151,8 @@ export class ProfileRouter extends BaseRouter {
 
             for (const [field, config] of Object.entries(profileUpdateConfig)) {
                 if (field in payload.data) {
-                    console.log(field);
-                    const userInput = payload.data[field as keyof typeof payload.data];
-                    console.log(userInput);
+                    const userInput =
+                        payload.data[field as keyof typeof payload.data];
                     const currentVal = config.getter(userProfile);
                     if (currentVal != userInput) {
                         hasChanges = true;
@@ -165,9 +176,10 @@ export class ProfileRouter extends BaseRouter {
         res: Response,
         next: NextFunction,
     ) {
-        const payload: LibrarianUpdateProfileDto = LibrarianUpdateProfileDto.fromRequest(req);
+        const payload: LibrarianUpdateProfileDto =
+            LibrarianUpdateProfileDto.fromRequest(req);
         const userToUpdate: UserService = await UserService.getUserByEmail({
-            email: payload.data.email
+            email: payload.data.email,
         });
         const userProfile: ProfileService = await ProfileService.GetByUserId({
             user_id: userToUpdate.getId(),

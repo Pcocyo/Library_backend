@@ -63,7 +63,7 @@ export default class Server {
                 serviceDict.jwtService,
                 serviceDict.bcryptService,
             ),
-            new ProfileModule(middlewareDict.authMiddleware),
+            new ProfileModule(middlewareDict.authMiddleware,middlewareDict.validationMiddleware),
             application_configuration,
         );
     }
