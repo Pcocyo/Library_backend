@@ -5,17 +5,13 @@ import { UserService } from "../../v1/user/user.service";
 import { UserRole } from "../../v1/user/types/user-service.types";
 import { UserUpdateProfileParam } from "./types/profile-service.types";
 import {
-    LibrarianUpdateUserProfileRequest,
-    ProfileUpdateRequest,
-} from "./types/profile-router.types";
-
-import {
     LibrarianUpdateProfileRequestSchema,
     ProfileUpdateRequestSchema,
 } from "./profile.schema";
 import { ClientErrorFactory } from "../../../core/error/exceptions";
 import { validate } from "../../../core/middleware/validation-handler/validation-handler.middleware";
 import { IAuthMiddleware } from "../../../core/middleware/types";
+import { GetProfileDto,ProfileUpdateDto,LibrarianUpdateProfileDto,SubscribeDto } from "./dto";
 
 export class ProfileRouter extends BaseRouter {
     private readonly authMiddleware: IAuthMiddleware;
@@ -38,7 +34,7 @@ export class ProfileRouter extends BaseRouter {
             "/update",
             this.authMiddleware.CreateValidateTokenMiddleware(undefined),
             validate(ProfileUpdateRequestSchema),
-            (req: ProfileUpdateRequest, res: Response, next: NextFunction) => {
+            (req: Request, res: Response, next: NextFunction) => {
                 this.updateUserProfile(req, res, next);
             },
         );
@@ -64,14 +60,14 @@ export class ProfileRouter extends BaseRouter {
     }
 
     private async getProfile(req: Request, res: Response, next: NextFunction) {
-        const userData = req.body.authorizedUser;
+        const payload:GetProfileDto = GetProfileDto.fromRequest(req);
         try {
             const userProfile: ProfileService =
                 await ProfileService.GetByUserId({
-                    user_id: userData.userId,
+                    user_id: payload.token.id,
                 });
             res.send({
-                user_id: userData.id,
+                user_id: userProfile.get_userId(),
                 user_name: userProfile.get_userName(),
                 first_name: userProfile.get_firstName(),
                 last_name: userProfile.get_lastName(),
@@ -88,14 +84,16 @@ export class ProfileRouter extends BaseRouter {
     }
 
     private async updateUserProfile(
-        req: ProfileUpdateRequest,
+        req: Request,
         res: Response,
         next: NextFunction,
     ) {
         try {
+            const payload: ProfileUpdateDto = ProfileUpdateDto.fromRequest(req);
+
             const userProfile: ProfileService =
                 await ProfileService.GetByUserId({
-                    user_id: req.body.authorizedUser.id,
+                    user_id: payload.token.id,
                 });
 
             const profileUpdateConfig: Record<
@@ -140,8 +138,10 @@ export class ProfileRouter extends BaseRouter {
             let hasChanges: boolean = false;
 
             for (const [field, config] of Object.entries(profileUpdateConfig)) {
-                if (field in req.body) {
-                    const userInput = req.body[field as keyof typeof req.body];
+                if (field in payload.data) {
+                    console.log(field);
+                    const userInput = payload.data[field as keyof typeof payload.data];
+                    console.log(userInput);
                     const currentVal = config.getter(userProfile);
                     if (currentVal != userInput) {
                         hasChanges = true;
@@ -161,19 +161,20 @@ export class ProfileRouter extends BaseRouter {
     }
 
     private async librarianUpdateUserProfile(
-        req: LibrarianUpdateUserProfileRequest,
+        req: Request,
         res: Response,
         next: NextFunction,
     ) {
+        const payload: LibrarianUpdateProfileDto = LibrarianUpdateProfileDto.fromRequest(req);
         const userToUpdate: UserService = await UserService.getUserByEmail({
-            email: req.body.email,
+            email: payload.data.email
         });
         const userProfile: ProfileService = await ProfileService.GetByUserId({
             user_id: userToUpdate.getId(),
         });
         try {
-            userProfile.set_fines(req.body.total_fines);
-            userProfile.set_status(req.body.status);
+            userProfile.set_fines(payload.data.total_fines);
+            userProfile.set_status(payload.data.status);
             res.status(200).json({ message: "success" });
         } catch (error: any) {
             next(error);
@@ -182,22 +183,22 @@ export class ProfileRouter extends BaseRouter {
 
     private async subscribe(req: Request, res: Response, next: NextFunction) {
         try {
-            if (req.body.authorizedUser.role !== "GUEST")
+            const payload: SubscribeDto = SubscribeDto.fromRequest(req);
+            if (payload.token.role !== "GUEST")
                 throw ClientErrorFactory.createInvalidClientRequestError({
-                    context: req.body,
+                    context: payload,
                     message: "User status is not a guest",
                 });
-            const userData = req.body.authorizedUser;
             const user: UserService = await UserService.getUserByEmail({
-                email: userData.email,
+                email: payload.token.email,
             });
             const profile: ProfileService = await ProfileService.GetByUserId({
-                user_id: userData.id,
+                user_id: payload.token.id,
             });
             user.setRole(UserRole.MEMBER);
             profile.set_memberDate(new Date());
             res.status(200).send({
-                message: `User ${userData.userEmail} successfully subscribed`,
+                message: `User ${payload.token.email} successfully subscribed`,
             });
         } catch (error: any) {
             next(error);
