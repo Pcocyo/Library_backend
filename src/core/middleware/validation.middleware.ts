@@ -3,7 +3,7 @@ import { Request, Response, NextFunction } from "express";
 import { ValidationErrorFactory } from "../error/exceptions";
 import { ZodError,ZodType } from "zod";
 
-export class ValidationMiddleware implements IValidationMiddleware {
+export default class ValidationMiddleware implements IValidationMiddleware {
     public constructor() {
       this.validate = this.validate.bind(this);
    }
