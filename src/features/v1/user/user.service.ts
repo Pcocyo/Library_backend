@@ -6,13 +6,8 @@ import {
     UserGetEmailInterface,
     UserDomainInterface,
     UserDeleteInterface,
-} from "./types/user-service.types";
+} from "./types";
 import { UserRole } from "./types/user-service.types";
-//user_id    String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-//email      String   @unique(map: "users_email_unique") @db.VarChar(255)
-//password   String   @db.VarChar(255)
-//role       String   @default("GUEST") @db.VarChar(255)
-//created_at DateTime @default(dbgenerated("CURRENT_TIMESTAMP(6)")) @db.Timestamptz(6)
 
 export class UserService {
     private userId: string;
