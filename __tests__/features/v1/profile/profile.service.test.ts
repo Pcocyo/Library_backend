@@ -1,6 +1,5 @@
 import { ProfileService } from "../../../../src/features/v1/profile";
-import { ProfileStatus } from "../../../../src/features/v1/profile/types/profile-service.types";
-import { CreateProfileParam,ProfileParam } from "../../../../src/features/v1/profile/types/profile-service.types";
+import { ProfileStatus,CreateProfileParam,ProfileParam } from "../../../../src/features/v1/profile/types";
 import { UserRegisterInterface } from "../../../../src/features/v1/user/types/user-service.types";
 import { UserService } from "../../../../src/features/v1/user";
 import { UserRole } from "../../../../src/features/v1/user/types/user-service.types";

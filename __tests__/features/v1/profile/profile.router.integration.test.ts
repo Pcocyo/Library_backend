@@ -1,14 +1,13 @@
 import { App } from "supertest/types";
 import Server from "../../../../src/server/server.ts";
 import { UserService } from "../../../../src/features/v1/user/user.service.ts";
-import { UserRole } from "../../../../src/features/v1/user/types/user-service.types.ts";
+import { UserRole } from "../../../../src/features/v1/user/types";
 import {ProfileService} from "../../../../src/features/v1/profile"
-import { ProfileStatus,UserUpdateProfileParam,LibrarianUpdateProfileParam } from "../../../../src/features/v1/profile/types/profile-service.types.ts";
+import { ProfileStatus,UserUpdateProfileParam,LibrarianUpdateProfileParam } from "../../../../src/features/v1/profile/types";
 import JwtService from "../../../../src/core/security/jwt.service.ts";
 import request from "supertest";
 import AppConfig from "../../../../src/config/app.config.ts";
 import { ClientErrorCode } from "../../../../src/core/error/exceptions/ClientError.ts";
-
 describe("Profile Route GET and PATCH endpoint test", () => {
     let initializeDummyUser = () => {
         let dummyEmail = "dummyEmail";

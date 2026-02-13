@@ -9,7 +9,7 @@ import { UserService } from "../../../../src/features/v1/user/user.service.ts";
 import JwtService from "../../../../src/core/security/jwt.service.ts";
 import { UserRole } from "../../../../src/features/v1/user/types/user-service.types.ts";
 import { ProfileService } from "../../../../src/features/v1/profile";
-import { ProfileStatus } from "../../../../src/features/v1/profile/types/profile-service.types.ts";
+import { ProfileStatus } from "../../../../src/features/v1/profile/types";
 import { ClientErrorCode } from "../../../../src/core/error/exceptions";
 import AppConfig from "../../../../src/config/app.config.ts";
 import BcryptService from "../../../../src/core/security/bcrypt.service.ts";

@@ -6,7 +6,6 @@ import { ProfileModule } from "../features/profile.module";
 import { IAppConfig } from "../config/config.interface";
 import JwtService from "../core/security/jwt.service";
 import UserModule from "../features/user.module";
-import { IBcryptService, IJwtService } from "../core/security/interfaces";
 import BcryptService from "../core/security/bcrypt.service";
 import ValidationMiddleware from "../core/middleware/validation.middleware";
 
