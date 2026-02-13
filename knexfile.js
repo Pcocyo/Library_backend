@@ -4,7 +4,7 @@ const common = {
     client: "pg",
     migrations: {
         directory: "./db/migrations",
-        extension: [".js", ".mjs"],
+        extension: "js",
     },
     seeds: {
         directory: "./db/seeds",
