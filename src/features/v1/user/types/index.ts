@@ -1,2 +1,11 @@
 export { IUserController } from "./user.controller.interface";
-export { UserRole,UserRegisterInterface,UserDomainInterface,UserGetEmailInterface,UserDeleteInterface } from "./user-service.types";
+export {
+    UserRegisterInterface,
+    UserDomainInterface,
+    UserGetEmailInterface,
+    UserDeleteInterface,
+} from "./user-service.types";
+
+export { UserRole } from "./user.entity.types";
+export { IUserEntityConstructor,IUserEntity } from "./user.entity.interface";
+export { IUserRepository } from "./user.repository.interface";

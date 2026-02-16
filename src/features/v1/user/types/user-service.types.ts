@@ -1,8 +1,5 @@
-export enum UserRole {
-    MEMBER = "MEMBER",
-    LIBRARIAN = "LIBRARIAN",
-    GUEST = "GUEST",
-}
+import { UserRole } from "./user.entity.types"
+
 export interface UserRegisterInterface {
     email:string,
     password: string,

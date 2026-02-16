@@ -2,7 +2,7 @@ import { Request, Response,NextFunction } from "express";
 
 export type ValidateTokenOption = {
     option: {
-        required_role: string;
+        required_role: UserRole;
     };
 };
 

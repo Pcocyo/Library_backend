@@ -1,5 +1,5 @@
 import {UserService} from "../../../../src/features/v1/user/user.service.ts";
-import { UserRole } from "../../../../src/features/v1/user/types/user-service.types.ts";
+import { UserRole } from "../../../../src/features/v1/user/types";
 import prisma from "../../../../src/prismaClient.ts";
 import { ClientError,ClientErrorCode } from "../../../../src/core/error/exceptions/ClientError.ts";
 
@@ -7,7 +7,7 @@ describe("User class test", () => {
     const dummyId = "dummyId";
     const dummyEmail: string = "dummyEmail";
     const dummyPassword: string = "dummyPassword";
-    const dummyRole: UserRole = UserRole.GUEST;
+    const dummyRole: UserRole = "GUEST";
     const dummyDate: Date = new Date();
     let dummyUser: UserService;
 
@@ -93,7 +93,7 @@ describe("database test suite", () => {
             expect(newUser.getEmail()).toEqual("dummyEmail2");
             expect(newUser.getId()).not.toBeNull();
             expect(newUser.getPassword()).toEqual(dummyPassword);
-            expect(newUser.getUserRole()).toEqual(UserRole.GUEST);
+            expect(newUser.getUserRole()).toEqual("GUEST");
             expect(newUser.getCreatedAt()).not.toBeNull();
 
             await prisma.users.delete({
@@ -205,12 +205,12 @@ describe("database test suite", () => {
 
 
     it("Update user role when setRole() object instance method called",async () => {
-        const newUserRole:UserRole = UserRole.MEMBER
+        const newUserRole:UserRole = "MEMBER"
         try{
             //expect to work
             await dummyDbUser.setRole(newUserRole)
             expect(dummyDbUser.getUserRole()).toEqual(newUserRole);
-            await expect(dummyDbUser.setRole(UserRole.LIBRARIAN)).resolves.not.toThrow()
+            await expect(dummyDbUser.setRole("LIBRARIAN")).resolves.not.toThrow()
         }catch(error){
             console.log(error);
         }
@@ -221,7 +221,7 @@ describe("database test suite", () => {
         try{
             //expect to work
             await dummyDbUser.setEmail(nullDummyUserRole)
-            expect(dummyDbUser.getUserRole()).toEqual(UserRole.GUEST);
+            expect(dummyDbUser.getUserRole()).toEqual("GUEST");
         }catch(error){
             console.log(error);
         }

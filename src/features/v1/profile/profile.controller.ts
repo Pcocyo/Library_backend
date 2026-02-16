@@ -9,7 +9,6 @@ import {
 import { ProfileService } from "./profile.service";
 import { UserService } from "../user";
 import { ClientErrorFactory } from "../../../core/error/exceptions";
-import { UserRole } from "../user/types";
 
 export class ProfileController implements IProfileController {
     public async getProfile(req: Request, res: Response, next: NextFunction) {
@@ -147,7 +146,7 @@ export class ProfileController implements IProfileController {
             const profile: ProfileService = await ProfileService.GetByUserId({
                 user_id: payload.token.id,
             });
-            user.setRole(UserRole.MEMBER);
+            user.setRole("MEMBER");
             profile.set_memberDate(new Date());
             res.status(200).send({
                 message: `User ${payload.token.email} successfully subscribed`,

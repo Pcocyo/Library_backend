@@ -7,7 +7,7 @@ import {
     UserDomainInterface,
     UserDeleteInterface,
 } from "./types";
-import { UserRole } from "./types/user-service.types";
+import { UserRole } from "./types";
 
 export class UserService {
     private userId: string;
@@ -95,7 +95,7 @@ export class UserService {
     ): Promise<UserService> {
         userRegisterData.role =
             userRegisterData.role == null
-                ? UserRole.GUEST
+                ? "GUEST" 
                 : userRegisterData.role;
         try {
             const newDbUser = await prisma.users.create({
@@ -109,7 +109,7 @@ export class UserService {
                 id: newDbUser.user_id,
                 email: newDbUser.email,
                 password: newDbUser.password,
-                role: userRegisterData.role,
+                role: userRegisterData.role as UserRole,
                 created_at: new Date(newDbUser.created_at),
             });
         } catch (error) {
@@ -136,7 +136,7 @@ export class UserService {
                 id: userDbFound.user_id,
                 email: userDbFound.email,
                 password: userDbFound.password,
-                role: UserRole[userDbFound.role as keyof typeof UserRole],
+                role: userDbFound.role as UserRole,
                 created_at: new Date(userDbFound.created_at),
             });
         } catch (error) {
@@ -182,7 +182,7 @@ export class UserService {
         try {
             dummyUserData.role =
                 dummyUserData.role == null
-                    ? UserRole.GUEST
+                    ? "GUEST"
                     : dummyUserData.role;
 
             let testUser = await prisma.users.create({
@@ -196,7 +196,7 @@ export class UserService {
                 id: testUser.user_id,
                 email: testUser.email,
                 password: testUser.password,
-                role: UserRole[testUser.role as keyof typeof UserRole],
+                role: testUser.role as UserRole,
                 created_at: new Date(testUser.created_at),
             });
         } catch (error) {

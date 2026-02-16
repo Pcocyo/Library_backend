@@ -7,7 +7,7 @@ import bcrypt from "bcrypt";
 import { jest } from "@jest/globals";
 import { UserService } from "../../../../src/features/v1/user/user.service.ts";
 import JwtService from "../../../../src/core/security/jwt.service.ts";
-import { UserRole } from "../../../../src/features/v1/user/types/user-service.types.ts";
+import { UserRole } from "../../../../src/features/v1/user/types";
 import { ProfileService } from "../../../../src/features/v1/profile";
 import { ProfileStatus } from "../../../../src/features/v1/profile/types";
 import { ClientErrorCode } from "../../../../src/core/error/exceptions";
@@ -19,7 +19,7 @@ describe("Update user test suite", () => {
     let dummyUserId = "dummyUseeId";
     let dummyUserEmail = "dummyUserEmail";
     let dummyUserPassword = "dummyUserPassword";
-    let dummyUserRole = UserRole.GUEST;
+    let dummyUserRole:UserRole = "GUEST";
     let dummyUserDate = new Date();
     let serverInstance: Server;
     let serverApp: App;
@@ -40,7 +40,7 @@ describe("Update user test suite", () => {
     let getUserByEmailMock: any;
     let payload: any;
 
-    let jwt_service 
+    let jwt_service;
     let bcrypt_service:IBcryptService;
     beforeAll(() => {
         let appConfig = AppConfig.__genTestAppConfig(); 
@@ -61,7 +61,7 @@ describe("Update user test suite", () => {
         payload = {
             email: "example@gmail.com",
             password: "TestPassword123@",
-            userRole: UserRole.GUEST,
+            userRole: "GUEST",
         };
     });
 
@@ -96,7 +96,7 @@ describe("Update user test suite", () => {
     it("put /user/update should Respond with Error code VALIDATION_ERROR if email parameter is missing", async () => {
         const missingEmailPayload = {
             password: "TestPassword123@",
-            role: UserRole.GUEST,
+            role: "GUEST",
         };
         const response = await request(serverApp)
             .put("/user/update")
@@ -119,7 +119,7 @@ describe("Update user test suite", () => {
     it("put /user/update should Respond with Error code VALIDATION_ERROR if password parameter is missing", async () => {
         const missingEmailPayload = {
             email: "example@gmail.com",
-            role: UserRole.GUEST,
+            role: "GUEST",
         };
         const response = await request(serverApp)
             .put("/user/update")
@@ -160,7 +160,7 @@ describe("Create, Delete, Read Test Suite (Unit Test)", () => {
     let dummyId: string = "dummyId";
     let dummyEmail: string = "dummyEmail@example.com";
     let dummyPassword: string = "dummyPassword123@";
-    let dummyRole: UserRole = UserRole.GUEST;
+    let dummyRole: UserRole = "GUEST";
     let dummyCreated_at: Date = new Date();
     let dummyToken: string;
     let serverInstance: Server;

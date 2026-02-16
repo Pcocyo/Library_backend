@@ -13,7 +13,7 @@ describe("Profile Route GET and PATCH endpoint test", () => {
         let dummyEmail = "dummyEmail";
         let dummyId = "dummyId";
         let dummyPassword = "dummyPassword";
-        let dummyRole = UserRole.GUEST;
+        let dummyRole:UserRole = "GUEST";
         let dummyCreatedAt = new Date();
         return UserService.tests__createTestUser(
             dummyId,
@@ -28,7 +28,7 @@ describe("Profile Route GET and PATCH endpoint test", () => {
         let dummyEmail = "dummyEmail";
         let dummyId = "dummyId";
         let dummyPassword = "dummyPassword";
-        let dummyRole = UserRole.MEMBER;
+        let dummyRole:UserRole = "MEMBER";
         let dummyCreatedAt = new Date();
         return UserService.tests__createTestUser(
             dummyId,
@@ -43,7 +43,7 @@ describe("Profile Route GET and PATCH endpoint test", () => {
         let dummyEmail = "dummyEmail";
         let dummyId = "dummyId";
         let dummyPassword = "dummyPassword";
-        let dummyRole = UserRole.LIBRARIAN;
+        let dummyRole:UserRole = "LIBRARIAN";
         let dummyCreatedAt = new Date();
         return UserService.tests__createTestUser(
             dummyId,
@@ -733,6 +733,6 @@ describe("Profile Route GET and PATCH endpoint test", () => {
             .set({ Authorization: dummyUserToken });
         expect(response.status).toBe(200);
         expect(userSet_role).toHaveBeenCalled();
-        expect(userSet_role).toHaveBeenCalledWith(UserRole.MEMBER);
+        expect(userSet_role).toHaveBeenCalledWith("MEMBER");
     });
 });

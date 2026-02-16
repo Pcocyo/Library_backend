@@ -2,7 +2,7 @@ import { ProfileService } from "../../../../src/features/v1/profile";
 import { ProfileStatus,CreateProfileParam,ProfileParam } from "../../../../src/features/v1/profile/types";
 import { UserRegisterInterface } from "../../../../src/features/v1/user/types/user-service.types";
 import { UserService } from "../../../../src/features/v1/user";
-import { UserRole } from "../../../../src/features/v1/user/types/user-service.types";
+import { UserRole } from "../../../../src/features/v1/user/types";
 import prisma from "../../../../src/prismaClient";
 import { ClientError,ClientErrorCode } from "../../../../src/core/error/exceptions";
 
@@ -66,7 +66,7 @@ describe("Profile table tests", () => {
     // for user creation;
     const dummyUserEmail: string = "dummyEmail";
     const dummyUserPassword: string = "dummyPassword";
-    const dummyUserRole: UserRole = UserRole.GUEST;
+    const dummyUserRole: UserRole = "GUEST";
     const dummyUserData: UserRegisterInterface = {
         email: dummyUserEmail,
         password: dummyUserPassword,

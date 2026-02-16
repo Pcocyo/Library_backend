@@ -1,23 +1,12 @@
 import { BaseRouter } from "../../../core/base/base.router";
-import { NextFunction, Request, Response } from "express";
-import { ProfileService } from "./profile.service";
-import { UserService } from "../../v1/user/user.service";
-import { UserRole } from "../../v1/user/types/user-service.types";
 import {
     LibrarianUpdateProfileRequestSchema,
     ProfileUpdateRequestSchema,
 } from "./profile.schema";
-import { ClientErrorFactory } from "../../../core/error/exceptions";
 import {
     IAuthMiddleware,
     IValidationMiddleware,
 } from "../../../core/middleware/types";
-import {
-    GetProfileDto,
-    ProfileUpdateDto,
-    LibrarianUpdateProfileDto,
-    SubscribeDto,
-} from "./dto";
 import { IProfileController } from "./types";
 export class ProfileRouter extends BaseRouter {
     private readonly authMiddleware: IAuthMiddleware;
@@ -59,7 +48,7 @@ export class ProfileRouter extends BaseRouter {
         this.router.patch(
             "/librarian/update",
             this.authMiddleware.CreateValidateTokenMiddleware({
-                option: { required_role: UserRole.LIBRARIAN },
+                option: { required_role: "LIBRARIAN" },
             }),
             this.validationMiddleware.validate(LibrarianUpdateProfileRequestSchema),
             this.profileController.librarianUpdateUserProfile

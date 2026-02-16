@@ -67,7 +67,7 @@ export class UserController implements IUserController {
             let user: UserService = await UserService.createNewUser({
                 email: String(payload.email),
                 password: String(cryptedPass),
-                role: UserRole.GUEST,
+                role: "GUEST",
             });
             await ProfileService.CreateProfile({ user_id: user.getId() });
 
