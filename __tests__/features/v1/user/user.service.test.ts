@@ -1,253 +1,290 @@
-import {UserService} from "../../../../src/features/v1/user/user.service.ts";
-import { UserRole } from "../../../../src/features/v1/user/types";
-import prisma from "../../../../src/prismaClient.ts";
-import { ClientError,ClientErrorCode } from "../../../../src/core/error/exceptions/ClientError.ts";
+import {
+    createJwtServiceMock,
+    jwtServiceMock_generateTokenReturn,
+} from "../../../__mocks__/jwtService.mock";
+import { createBcryptServiceMock } from "../../../__mocks__/bcryptService.mock";
+import { createUserRepositoryMock } from "../../../__mocks__/userRepository.mock";
+import {
+    createUpdateUserDto,
+    createGetByUserDto,
+    createDeleteUserDto,
+} from "../../../__mocks__/request.dto.mock";
+import { UserService } from "../../../../src/features/v1/user";
+import {
+    DeleteUserDto,
+    GetUserDto,
+    UpdateUserDto,
+    LoginUserDto,
+} from "../../../../src/features/v1/user/dto";
+import { UserEntity } from "../../../../src/features/v1/user";
+import { IUserEntity } from "../../../../src/features/v1/user/types";
+import { ErrorMapperGroup } from "../../../../src/core/error/mappers/ErrorMapperGroup";
+import { ClientError } from "../../../../src/core/error/exceptions";
 
-describe("User class test", () => {
-    const dummyId = "dummyId";
-    const dummyEmail: string = "dummyEmail";
-    const dummyPassword: string = "dummyPassword";
-    const dummyRole: UserRole = "GUEST";
-    const dummyDate: Date = new Date();
-    let dummyUser: UserService;
+jest.mock("../../../../src/core/error/mappers/ErrorMapperGroup", () => ({
+    ErrorMapperGroup: {
+        getInstance: jest.fn().mockReturnValue({
+            mapError: jest.fn().mockImplementation((error) => error),
+        }),
+    },
+}));
+describe("user service unit test suite", () => {
+    let jwtServiceMock = createJwtServiceMock();
+    let bcryptServiceMock = createBcryptServiceMock();
+    let mockedMapError: jest.Mock = ErrorMapperGroup.getInstance()
+        .mapError as jest.Mock;
+
+    let userRepositoryMock = createUserRepositoryMock();
+    let mockRepo_UpdateUser: jest.Mock =
+        userRepositoryMock.updateUser as jest.Mock;
+    let mockRepo_CreateUser: jest.Mock =
+        userRepositoryMock.createNewUser as jest.Mock;
+    let mockRepo_DeleteUser: jest.Mock =
+        userRepositoryMock.deleteUser as jest.Mock;
+    let mockRepo_GetUserByEmail: jest.Mock =
+        userRepositoryMock.getUserByEmail as jest.Mock;
+    let userService: UserService;
+
+    let getByUserDto = createGetByUserDto({
+        email: "dummyEmailToFind",
+        authorizedUser: {
+            email: "dummyEmail",
+            id: "dummyId",
+            role: "GUEST",
+        },
+    });
+
+    function createNewUserEntity(): IUserEntity {
+        return new UserEntity({
+            user_id: "dummyUser",
+            email: "dummyUserEmail",
+            password: "dummyUserPassword",
+            created_at: new Date(),
+            updated_at: new Date(),
+            role: "GUEST",
+        });
+    }
+
+    beforeAll(() => {
+        userService = new UserService({
+            userRepository: userRepositoryMock,
+            bcryptService: bcryptServiceMock,
+            jwtService: jwtServiceMock,
+        });
+    });
 
     beforeEach(() => {
-        dummyUser = UserService.tests__createTestUser(
-            dummyId,
-            dummyEmail,
-            dummyPassword,
-            dummyRole,
-            dummyDate,
+        jest.clearAllMocks();
+        mockRepo_CreateUser.mockResolvedValue(createNewUserEntity());
+        mockRepo_UpdateUser.mockResolvedValue(createNewUserEntity());
+        mockRepo_DeleteUser.mockResolvedValue(createNewUserEntity());
+        mockRepo_GetUserByEmail.mockResolvedValue(createNewUserEntity());
+    });
+
+    afterAll(() => {
+        jest.resetAllMocks();
+    });
+
+    it("userService.update should call user repository with correct data", async () => {
+        await userService.update(createUpdateUserDto(false));
+        expect(userRepositoryMock.updateUser).toHaveBeenCalled();
+        expect(mockRepo_UpdateUser.mock.calls[0][0]).toBeInstanceOf(
+            UpdateUserDto,
         );
     });
 
-    it("Generate correct user email", () => {
-        expect(dummyUser.getEmail()).toBe(dummyEmail);
-    });
-
-    it("Generate correct user password", () => {
-        expect(dummyUser.getPassword()).toBe(dummyPassword);
-    });
-
-    it("Generate correct user role", () => {
-        expect(dummyUser.getUserRole()).toBe(dummyRole);
-    });
-
-    it("Generate correct user data data", () => {
-        expect(dummyUser.getCreatedAt()).toBe(dummyDate);
-    });
-
-});
-
-describe("database test suite", () => {
-    const dummyEmail = "dummyEmail";
-    const dummyPassword = "dummyPassword";
-    const dummyRole = null;
-    let newUser: UserService;
-    let dummyDbUser: UserService;
-
-    beforeEach(async () => {
+    it("userService.update should throw error when repository fail", async () => {
         try {
-            dummyDbUser = await UserService.tests__createDbTestUser({
-                email: dummyEmail,
-                password: dummyPassword,
-                role: dummyRole,
-            });
-        } catch (error) {
-            await prisma.users.delete({
-                where: {
-                    user_id: dummyDbUser.getId(),
-                },
-            });
-            console.log(error);
-            throw error;
+            await userService.update(createUpdateUserDto(false));
+            mockRepo_UpdateUser.mockRejectedValue(
+                new Error("repo throw error"),
+            );
+        } catch (err) {
+            expect(mockedMapError).toHaveBeenCalled();
         }
     });
 
-    afterEach(async () => {
-        try {
-            await prisma.users.delete({
-                where: {
-                    user_id: dummyDbUser.getId(),
-                },
-            });
-        } catch (error) {
-            console.log(error);
-            throw error;
-        }
-    });
-    it("creates a user in DB with email, password, role, ID, and creation date", async () => {
-        try {
-            newUser = await UserService.createNewUser({
-                email: "dummyEmail2",
-                password: dummyPassword,
-                role: dummyRole,
-            });
-
-            let dbUser = prisma.users.findUnique({
-                where: {
-                    email: "dummyEmail2",
-                },
-            });
-            expect(dbUser).not.toBeNull();
-            expect(newUser.getEmail()).toEqual("dummyEmail2");
-            expect(newUser.getId()).not.toBeNull();
-            expect(newUser.getPassword()).toEqual(dummyPassword);
-            expect(newUser.getUserRole()).toEqual("GUEST");
-            expect(newUser.getCreatedAt()).not.toBeNull();
-
-            await prisma.users.delete({
-                where: {
-                    email: "dummyEmail2",
-                },
-            });
-        } catch (e) {
-            await prisma.users.delete({
-                where: {
-                    email: "dummyEmail2",
-                },
-            });
-            console.log(e);
-            throw e;
-        }
+    it("userService.update should call bcryptService hashPassword and use it in the userRepository", async () => {
+        await userService.update(createUpdateUserDto(false));
+        expect(bcryptServiceMock.hashPassword).toHaveBeenCalled();
+        expect(
+            (mockRepo_UpdateUser.mock.calls[0][0] as UpdateUserDto).data
+                .password,
+        ).toBe("hashedPassword");
     });
 
-    //it("Throw an error when duplicate user input existed", async () => {
-    //    let errorUser: User;
-    //    try {
+    it("userService.update should call generateJwtToken() with the correct data and return it", async () => {
+        let jwtToken = await userService.update(createUpdateUserDto(false));
+        let generateJwtTokenCall = (
+            jwtServiceMock.generateJwtToken as jest.Mock
+        ).mock.calls[0][0];
+        expect(jwtServiceMock.generateJwtToken).toHaveBeenCalled();
+        expect(generateJwtTokenCall).toHaveProperty("email");
+        expect(generateJwtTokenCall).toHaveProperty("id");
+        expect(generateJwtTokenCall).toHaveProperty("role");
+        expect(generateJwtTokenCall.email).toBe("dummyUserEmail");
+        expect(generateJwtTokenCall.id).toBe("dummyUser");
+        expect(generateJwtTokenCall.role).toBe("GUEST");
+        expect(jwtToken).toBe("jwtTokenMock");
+    });
 
-    //        expect(async()=>{
-    //        errorUser = await User.createNewUser({
-    //            email: dummyDbUser.getEmail(),
-    //            password: dummyDbUser.getPassword(),
-    //            role: dummyDbUser.getUserRole(),
-    //            });
-    //        }).rejects.toThrow()
+    // userService create user
+    it("userService.create call userRepository.createUser should call bcryptService. crypt password", async () => {
+        await userService.create({
+            email: "dummyUserEmail",
+            password: "dummyUserPassword",
+        });
+        expect(bcryptServiceMock.hashPassword).toHaveBeenCalled();
+    });
 
-    //    } catch (error) {
-    //        expect(
-    //            error instanceof Prisma.PrismaClientKnownRequestError,
-    //        ).toBeTruthy();
-    //    }
+    it("userService.create call userRepository.createUser function with the correct email and crypted password", async () => {
+        await userService.create({
+            email: "dummyUserEmail",
+            password: "dummyUserPassword",
+        });
+        expect(mockRepo_CreateUser).toHaveBeenCalled();
+        expect(mockRepo_CreateUser.mock.calls[0][0]).toHaveProperty("email");
+        expect(mockRepo_CreateUser.mock.calls[0][0]).toHaveProperty("password");
+        expect(mockRepo_CreateUser.mock.calls[0][0].email).toBe(
+            "dummyUserEmail",
+        );
+        expect(mockRepo_CreateUser.mock.calls[0][0].password).toBe(
+            "hashedPassword",
+        );
+    });
+
+    it("userService.create should return generate new jwt token and return it", async () => {
+        let generatedJwtToken = await userService.create({
+            email: "dummyUserEmail",
+            password: "dummyUserPassword",
+        });
+        expect(jwtServiceMock.generateJwtToken).toHaveBeenCalled();
+        expect(generatedJwtToken).toBe("jwtTokenMock");
+    });
+
+    // create new user profile holder
+    //it("userService.create should return generate new jwt token and return it", async () => {
+    //    let generatedJwtToken = await userService.create({
+    //        email: "dummyUserEmail",
+    //        password: "dummyUserPassword",
+    //    });
     //});
 
-    it("Return a User domain model when getUserEmail() function called", async () => {
+    it("userService.create throw error if userRepository.createUser failed", async () => {
         try {
-            let userGot: UserService = await UserService.getUserByEmail({
-                email: dummyDbUser.getEmail(),
-            });
-            expect(userGot).not.toBeNull();
-            expect(userGot).toBeInstanceOf(UserService);
-        } catch (error) {
-            console.log(error);
-        }
-    });
-
-    it("Return ClientError CLIENT_ERROR_004 when getUserEmail() does not found a user", async () => {
-        let userGot: UserService;
-        try {
-            userGot = await UserService.getUserByEmail({
-                    email: "invalidEmail",
-            });
-        } catch (error) {
-            const clientError:ClientError = error as ClientError;
-            expect(clientError instanceof ClientError);
-            expect(clientError.httpsStatusCode).toBe(400);
-            expect(clientError.code).toBe(ClientErrorCode.Email_Not_Found);
-        }
-    });
-
-    it("Delete a user when deleteUser() method called", async () => {
-        try{
-            let newDummyUser = await prisma.users.create({data:{
-                email:"dummyUser2",
+            mockRepo_CreateUser.mockRejectedValue(new Error("user repo fail"));
+            await userService.create({
+                email: "dummyUserEmail",
                 password: "dummyUserPassword",
-            }})
-            expect(
-                UserService.deleteUser({id:newDummyUser.user_id,email:newDummyUser.email})
-            ).resolves.not.toThrow();
-        }catch(error){
-            console.log(error);
+            });
+        } catch (error) {
+            expect(mockedMapError).toHaveBeenCalled();
         }
     });
 
-    it("Throw error when deleteUser() method called with invalid data", async () => {
-        try{
-             expect(
-                await UserService.deleteUser({id:"Unexist id",email:"Unexist email"})
-            ).resolves.toThrow();
-        }catch(error){
+    //userService delete
+    it("userService.delete calls userRepository.deleteUser", async () => {
+        await userService.delete(
+            createDeleteUserDto({
+                email: "dummyEmail",
+                id: "dummyId",
+                role: "dummyRole",
+            }),
+        );
+        expect(mockRepo_DeleteUser).toHaveBeenCalled();
+        expect(mockRepo_DeleteUser.mock.calls[0][0]).toBeInstanceOf(
+            DeleteUserDto,
+        );
+    });
+
+    it("userService.delete calls error mapper group if any operation failed", async () => {
+        try {
+            mockRepo_DeleteUser.mockRejectedValue(new Error("test error"));
+            await userService.delete(
+                createDeleteUserDto({
+                    email: "dummyEmail",
+                    id: "dummyId",
+                    role: "dummyRole",
+                }),
+            );
+        } catch (error: unknown) {
+            expect(mockedMapError).toHaveBeenCalled();
         }
     });
 
-    it("Update user email when setUser() object method called",async () => {
-        const newDummyUserEmail:string ="newDummyUserEmail"
-        try{
-            //expect to work
-            await dummyDbUser.setEmail(newDummyUserEmail)
-            expect(dummyDbUser.getEmail()).toEqual(newDummyUserEmail)
-            await expect(dummyDbUser.setEmail("changeUserEmail")).resolves.not.toThrow()
-        }catch(error){
-            console.log(error);
+    //delete user profile holder
+
+    //it("userService.delete calls userRepository.deleteUser", async () => {
+    //  await userService.delete(createDeleteUserDto({email:"dummyEmail",id:"dummyId",role:"dummyRole"}));
+    //  expect(mockRepo_DeleteUser).toHaveBeenCalled();
+    //})
+
+    it("userService.findUser calls userRepository.getByUserEmail with the correct data when passed with GetUserDto", async () => {
+        await userService.findUser(getByUserDto);
+        expect(mockRepo_GetUserByEmail).toHaveBeenCalled();
+        expect(mockRepo_GetUserByEmail.mock.calls[0][0]).toBeInstanceOf(
+            GetUserDto,
+        );
+    });
+
+    it("userService.findUser return user entity", async () => {
+        let user = await userService.findUser(getByUserDto);
+        expect(user).toBeInstanceOf(UserEntity);
+    });
+
+    it("userService.findUser calls error mapper group if any operation failed", async () => {
+        try {
+            mockRepo_GetUserByEmail.mockRejectedValue(new Error("test error"));
+            await userService.findUser(getByUserDto);
+        } catch (error: unknown) {
+            expect(mockedMapError).toHaveBeenCalled();
         }
     });
 
-    it("Do not update user email when setUser() object method called with null parameter",async () => {
-        const newDummyUserEmail:null = null;
-        try{
-            //expect to work
-            await dummyDbUser.setEmail(newDummyUserEmail)
-            expect(dummyDbUser.getEmail()).toEqual(dummyEmail)
-        }catch(error){
-            console.log(error);
-        }
+    // userService compare test suite
+
+    it("userService.compare calls userRepository get User by email with the correct data", async () => {
+        await userService.compare({
+            email: "dummyEmail",
+            password: "dummyPassword",
+        });
+        let mockRepo_GetUserByEmailCalls =
+            mockRepo_GetUserByEmail.mock.calls[0][0];
+        expect(mockRepo_GetUserByEmail).toHaveBeenCalled();
+        expect(mockRepo_GetUserByEmailCalls).toHaveProperty("email");
+        expect(mockRepo_GetUserByEmailCalls).toHaveProperty("password");
+        expect(mockRepo_GetUserByEmailCalls.email).toBe("dummyEmail");
+        expect(mockRepo_GetUserByEmailCalls.password).toBe("dummyPassword");
     });
 
-
-    it("Update user role when setRole() object instance method called",async () => {
-        const newUserRole:UserRole = "MEMBER"
-        try{
-            //expect to work
-            await dummyDbUser.setRole(newUserRole)
-            expect(dummyDbUser.getUserRole()).toEqual(newUserRole);
-            await expect(dummyDbUser.setRole("LIBRARIAN")).resolves.not.toThrow()
-        }catch(error){
-            console.log(error);
-        }
+    it("userService.compare user jwtTokenService to generate token and return it", async () => {
+        let token = await userService.compare({
+            email: "dummyEmail",
+            password: "dummyPassword",
+        });
+        expect(jwtServiceMock.generateJwtToken).toHaveBeenCalled();
+        expect(token).toBe(jwtServiceMock_generateTokenReturn);
     });
 
-    it("Do not update user role when setRole() object method called with null parameter",async () => {
-        const nullDummyUserRole:null = null;
-        try{
-            //expect to work
-            await dummyDbUser.setEmail(nullDummyUserRole)
-            expect(dummyDbUser.getUserRole()).toEqual("GUEST");
-        }catch(error){
-            console.log(error);
-        }
+    it("userService.compare should use bcryptService compare method", async () => {
+        await userService.compare({
+            email: "dummyEmail",
+            password: "dummyComparePassword",
+        });
+        expect(bcryptServiceMock.comparePassword).toHaveBeenCalled();
     });
 
-    it("Update user password when setRole() object instance method called",async () => {
-        const newDummyPassword:string = "newDummyPassword"
-        try{
-            //expect to work
-            await dummyDbUser.setPassword(newDummyPassword)
-            expect(dummyDbUser.getPassword()).toEqual(newDummyPassword);
-            await expect(dummyDbUser.setPassword("newDummyPassword2")).resolves.not.toThrow()
-        }catch(error){
-            console.log(error);
+    it("userService.compare should return throw ClientError when bcrypt compare false", async () => {
+        (bcryptServiceMock.comparePassword as jest.Mock).mockResolvedValue(
+            false,
+        );
+        try {
+            await userService.compare({
+                email: "dummyEmail",
+                password: "dummyComparePassword",
+            });
+        } catch (error: unknown) {
+            expect(error).toBeInstanceOf(ClientError);
         }
     });
-
-    it("Do not update user password when setPassword() object method called with null parameter",async () => {
-        const nullDummyPassword:null = null;
-        try{
-            //expect to work
-            await dummyDbUser.setEmail(nullDummyPassword)
-            expect(dummyDbUser.getPassword()).toEqual(dummyPassword)
-        }catch(error){
-            console.log(error);
-        }
-    });
-
 });

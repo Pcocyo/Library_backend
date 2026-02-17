@@ -8,7 +8,6 @@ export class ProfileModule {
     private readonly authMiddleware: IAuthMiddleware;
     private readonly validationMiddleware: IValidationMiddleware;
     private readonly profileController: IProfileController;
-    
      
     constructor(authMiddleware: IAuthMiddleware,validationMiddleware: IValidationMiddleware) {
         this.authMiddleware = authMiddleware;

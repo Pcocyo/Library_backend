@@ -1,6 +1,12 @@
 import { PrismaClient } from "@prisma/client";
 import { IUserEntity, IUserRepository } from "./types";
-import { CreateUserDto, DeleteUserDto, GetUserDto, UpdateUserDto } from "./dto";
+import {
+    CreateUserDto,
+    DeleteUserDto,
+    GetUserDto,
+    LoginUserDto,
+    UpdateUserDto,
+} from "./dto";
 import { UserEntity } from "./user.entity";
 
 import { ErrorMapperGroup } from "../../../core/error/mappers";
@@ -33,13 +39,24 @@ export class UserRepository implements IUserRepository {
         }
     }
 
-    async getUserByEmail(dto: GetUserDto): Promise<IUserEntity> {
+    async getUserByEmail(dto: GetUserDto | LoginUserDto): Promise<IUserEntity> {
         try {
-            const userFound = await this.prisma.users.findUnique({
-                where: {
-                    email: dto.data.email,
-                },
+         let userFound;
+           if(dto instanceof GetUserDto){
+             userFound = await this.prisma.users.findUnique({
+               where: {
+                  email: dto.data.email,
+               },
             });
+         }
+
+            else{
+               userFound = await this.prisma.users.findUnique({
+                where:{
+                  email:dto.email
+            }
+               })
+            }
 
             if (userFound == null) {
                 throw ClientErrorFactory.createEmailNotFoundError({

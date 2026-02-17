@@ -1,206 +1,101 @@
-import { ClientErrorFactory } from "../../../core/error/exceptions";
-import prisma from "../../../prismaClient";
-import { ErrorMapperGroup } from "../../../core/error/mappers";
-import { 
-    UserRegisterInterface,
-    UserGetEmailInterface,
-    UserDomainInterface,
-    UserDeleteInterface,
+import { CreateUserDto, DeleteUserDto, UpdateUserDto, GetUserDto, LoginUserDto } from "./dto";
+import {
+    IUserRepository,
+    IUserService,
+    IUserServiceConstructor,
 } from "./types";
-import { UserRole } from "./types";
+import { IBcryptService, IJwtService } from "../../../core/security/interfaces";
+import { IUserEntity } from "./types";
+import { ErrorMapperGroup } from "../../../core/error/mappers";
+import { ClientError, ClientErrorFactory } from "../../../core/error/exceptions";
 
-export class UserService {
-    private userId: string;
-    private email: string;
-    private password: string;
-    private role: UserRole;
-    private created_at: Date;
+export class UserService implements IUserService {
+    private readonly bcryptService: IBcryptService;
+    private readonly userRepository: IUserRepository;
+    private readonly jwtService: IJwtService;
 
-    private constructor(userDomainInterface: UserDomainInterface) {
-        this.userId = userDomainInterface.id;
-        this.email = userDomainInterface.email;
-        this.password = userDomainInterface.password;
-        this.role = userDomainInterface.role as unknown as UserRole;
-        this.created_at = userDomainInterface.created_at;
+    public constructor(constructor: IUserServiceConstructor) {
+        this.userRepository = constructor.userRepository;
+        this.bcryptService = constructor.bcryptService;
+        this.jwtService = constructor.jwtService;
     }
-
-    public getEmail(): string {
-        return this.email;
-    }
-
-    public getId(): string {
-        return this.userId;
-    }
-
-    public getPassword(): string {
-        return this.password;
-    }
-
-    public getUserRole(): UserRole {
-        return this.role;
-    }
-
-    public getCreatedAt(): Date {
-        return this.created_at;
-    }
-
-    // set basic user data
-    public async setEmail(newEmail: string | null) {
-        if (newEmail) {
-            try {
-                await prisma.users.update({
-                    where: { user_id: this.userId },
-                    data: { email: newEmail },
-                });
-            } catch (error) {
-                throw ErrorMapperGroup.getInstance().mapError(error);
-            }
-            this.email = newEmail;
-        }
-        return;
-    }
-
-    public async setPassword(newPassword: string | null) {
-        if (newPassword) {
-            try {
-                await prisma.users.update({
-                    where: { user_id: this.userId },
-                    data: { password: newPassword },
-                });
-            } catch (error) {
-                throw ErrorMapperGroup.getInstance().mapError(error);
-            }
-            this.password = newPassword;
-        }
-        return;
-    }
-
-    public async setRole(newRole: UserRole | null) {
-        if (newRole != null) {
-            try {
-                await prisma.users.update({
-                    where: { user_id: this.userId },
-                    data: { role: String(newRole) },
-                });
-            } catch (error) {
-                throw ErrorMapperGroup.getInstance().mapError(error);
-            }
-            this.role = newRole;
-        }
-        return;
-    }
-
-    public static async createNewUser(
-        userRegisterData: UserRegisterInterface,
-    ): Promise<UserService> {
-        userRegisterData.role =
-            userRegisterData.role == null
-                ? "GUEST" 
-                : userRegisterData.role;
+    async update(dto: UpdateUserDto): Promise<string> {
         try {
-            const newDbUser = await prisma.users.create({
-                data: {
-                    email: userRegisterData.email,
-                    password: userRegisterData.password,
-                    role: String(userRegisterData.role),
-                },
+            dto.data.password == null
+                ? dto.data.password
+                : (dto.data.password = await this.bcryptService.hashPassword(
+                      dto.data.password,
+                  ));
+            const user: IUserEntity = await this.userRepository.updateUser(dto);
+            let token = this.jwtService.generateJwtToken({
+                email: user.getEmail(),
+                id: user.getId(),
+                role: user.getRole(),
             });
-            return new UserService({
-                id: newDbUser.user_id,
-                email: newDbUser.email,
-                password: newDbUser.password,
-                role: userRegisterData.role as UserRole,
-                created_at: new Date(newDbUser.created_at),
+            return token;
+        } catch (error: unknown) {
+            throw ErrorMapperGroup.getInstance().mapError(error);
+        }
+    }
+
+    async create(dto: CreateUserDto): Promise<string> {
+        try {
+            dto.password = await this.bcryptService.hashPassword(dto.password);
+            // remember to create new profile when user create new
+            let user: IUserEntity =
+                await this.userRepository.createNewUser(dto);
+            return this.jwtService.generateJwtToken({
+                email: user.getEmail(),
+                id: user.getId(),
+                role: user.getRole(),
             });
+        } catch (error: unknown) {
+            throw ErrorMapperGroup.getInstance().mapError(error);
+        }
+    }
+
+    async delete(dto: DeleteUserDto): Promise<void> {
+        try {
+            // remember to delete profile when user create new
+            await this.userRepository.deleteUser(dto);
         } catch (error) {
             throw ErrorMapperGroup.getInstance().mapError(error);
         }
     }
 
-    public static async getUserByEmail(
-        userLoginData: UserGetEmailInterface,
-    ): Promise<UserService> {
+    async findUser(dto: GetUserDto): Promise<IUserEntity> {
         try {
-            const userDbFound = await prisma.users.findUnique({
-                where: {
-                    email: userLoginData.email,
-                },
-            });
-
-            if (userDbFound == null) {
-                throw ClientErrorFactory.createEmailNotFoundError({
-                    context: { data_recieved: userLoginData },
-                });
-            }
-            return new UserService({
-                id: userDbFound.user_id,
-                email: userDbFound.email,
-                password: userDbFound.password,
-                role: userDbFound.role as UserRole,
-                created_at: new Date(userDbFound.created_at),
-            });
-        } catch (error) {
-            error = ErrorMapperGroup.getInstance().mapError(error);
-            throw error;
-        }
-    }
-
-    public static async deleteUser(userData: UserDeleteInterface) {
-        try {
-            await prisma.users.delete({
-                where: {
-                    user_id: userData.id,
-                    email: userData.email,
-                },
-            });
-        } catch (error) {
+            const foundUser = await this.userRepository.getUserByEmail(dto);
+            return foundUser;
+        } catch (error: unknown) {
             throw ErrorMapperGroup.getInstance().mapError(error);
         }
     }
 
-    // Test only
-    static tests__createTestUser(
-        dummyId: string,
-        dummyEmail: string,
-        password: string,
-        role: UserRole,
-        created_at: Date,
-    ): UserService {
-        return new UserService({
-            id: dummyId,
-            email: dummyEmail,
-            password: password,
-            role: role,
-            created_at: created_at,
-        });
-    }
+   async compare(dto: LoginUserDto): Promise<string> {
+      try{
+            const user = await this.userRepository.getUserByEmail(dto);
+            const correctPassword = await this.bcryptService.comparePassword(
+                dto.password,
+                user.getPassword(),
+            );
 
-    // Test only
-    static async tests__createDbTestUser(
-        dummyUserData: UserRegisterInterface,
-    ): Promise<UserService> {
-        try {
-            dummyUserData.role =
-                dummyUserData.role == null
-                    ? "GUEST"
-                    : dummyUserData.role;
+            if (!correctPassword) {
+                throw ClientErrorFactory.createIncorrectPasswordError({
+                    field: "password",
+                    context: { user_request_info: dto},
+                });
+            }
 
-            let testUser = await prisma.users.create({
-                data: {
-                    email: dummyUserData.email,
-                    password: dummyUserData.password,
-                    role: String(dummyUserData.role),
-                },
+            const token = this.jwtService.generateJwtToken({
+                email: user.getEmail(),
+                id: user.getId(),
+                role: user.getRole(),
             });
-            return new UserService({
-                id: testUser.user_id,
-                email: testUser.email,
-                password: testUser.password,
-                role: testUser.role as UserRole,
-                created_at: new Date(testUser.created_at),
-            });
-        } catch (error) {
-            throw error;
-        }
-    }
+         return token;
+      }catch(error:unknown){
+         if(error instanceof ClientError) throw error;
+         throw ErrorMapperGroup.getInstance().mapError(error);
+      }
+   }
 }
