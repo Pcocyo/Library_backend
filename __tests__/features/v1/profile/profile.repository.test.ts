@@ -145,7 +145,9 @@ describe("Profile Repository unit test suite", () => {
             expect(deleteMock).toHaveBeenCalled();
             expect(getMockCalls(deleteMock)).toHaveProperty("where");
             expect(getMockCalls(deleteMock).where).toHaveProperty("user_id");
-            expect(getMockCalls(deleteMock).where.user_id).toBe(defaultIdHolder);
+            expect(getMockCalls(deleteMock).where.user_id).toBe(
+                defaultIdHolder,
+            );
         });
         it("Should delegate to ErrorMapperGroup error and rethrow when when prisma failed", async () => {
             setMockCallResolveError(deleteMock, "prisma error");

@@ -1,9 +1,5 @@
 export {
-    ProfileParam,
-    CreateProfileParam,
-    UserUpdateProfileParam,
-    LibrarianUpdateProfileParam,
-    GetByUserIdParam,
+   IProfileService
 } from "./profile.service.interface";
 
 export { IProfileController } from "./profile.controller.interface";

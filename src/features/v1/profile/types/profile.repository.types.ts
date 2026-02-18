@@ -20,3 +20,4 @@ export type ProfileRepoSaveDto = {
     total_fines?: number;
     updated_at?: Date | null;
 }
+

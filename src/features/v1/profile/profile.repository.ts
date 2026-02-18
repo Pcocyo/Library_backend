@@ -31,7 +31,7 @@ export class ProfileRepository implements IProfileRepository {
                     membership_date: parameter.membership_date,
                     status: parameter.status,
                     total_fines: parameter.total_fines,
-                    updated_at: parameter.updated_at,
+                    updated_at: new Date(),
                 },
                 create: {
                     user_id: parameter.user_id,
@@ -43,7 +43,7 @@ export class ProfileRepository implements IProfileRepository {
                     membership_date: parameter.membership_date,
                     status: parameter.status,
                     total_fines: parameter.total_fines,
-                    updated_at: parameter.updated_at,
+                    updated_at: new Date(),
                 },
             });
 
@@ -82,6 +82,7 @@ export class ProfileRepository implements IProfileRepository {
             throw ErrorMapperGroup.getInstance().mapError(error);
         }
     }
+
 
     async delete(parameter: ProfileRepoDeleteDto): Promise<void> {
         try {
