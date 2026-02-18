@@ -6,7 +6,6 @@ import {
     CreateProfileParam,
     GetByUserIdParam,
 } from "./types";
-
 import { ErrorMapperGroup } from "../../../core/error/mappers";
 
 export class ProfileService {
@@ -228,7 +227,7 @@ export class ProfileService {
             contact: profile.contact,
             address: profile.address,
             membership_date: profile.membership_date,
-            status: ProfileStatus[profile.status as keyof typeof ProfileStatus],
+            status: profile.status as any,
             total_fines: profile.total_fines.toNumber(),
             updated_at: profile.updated_at,
         };
@@ -265,9 +264,7 @@ export class ProfileService {
                 contact: profile.contact,
                 address: profile.address,
                 membership_date: profile.membership_date,
-                status: ProfileStatus[
-                    profile.status as keyof typeof ProfileStatus
-                ],
+                status: profile.status as any,
                 total_fines: profile.total_fines.toNumber(),
                 updated_at: profile.updated_at,
             };

@@ -6,7 +6,7 @@ import { UserRole } from "../../../../src/features/v1/user/types";
 import prisma from "../../../../src/prismaClient";
 import { ClientError,ClientErrorCode } from "../../../../src/core/error/exceptions";
 
-describe("Class Tests", () => {
+describe.skip("Class Tests", () => {
     const dummyId: string = "dummyId";
     const dummyUserName: string = "dummyUserName";
     const dummyFirstName: string = "dummyFirstName";

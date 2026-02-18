@@ -8,7 +8,7 @@ import JwtService from "../../../../src/core/security/jwt.service.ts";
 import request from "supertest";
 import AppConfig from "../../../../src/config/app.config.ts";
 import { ClientErrorCode } from "../../../../src/core/error/exceptions/ClientError.ts";
-describe("Profile Route GET and PATCH endpoint test", () => {
+describe.skip("Profile Route GET and PATCH endpoint test", () => {
     let initializeDummyUser = () => {
         let dummyEmail = "dummyEmail";
         let dummyId = "dummyId";

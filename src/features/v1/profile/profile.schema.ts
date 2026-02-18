@@ -33,11 +33,6 @@ export const ProfileUpdateRequestSchema = z.object({
 
 export const LibrarianUpdateProfileRequestSchema = z.object({
     total_fines: z.number("invalid total fines input").nullable(),
-    status: z
-        .nativeEnum(
-            ProfileStatus,
-            "invalid status input (expected: ACTIVE,BANNED,SUSPENDED)",
-        )
-        .nullable(),
+    status: z.enum(["ACTIVE", "SUSPENDED", "BANNED"]).nullable(),
     email: z.string().email("invalid email input"),
 });
