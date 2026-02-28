@@ -1,17 +1,17 @@
 import { IUserRepository } from "../../src/features/v1/user/types";
-import { UserEntity, UserRepository } from "../../src/features/v1/user";
+import { UserRepository } from "../../src/features/v1/user";
 import { PrismaClient } from "@prisma/client/extension";
 
 export function createUserRepositoryMock(): IUserRepository {
     let userRepository = new UserRepository({} as PrismaClient);
 
-    jest.spyOn(userRepository, "updateUser");
+    jest.spyOn(userRepository, "create");
 
-    jest.spyOn(userRepository, "deleteUser");
+    jest.spyOn(userRepository, "delete");
 
-    jest.spyOn(userRepository, "createNewUser");
+    jest.spyOn(userRepository, "update");
 
-    jest.spyOn(userRepository, "getUserByEmail");
+    jest.spyOn(userRepository, "getByEmail");
 
    return userRepository;
 }

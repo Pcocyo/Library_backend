@@ -4,9 +4,14 @@ import {
     GetUserDto,
     UpdateUserDto,
 } from "../../../../src/features/v1/user/dto";
-import { createMockPrisma } from "../../../__mocks__/prisma.mock";
+import {
+    createMockPrisma,
+    createDefaultUserDb,
+} from "../../../__mocks__/prisma.mock";
 import { Request } from "express";
 import { ErrorMapperGroup } from "../../../../src/core/error/mappers/ErrorMapperGroup";
+import { IUserEntity } from "../../../../src/features/v1/user/types";
+import { email } from "zod";
 
 jest.mock("../../../../src/core/error/mappers/ErrorMapperGroup", () => ({
     ErrorMapperGroup: {
@@ -16,76 +21,21 @@ jest.mock("../../../../src/core/error/mappers/ErrorMapperGroup", () => ({
     },
 }));
 
-describe("user repository unit test suite", () => {
+describe("User Repository Unit Test Suite", () => {
     let mockedPrisma = createMockPrisma();
+    let mockCreatePrisma: jest.Mock = mockedPrisma.users.create as jest.Mock;
+    let mockDeletePrisma: jest.Mock = mockedPrisma.users.delete as jest.Mock;
+    let mockUpdatePrisma: jest.Mock = mockedPrisma.users.update as jest.Mock;
+    let mockfindUniquePrisma: jest.Mock = mockedPrisma.users
+        .findUniqueOrThrow as jest.Mock;
     let mockedMapError: jest.Mock = ErrorMapperGroup.getInstance()
         .mapError as jest.Mock;
     let repoInstance: UserRepository;
     let request: Partial<Request> = { headers: {}, body: {} };
-
-    function createGetByUserDto(request: Partial<Request>): GetUserDto {
-        request.body = {
-            email: "dummyEmail",
-            authorizedUser: "authorization-holder",
-        };
-        return GetUserDto.fromRequest(request as Request);
-    }
-
-    function createDeleteUserDto(request: Partial<Request>): DeleteUserDto {
-        request.body = {
-            authorizedUser: {
-                email: "dummyEmail",
-                role: "dummyRole",
-                id: "dummyId",
-            },
-        };
-        return DeleteUserDto.fromRequest(request as Request);
-    }
-
-    function createUpdateUserDto(
-        request: Partial<Request>,
-        haveNull: boolean,
-    ): UpdateUserDto {
-        if (haveNull) {
-            request.body = {
-                authorizedUser: {
-                    email: null,
-                    password: "newPassword",
-                    authorizedUser: {
-                        email: "dummyEmail",
-                        role: "dummyRole",
-                        id: "dummyId",
-                    },
-                },
-            };
-        } else {
-            request.body = {
-                email: "newEmail",
-                password: "newPassword",
-                authorizedUser: {
-                    email: "dummyEmail",
-                    role: "dummyRole",
-                    id: "dummyId",
-                },
-            };
-        }
-        return UpdateUserDto.fromRequest(request as Request);
-    }
-
-    function mockPrismaReturnUser(parameter: jest.Mock) {
-        parameter.mockResolvedValue({
-            user_id: "123",
-            email: "test@test.com",
-            password: "hash123",
-            role: "user",
-            created_at: new Date("2024-01-01"),
-            updated_at: new Date("2024-01-02"),
-        });
-    }
-
-    function mockPrismaResolveError(parameter: jest.Mock) {
-        parameter.mockResolvedValue(new Error("Error"));
-    }
+    let defaultEmailHolder: string = "dummyEmail";
+    let defaultPasswordHolder: string = "dummyPassword";
+    let defaultIdHolder: string = "dummyId";
+    let defaultRoleHolder: string = "GUEST";
 
     afterEach(() => {
         jest.clearAllMocks();
@@ -94,148 +44,205 @@ describe("user repository unit test suite", () => {
 
     beforeAll(() => {
         repoInstance = new UserRepository(mockedPrisma as any);
-        //repoInstance = new UserRepository(new PrismaClient());
     });
 
     afterAll(() => {
         jest.resetAllMocks();
     });
 
-    //repository create user tests
-    it("repository.create should call prisma.user.create with the provided email, password, and role", async () => {
-        mockPrismaReturnUser(mockedPrisma.users.create);
-        await repoInstance.createNewUser({
-            email: "dummyEmail",
-            password: "dummyPassword",
-        });
-        let createPrimsaMockCalls = mockedPrisma.users.create.mock.calls[0][0];
-        expect(mockedPrisma.users.create).toHaveBeenCalled();
-        expect(createPrimsaMockCalls).toHaveProperty("data");
-        expect((createPrimsaMockCalls as any).data).toHaveProperty("email");
-        expect((createPrimsaMockCalls as any).data).toHaveProperty("password");
-        expect((createPrimsaMockCalls as any).data.email).toEqual("dummyEmail");
-        expect((createPrimsaMockCalls as any).data.password).toEqual(
-            "dummyPassword",
-        );
+    beforeEach(() => {
+        mockCreatePrisma.mockResolvedValue(createDefaultUserDb());
+        mockDeletePrisma.mockResolvedValue(createDefaultUserDb());
+        mockUpdatePrisma.mockResolvedValue(createDefaultUserDb());
+        mockfindUniquePrisma.mockResolvedValue(createDefaultUserDb());
     });
 
-    it("repository.create should return a UserEntity when a new user is created successfully", async () => {
-        mockPrismaReturnUser(mockedPrisma.users.create);
-        let user = await repoInstance.createNewUser({
-            email: "dummyEmail",
-            password: "dummyPassword",
-        });
-        expect(user).toBeInstanceOf(UserEntity);
-    });
+    // helper function
+    function getMockCalls(parameter: jest.Mock) {
+        return parameter.mock.calls[0][0];
+    }
 
-    it("repository.create should throw a mapped error when Prisma fails", async () => {
-        try {
-            (mockedPrisma.users.create as jest.Mock).mockRejectedValue(
-                new Error("test"),
-            );
-            await repoInstance.createNewUser({
-                email: "dummyEmail",
-                password: "dummyPassword",
+    function setMockResolveError(parameter: jest.Mock, errorMessage: string) {
+        parameter.mockRejectedValue(new Error(errorMessage));
+    }
+
+    function isMapErrorCalledWith(expectedErrorMessage: string) {
+        expect(mockedMapError).toHaveBeenCalled();
+        expect(getMockCalls(mockedMapError).message).toBe(expectedErrorMessage);
+    }
+
+    // repository calls
+    async function repoInstanceCreateNew(includeReturn: boolean): Promise<any> {
+        if (includeReturn)
+            return await repoInstance.create({
+                email: defaultEmailHolder,
+                password: defaultPasswordHolder,
             });
-        } catch (error: unknown) {
-            expect(mockedMapError).toHaveBeenCalled();
-        }
+        else
+            await repoInstance.create({
+                email: defaultEmailHolder,
+                password: defaultPasswordHolder,
+            });
+    }
+
+    async function repoInstanceGetByEmail(
+        includeReturn: boolean,
+    ): Promise<any> {
+        if (includeReturn)
+            return await repoInstance.getByEmail({
+                email: defaultEmailHolder,
+            });
+        else
+            await repoInstance.getByEmail({
+                email: defaultEmailHolder,
+            });
+    }
+
+    async function repoInstanceDelete(): Promise<any> {
+        return await repoInstance.delete({
+            email: defaultEmailHolder,
+            user_id: defaultIdHolder,
+        });
+    }
+
+    async function repoInstanceUpdate(includeReturn: boolean): Promise<any> {
+        if (includeReturn)
+            return await repoInstance.update({
+                email: defaultEmailHolder,
+                password: defaultPasswordHolder,
+                role: defaultRoleHolder,
+            } as any);
+        else
+            await repoInstance.update({
+                email: defaultEmailHolder,
+                password: defaultPasswordHolder,
+                role: defaultRoleHolder,
+            } as any);
+    }
+
+    async function isUserEntity(parameter: any) {
+        expect(parameter).toBeInstanceOf(UserEntity);
+    }
+
+    describe("create()", () => {
+        //repository create user tests
+        it("Should call prisma.user.create with correct data", async () => {
+            await repoInstanceCreateNew(false);
+
+            expect(mockCreatePrisma).toHaveBeenCalled();
+            expect(getMockCalls(mockCreatePrisma)).toHaveProperty("data");
+            expect(getMockCalls(mockCreatePrisma).data).toHaveProperty("email");
+            expect(getMockCalls(mockCreatePrisma).data).toHaveProperty(
+                "password",
+            );
+            expect(getMockCalls(mockCreatePrisma).data.email).toBe(
+                defaultEmailHolder,
+            );
+            expect(getMockCalls(mockCreatePrisma).data.password).toBe(
+                defaultPasswordHolder,
+            );
+        });
+
+        it("Should return a UserEntity when succesfully persisted", async () => {
+            let user = await repoInstanceCreateNew(true);
+            expect(user).toBeInstanceOf(UserEntity);
+        });
+
+        it("Should throw a mapped error when Prisma fails", async () => {
+            setMockResolveError(mockCreatePrisma, "prisma error");
+            await expect(repoInstanceCreateNew(true)).rejects.toThrow();
+            isMapErrorCalledWith("prisma error");
+        });
     });
 
     //repository get by email test
-    it("repository.getByUserEmail should call prisma.user.findUnique with the correct data", async () => {
-        mockPrismaReturnUser(mockedPrisma.users.findUnique);
-        await repoInstance.getUserByEmail(createGetByUserDto(request));
-        expect(mockedPrisma.users.findUnique).toHaveBeenCalled();
-        expect(mockedPrisma.users.findUnique.mock.calls[0][0]).toHaveProperty(
-            "where",
-        );
-        expect(
-            (mockedPrisma.users.findUnique.mock.calls[0][0] as any).where,
-        ).toHaveProperty("email");
-        expect(
-            (mockedPrisma.users.findUnique.mock.calls[0][0] as any).where.email,
-        ).toBe("dummyEmail");
-    });
+    describe("getByEmail()", () => {
+        it("Should call prisma.user.findUniqueOrThrow with the correct data", async () => {
+            repoInstanceGetByEmail(false);
+            expect(mockfindUniquePrisma).toHaveBeenCalled();
+            expect(getMockCalls(mockfindUniquePrisma)).toHaveProperty("where");
+            expect(getMockCalls(mockfindUniquePrisma).where).toHaveProperty(
+                "email",
+            );
+            expect(getMockCalls(mockfindUniquePrisma).where.email).toBe(
+                defaultEmailHolder,
+            );
+        });
 
-    it("repository.getByEmail should return a User entity when a record exists", async () => {
-        mockPrismaReturnUser(mockedPrisma.users.findUnique);
-        let user = await repoInstance.getUserByEmail(
-            createGetByUserDto(request),
-        );
-        expect(user).toBeInstanceOf(UserEntity);
-    });
+        it("Should return a User entity when a record exists", async () => {
+            let user = await repoInstanceGetByEmail(true);
+            expect(isUserEntity(user)).toBeTruthy;
+        });
 
-    it("repository.getByEmail should throw a mapped error when Prisma fail", async () => {
-        try {
-            mockPrismaResolveError(mockedPrisma.users.findUnique);
-            await repoInstance.getUserByEmail(createGetByUserDto(request));
-        } catch (error: unknown) {
-            expect(mockedMapError).toHaveBeenCalled();
-        }
+        it("Should throw a mapped error when Prisma fail", async () => {
+            setMockResolveError(mockfindUniquePrisma, "prisma error");
+            await expect(repoInstanceGetByEmail(true)).rejects.toThrow();
+            isMapErrorCalledWith("prisma error");
+        });
     });
 
     //repository delete user test
-    it("repository.delete should call prisma.user.delete with the correct data", () => {
-        repoInstance.deleteUser(createDeleteUserDto(request));
-        let deleteMock = mockedPrisma.users.delete;
-        let deleteMockCalls = deleteMock.mock.calls[0][0];
-        expect(deleteMock).toHaveBeenCalled();
-        expect(deleteMockCalls).toHaveProperty("where");
-        expect((deleteMockCalls as any).where).toHaveProperty("email");
-        expect((deleteMockCalls as any).where).toHaveProperty("user_id");
-        expect((deleteMockCalls as any).where.email).toBe("dummyEmail");
-        expect((deleteMockCalls as any).where.user_id).toBe("dummyId");
-    });
+    describe("delete()", () => {
+        it("Should call prisma.user.delete with the correct data", async () => {
+            await repoInstanceDelete();
+            expect(mockDeletePrisma).toHaveBeenCalled();
+            expect(getMockCalls(mockDeletePrisma)).toHaveProperty("where");
+            expect(getMockCalls(mockDeletePrisma).where).toHaveProperty(
+                "email",
+            );
+            expect(getMockCalls(mockDeletePrisma).where).toHaveProperty(
+                "user_id",
+            );
+            expect(getMockCalls(mockDeletePrisma).where.email).toBe(
+                defaultEmailHolder,
+            );
+            expect(getMockCalls(mockDeletePrisma).where.user_id).toBe(
+                defaultIdHolder,
+            );
+        });
 
-    it("repository.delete should throw a mapped error when Prisma fail", () => {
-        try {
-            mockPrismaResolveError(mockedPrisma.users.delete);
-            repoInstance.deleteUser(createDeleteUserDto(request));
-        } catch (error: unknown) {
-            expect(mockedMapError).toHaveBeenCalled();
-        }
+        it("Should dalegate into mapped error when Prisma fail", async () => {
+            setMockResolveError(mockDeletePrisma, "prisma error");
+            await expect(repoInstanceDelete()).rejects.toThrow();
+            isMapErrorCalledWith("prisma error");
+        });
     });
 
     //repository update user test
-    it("repository.updateUser should call prisma.users.update with the correct data", async () => {
-        mockPrismaReturnUser(mockedPrisma.users.update);
-        await repoInstance.updateUser(createUpdateUserDto(request, false));
-        let mockedPrismaCalls = mockedPrisma.users.update.mock.calls[0][0];
-        expect(mockedPrisma.users.update).toHaveBeenCalled();
-        expect(mockedPrismaCalls).toHaveProperty("where");
-        expect(mockedPrismaCalls).toHaveProperty("data");
-        expect((mockedPrismaCalls as any).where).toHaveProperty("user_id");
-        expect((mockedPrismaCalls as any).where.user_id).toBe("dummyId");
+    describe("update()", () => {
+        it("repository.updateUser should call prisma.users.update with the correct data", async () => {
+            repoInstanceUpdate(false);
+            expect(mockUpdatePrisma).toHaveBeenCalled();
+            expect(getMockCalls(mockUpdatePrisma)).toHaveProperty("where");
+            expect(getMockCalls(mockUpdatePrisma).where).toHaveProperty(
+                "user_id",
+            );
+            expect(getMockCalls(mockUpdatePrisma)).toHaveProperty("data");
+            expect(getMockCalls(mockUpdatePrisma).data).toHaveProperty("email");
+            expect(getMockCalls(mockUpdatePrisma).data).toHaveProperty(
+                "password",
+            );
+            expect(getMockCalls(mockUpdatePrisma).data).toHaveProperty("role");
+            expect(getMockCalls(mockUpdatePrisma).data.email).toBe(
+                defaultEmailHolder,
+            );
+            expect(getMockCalls(mockUpdatePrisma).data.password).toBe(
+                defaultPasswordHolder,
+            );
+            expect(getMockCalls(mockUpdatePrisma).data.role).toBe(
+                defaultRoleHolder,
+            );
+        });
 
-        expect((mockedPrismaCalls as any).data).toHaveProperty("email");
-        expect((mockedPrismaCalls as any).data).toHaveProperty("password");
-        expect((mockedPrismaCalls as any).data.email).toBe("newEmail");
-        expect((mockedPrismaCalls as any).data.password).toBe("newPassword");
-    });
+        it("repository.updateUser should return user entity on success", async () => {
+            let user = await repoInstanceUpdate(true);
+            isUserEntity(user);
+        });
 
-    it("repository.updateUser should map null fields to undefined to prevent unintended database overwrites", async () => {
-        mockPrismaReturnUser(mockedPrisma.users.update);
-        await repoInstance.updateUser(createUpdateUserDto(request, true));
-        let mockedPrismaCalls = mockedPrisma.users.update.mock.calls[0][0];
-        expect((mockedPrismaCalls as any).data).toHaveProperty("email");
-        expect((mockedPrismaCalls as any).data.email).toBe(undefined);
-    });
-
-    it("repository.updateUser should return user entity on success", async () => {
-        mockPrismaReturnUser(mockedPrisma.users.update);
-        let user = await repoInstance.updateUser(
-            createUpdateUserDto(request, false),
-        );
-        expect(user).toBeInstanceOf(UserEntity);
-    });
-
-    it("repository.updateUser should throw a mapped error when Prisma fail ", async () => {
-        try {
-            mockPrismaResolveError(mockedPrisma.users.update);
-            await repoInstance.updateUser(createUpdateUserDto(request, false));
-        } catch (error: unknown) {
-            expect(mockedMapError).toHaveBeenCalled();
-        }
+        it("repository.updateUser should throw a mapped error when Prisma fail ", async () => {
+            setMockResolveError(mockUpdatePrisma, "prisma error");
+            await expect(repoInstanceUpdate(true)).rejects.toThrow();
+            isMapErrorCalledWith("prisma error");
+        });
     });
 });

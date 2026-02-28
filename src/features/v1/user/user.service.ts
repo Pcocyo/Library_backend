@@ -1,4 +1,10 @@
-import { CreateUserDto, DeleteUserDto, UpdateUserDto, GetUserDto, LoginUserDto } from "./dto";
+import {
+    CreateUserDto,
+    DeleteUserDto,
+    UpdateUserDto,
+    GetUserDto,
+    LoginUserDto,
+} from "./dto";
 import {
     IUserRepository,
     IUserService,
@@ -6,10 +12,11 @@ import {
 } from "./types";
 import { IBcryptService, IJwtService } from "../../../core/security/interfaces";
 import { IUserEntity } from "./types";
-import { ErrorMapperGroup } from "../../../core/error/mappers";
-import { ClientError, ClientErrorFactory } from "../../../core/error/exceptions";
+import {
+    ClientErrorFactory,
+} from "../../../core/error/exceptions";
 
-export class UserService implements IUserService {
+export class UserService implements IUserService{
     private readonly bcryptService: IBcryptService;
     private readonly userRepository: IUserRepository;
     private readonly jwtService: IJwtService;
@@ -19,62 +26,60 @@ export class UserService implements IUserService {
         this.bcryptService = constructor.bcryptService;
         this.jwtService = constructor.jwtService;
     }
+
     async update(dto: UpdateUserDto): Promise<string> {
-        try {
-            dto.data.password == null
-                ? dto.data.password
-                : (dto.data.password = await this.bcryptService.hashPassword(
-                      dto.data.password,
-                  ));
-            const user: IUserEntity = await this.userRepository.updateUser(dto);
-            let token = this.jwtService.generateJwtToken({
-                email: user.getEmail(),
-                id: user.getId(),
-                role: user.getRole(),
-            });
-            return token;
-        } catch (error: unknown) {
-            throw ErrorMapperGroup.getInstance().mapError(error);
-        }
+        dto.data.password == null
+            ? dto.data.password
+            : (dto.data.password = await this.bcryptService.hashPassword(
+                  dto.data.password,
+              ));
+        const user: IUserEntity = await this.userRepository.update({
+            user_id: dto.token.id,
+            email: dto.data.email ?? undefined,
+            password: dto.data.password ?? undefined,
+        });
+        let token = this.jwtService.generateJwtToken({
+            email: user.getEmail(),
+            id: user.getId(),
+            role: user.getRole(),
+        });
+        return token;
     }
 
     async create(dto: CreateUserDto): Promise<string> {
-        try {
-            dto.password = await this.bcryptService.hashPassword(dto.password);
-            // remember to create new profile when user create new
-            let user: IUserEntity =
-                await this.userRepository.createNewUser(dto);
-            return this.jwtService.generateJwtToken({
-                email: user.getEmail(),
-                id: user.getId(),
-                role: user.getRole(),
-            });
-        } catch (error: unknown) {
-            throw ErrorMapperGroup.getInstance().mapError(error);
-        }
+        dto.password = await this.bcryptService.hashPassword(dto.password);
+        let user: IUserEntity = await this.userRepository.create({
+            email: dto.email,
+            password: dto.password,
+        });
+        return this.jwtService.generateJwtToken({
+            email: user.getEmail(),
+            id: user.getId(),
+            role: user.getRole(),
+        });
+        // remember to create new profile when user create new
     }
 
     async delete(dto: DeleteUserDto): Promise<void> {
-        try {
-            // remember to delete profile when user create new
-            await this.userRepository.deleteUser(dto);
-        } catch (error) {
-            throw ErrorMapperGroup.getInstance().mapError(error);
-        }
+        await this.userRepository.delete({
+            email: dto.token.email,
+            user_id: dto.token.id,
+        });
+        //remember to call delete profile when user deleted
     }
 
     async findUser(dto: GetUserDto): Promise<IUserEntity> {
-        try {
-            const foundUser = await this.userRepository.getUserByEmail(dto);
-            return foundUser;
-        } catch (error: unknown) {
-            throw ErrorMapperGroup.getInstance().mapError(error);
-        }
+        const foundUser = await this.userRepository.getByEmail({
+            email: dto.data.email,
+        });
+        return foundUser;
     }
 
-   async compare(dto: LoginUserDto): Promise<string> {
-      try{
-            const user = await this.userRepository.getUserByEmail(dto);
+    async compare(dto: LoginUserDto): Promise<string> {
+        try {
+            const user = await this.userRepository.getByEmail({
+                email: dto.email,
+            });
             const correctPassword = await this.bcryptService.comparePassword(
                 dto.password,
                 user.getPassword(),
@@ -83,7 +88,7 @@ export class UserService implements IUserService {
             if (!correctPassword) {
                 throw ClientErrorFactory.createIncorrectPasswordError({
                     field: "password",
-                    context: { user_request_info: dto},
+                    context: { user_request_info: dto },
                 });
             }
 
@@ -92,10 +97,9 @@ export class UserService implements IUserService {
                 id: user.getId(),
                 role: user.getRole(),
             });
-         return token;
-      }catch(error:unknown){
-         if(error instanceof ClientError) throw error;
-         throw ErrorMapperGroup.getInstance().mapError(error);
-      }
-   }
+            return token;
+        } catch (error: unknown) {
+            throw error;
+        }
+    }
 }

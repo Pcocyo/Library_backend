@@ -1,29 +1,27 @@
 import { PrismaClient } from "@prisma/client";
-import { IUserEntity, IUserRepository } from "./types";
 import {
-    CreateUserDto,
-    DeleteUserDto,
-    GetUserDto,
-    LoginUserDto,
-    UpdateUserDto,
-} from "./dto";
+    IUserEntity,
+    IUserRepository,
+    UserRepoCreateDto,
+    UserRepoDeleteDto,
+    UserRepoGetByEmailDto,
+    UserRepoUpdateDto,
+} from "./types";
 import { UserEntity } from "./user.entity";
-
 import { ErrorMapperGroup } from "../../../core/error/mappers";
-import { ClientErrorFactory } from "../../../core/error/exceptions";
 
 export class UserRepository implements IUserRepository {
     public readonly prisma: PrismaClient;
+
     public constructor(prisma: PrismaClient) {
         this.prisma = prisma;
     }
-
-    async createNewUser(dto: CreateUserDto): Promise<IUserEntity> {
+    public async create(parameter: UserRepoCreateDto): Promise<IUserEntity> {
         try {
             let newUser = await this.prisma.users.create({
                 data: {
-                    email: dto.email,
-                    password: dto.password,
+                    email: parameter.email,
+                    password: parameter.password,
                 },
             });
             return new UserEntity({
@@ -38,38 +36,23 @@ export class UserRepository implements IUserRepository {
             throw ErrorMapperGroup.getInstance().mapError(error);
         }
     }
-
-    async getUserByEmail(dto: GetUserDto | LoginUserDto): Promise<IUserEntity> {
+    public async getByEmail(
+        parameter: UserRepoGetByEmailDto,
+    ): Promise<IUserEntity> {
         try {
-         let userFound;
-           if(dto instanceof GetUserDto){
-             userFound = await this.prisma.users.findUnique({
-               where: {
-                  email: dto.data.email,
-               },
+            let user = await this.prisma.users.findUniqueOrThrow({
+                where: {
+                    email: parameter.email,
+                },
             });
-         }
 
-            else{
-               userFound = await this.prisma.users.findUnique({
-                where:{
-                  email:dto.email
-            }
-               })
-            }
-
-            if (userFound == null) {
-                throw ClientErrorFactory.createEmailNotFoundError({
-                    context: { data_recieved: dto },
-                });
-            }
             return new UserEntity({
-                user_id: userFound.user_id,
-                email: userFound.email,
-                password: userFound.password,
-                role: userFound.role,
-                created_at: userFound.created_at as Date,
-                updated_at: userFound.updated_at as Date,
+                user_id: user.user_id,
+                email: user.email,
+                password: user.password,
+                role: user.role,
+                created_at: user.created_at as Date,
+                updated_at: user.updated_at as Date,
             });
         } catch (error) {
             error = ErrorMapperGroup.getInstance().mapError(error);
@@ -77,12 +60,12 @@ export class UserRepository implements IUserRepository {
         }
     }
 
-    async deleteUser(dto: DeleteUserDto): Promise<void> {
+    public async delete(parameter: UserRepoDeleteDto): Promise<void> {
         try {
             await this.prisma.users.delete({
                 where: {
-                    user_id: dto.token.id,
-                    email: dto.token.email,
+                    user_id: parameter.user_id,
+                    email: parameter.email,
                 },
             });
             return;
@@ -91,13 +74,14 @@ export class UserRepository implements IUserRepository {
         }
     }
 
-    async updateUser(dto: UpdateUserDto): Promise<IUserEntity> {
+    public async update(parameter: UserRepoUpdateDto): Promise<IUserEntity> {
         try {
             let user = await this.prisma.users.update({
-                where: { user_id: dto.token.id },
+                where: { user_id: parameter.user_id },
                 data: {
-                    email: (dto.data.email as string) ?? undefined,
-                    password: (dto.data.password as string) ?? undefined,
+                    email: parameter.email,
+                    password: parameter.password,
+                    role: parameter.role,
                     updated_at: new Date(),
                 },
             });

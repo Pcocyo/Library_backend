@@ -46,7 +46,7 @@ export function createUpdateUserDto(haveNull: boolean): UpdateUserDto {
         request.body = {
             authorizedUser: {
                 email: null,
-                password: "newPassword",
+                password: null,
                 authorizedUser: {
                     email: "dummyEmail",
                     role: "dummyRole",

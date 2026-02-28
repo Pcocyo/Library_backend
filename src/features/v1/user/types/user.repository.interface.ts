@@ -1,8 +1,8 @@
 import { IUserEntity } from "./user.entity.interface"
-import { CreateUserDto,DeleteUserDto,GetUserDto, LoginUserDto, UpdateUserDto } from "../dto";
+import { UserRepoCreateDto, UserRepoDeleteDto, UserRepoGetByEmailDto, UserRepoUpdateDto } from "./user.repository.types";
 export interface IUserRepository{
-   createNewUser(dto:CreateUserDto):Promise<IUserEntity>;
-   getUserByEmail(dto:GetUserDto | LoginUserDto):Promise<IUserEntity>;
-   deleteUser(dto:DeleteUserDto):Promise<void>;
-   updateUser(dto:UpdateUserDto):Promise<IUserEntity>;
+   create(parameter:UserRepoCreateDto):Promise<IUserEntity>;
+   getByEmail(parameter:UserRepoGetByEmailDto):Promise<IUserEntity>;
+   delete(parameter:UserRepoDeleteDto):Promise<void>;
+   update(parameter:UserRepoUpdateDto):Promise<IUserEntity>;
 }
