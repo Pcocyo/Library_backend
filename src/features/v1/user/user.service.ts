@@ -30,9 +30,7 @@ export class UserService implements IUserService{
     async update(dto: UpdateUserDto): Promise<string> {
         dto.data.password == null
             ? dto.data.password
-            : (dto.data.password = await this.bcryptService.hashPassword(
-                  dto.data.password,
-              ));
+            : (dto.data.password = await this.bcryptService.hashPassword(dto.data.password));
         const user: IUserEntity = await this.userRepository.update({
             user_id: dto.token.id,
             email: dto.data.email ?? undefined,
@@ -57,7 +55,7 @@ export class UserService implements IUserService{
             id: user.getId(),
             role: user.getRole(),
         });
-        // remember to create new profile when user create new
+
     }
 
     async delete(dto: DeleteUserDto): Promise<void> {

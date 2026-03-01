@@ -20,7 +20,6 @@ import { UserService } from "../../../../src/features/v1/user";
 import { UserEntity } from "../../../../src/features/v1/user";
 import { IUserEntity } from "../../../../src/features/v1/user/types";
 import { ClientError } from "../../../../src/core/error/exceptions";
-import { afterEach, beforeEach } from "node:test";
 
 describe("UserService unit test suite", () => {
     let jwtServiceMock = createJwtServiceMock();

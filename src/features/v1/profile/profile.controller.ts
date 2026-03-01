@@ -11,6 +11,7 @@ import { UserService } from "../user";
 import { ClientErrorFactory } from "../../../core/error/exceptions";
 
 export class ProfileController implements IProfileController {
+
     public async getProfile(req: Request, res: Response, next: NextFunction) {
         const payload: GetProfileDto = GetProfileDto.fromRequest(req);
         try {
