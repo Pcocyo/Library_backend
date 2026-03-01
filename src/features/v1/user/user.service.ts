@@ -15,16 +15,19 @@ import { IUserEntity } from "./types";
 import {
     ClientErrorFactory,
 } from "../../../core/error/exceptions";
+import { IProfileRepository } from "../profile/types";
 
 export class UserService implements IUserService{
     private readonly bcryptService: IBcryptService;
     private readonly userRepository: IUserRepository;
     private readonly jwtService: IJwtService;
+    private readonly profileRepository:IProfileRepository;
 
     public constructor(constructor: IUserServiceConstructor) {
         this.userRepository = constructor.userRepository;
         this.bcryptService = constructor.bcryptService;
         this.jwtService = constructor.jwtService;
+        this.profileRepository = constructor.profileRepository;
     }
 
     async update(dto: UpdateUserDto): Promise<string> {
@@ -36,6 +39,7 @@ export class UserService implements IUserService{
             email: dto.data.email ?? undefined,
             password: dto.data.password ?? undefined,
         });
+
         let token = this.jwtService.generateJwtToken({
             email: user.getEmail(),
             id: user.getId(),
@@ -50,12 +54,12 @@ export class UserService implements IUserService{
             email: dto.email,
             password: dto.password,
         });
+        await this.profileRepository.save({user_id:user.getId()});
         return this.jwtService.generateJwtToken({
             email: user.getEmail(),
             id: user.getId(),
             role: user.getRole(),
         });
-
     }
 
     async delete(dto: DeleteUserDto): Promise<void> {
@@ -63,7 +67,7 @@ export class UserService implements IUserService{
             email: dto.token.email,
             user_id: dto.token.id,
         });
-        //remember to call delete profile when user deleted
+        await this.profileRepository.delete({user_id:dto.token.id});
     }
 
     async findUser(dto: GetUserDto): Promise<IUserEntity> {

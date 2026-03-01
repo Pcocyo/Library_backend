@@ -1,12 +1,7 @@
-import {
-    createJwtServiceMock,
-    jwtServiceMock_generateTokenReturn,
-} from "../../../__mocks__/jwtService.mock";
-import {
-    createBcryptServiceMock,
-    bcryptServiceMock_hashFnReturnValue,
-} from "../../../__mocks__/bcryptService.mock";
+import { createJwtServiceFakes } from "../../../__mocks__/jwtService.mock";
+import { createBcryptServiceFakes } from "../../../__mocks__/bcryptService.mock";
 import { createUserRepositoryMock } from "../../../__mocks__/userRepository.mock";
+import { createProfileRepositoryMock } from "../../../__mocks__/profileRepository.mock";
 import {
     createUpdateUserDto,
     createGetByUserDto,
@@ -20,13 +15,13 @@ import { UserService } from "../../../../src/features/v1/user";
 import { UserEntity } from "../../../../src/features/v1/user";
 import { IUserEntity } from "../../../../src/features/v1/user/types";
 import { ClientError } from "../../../../src/core/error/exceptions";
-
+import { afterEach } from "node:test";
 describe("UserService unit test suite", () => {
-    let jwtServiceMock = createJwtServiceMock();
-    let bcryptServiceMock = createBcryptServiceMock();
+    let jwtServiceFakes = createJwtServiceFakes();
+    let bcryptServiceFakes = createBcryptServiceFakes();
 
     let userRepositoryMock = createUserRepositoryMock();
-    let mockRepo_DeleteUser: jest.Mock = userRepositoryMock.delete as jest.Mock;
+    let profileRepositoryMock = createProfileRepositoryMock();
     let userService: UserService;
 
     function createNewUserEntity(): IUserEntity {
@@ -39,19 +34,16 @@ describe("UserService unit test suite", () => {
             role: "GUEST",
         });
     }
-    let userEntityReturned = createNewUserEntity();
 
     beforeAll(() => {
         userService = new UserService({
             userRepository: userRepositoryMock,
-            bcryptService: bcryptServiceMock,
-            jwtService: jwtServiceMock,
+            profileRepository: profileRepositoryMock,
+            bcryptService: bcryptServiceFakes,
+            jwtService: jwtServiceFakes,
         });
     });
 
-    //beforeEach(() => {
-    //    mockRepo_GetUserByEmail.mockResolvedValue(createNewUserEntity());
-    //});
     afterEach(() => {
         jest.clearAllMocks();
     });
@@ -63,15 +55,19 @@ describe("UserService unit test suite", () => {
     describe("update()", () => {
         let mockRepo_UpdateUser: jest.Mock =
             userRepositoryMock.update as jest.Mock;
+        let updateDto = createUpdateUserDto(false);
+        let updateDtoHaveNull = createUpdateUserDto(true);
         beforeAll(() => {
             mockRepo_UpdateUser.mockResolvedValue(createNewUserEntity());
         });
         afterEach(() => {
             mockRepo_UpdateUser.mockClear();
+            updateDto = createUpdateUserDto(false);
+            updateDtoHaveNull = createUpdateUserDto(true);
         });
 
         it("Should call user repository with correct data", async () => {
-            const testUserDto = createUpdateUserDto(false);
+            const testUserDto = updateDto;
             await userService.update(testUserDto);
             const updateMockCalls = getMockCalls(mockRepo_UpdateUser);
             expect(userRepositoryMock.update).toHaveBeenCalled();
@@ -81,35 +77,31 @@ describe("UserService unit test suite", () => {
         });
 
         it("Should call bcryptService hashPassword and use it in the userRepository", async () => {
-            await userService.update(createUpdateUserDto(false));
+            await userService.update(updateDto);
             const updateMockCalls = getMockCalls(mockRepo_UpdateUser);
-            expect(bcryptServiceMock.hashPassword).toHaveBeenCalled();
-            expect(updateMockCalls.password).toBe(
-                bcryptServiceMock_hashFnReturnValue,
-            );
+            expect(
+                bcryptServiceFakes.comparePassword(
+                    updateMockCalls.password,
+                    updateDto.data.password as string,
+                ),
+            ).toBeTruthy();
         });
 
         it("Should call generateJwtToken() with the correct data and return it", async () => {
-            const jwtToken = await userService.update(
-                createUpdateUserDto(false),
-            );
-            const generateJwtTokenCall = getMockCalls(
-                jwtServiceMock.generateJwtToken as jest.Mock,
-            );
-            expect(jwtServiceMock.generateJwtToken).toHaveBeenCalled();
-            testHaveProperties(generateJwtTokenCall, ["email", "id", "role"]);
-            expect(generateJwtTokenCall.email).toBe(
-                userEntityReturned.getEmail(),
-            );
-            expect(generateJwtTokenCall.id).toBe(userEntityReturned.getId());
-            expect(generateJwtTokenCall.role).toBe(
-                userEntityReturned.getRole(),
-            );
-            expect(jwtToken).toBe(jwtServiceMock_generateTokenReturn);
+            const jwtToken = await userService.update(updateDto);
+            const tokenReturnJwtInfo =
+                jwtServiceFakes.validateJwtToken(jwtToken);
+            testHaveProperties(tokenReturnJwtInfo, [
+                "email",
+                "role",
+                "id",
+                "iat",
+                "exp",
+            ]);
         });
 
         it("Should convert null email and password into undefined when calling userRepository.update", () => {
-            userService.update(createUpdateUserDto(true));
+            userService.update(updateDtoHaveNull);
             const updateMockCall = getMockCalls(mockRepo_UpdateUser);
             expect(updateMockCall.email).toBeUndefined();
             expect(updateMockCall.password).toBeUndefined();
@@ -118,51 +110,67 @@ describe("UserService unit test suite", () => {
     describe("create()", () => {
         let mockRepo_CreateUser: jest.Mock =
             userRepositoryMock.create as jest.Mock;
+        let mockRepo_SaveProfile: jest.Mock =
+            profileRepositoryMock.save as jest.Mock;
         let newUserCreateInfo = {
             email: "dummyUserEmail",
             password: "dummyUserPassword",
         };
+        let mockCreateUserReturnVal = createNewUserEntity();
         beforeAll(() => {
-            mockRepo_CreateUser.mockResolvedValue(createNewUserEntity());
+            mockRepo_CreateUser.mockResolvedValue(mockCreateUserReturnVal);
+            mockRepo_SaveProfile.mockResolvedValue({ data: "test" });
         });
         afterEach(() => {
             mockRepo_CreateUser.mockClear();
-        });
-
-        it("Should call bcryptService.crypt password", async () => {
-            await userService.create(newUserCreateInfo);
-            expect(bcryptServiceMock.hashPassword).toHaveBeenCalled();
+            mockRepo_SaveProfile.mockClear();
         });
 
         it("Should call userRepository.create function with the correct email and crypted password", async () => {
-            await userService.create(newUserCreateInfo);
+            await userService.create({ ...newUserCreateInfo });
             const repo_createMockCall = getMockCalls(mockRepo_CreateUser);
             expect(mockRepo_CreateUser).toHaveBeenCalled();
             testHaveProperties(repo_createMockCall, ["email", "password"]);
             expect(repo_createMockCall.email).toBe(newUserCreateInfo.email);
-            expect(mockRepo_CreateUser.mock.calls[0][0].password).toBe(
-                bcryptServiceMock_hashFnReturnValue,
-            );
+            expect(
+                bcryptServiceFakes.comparePassword(
+                    repo_createMockCall.password,
+                    newUserCreateInfo.password,
+                ),
+            ).toBeTruthy();
         });
 
         it("Should call jwtSerivice and return the new jwt token that was generated", async () => {
             let token = await userService.create(newUserCreateInfo);
-            expect(jwtServiceMock.generateJwtToken).toHaveBeenCalled();
-            expect(token).toBe(jwtServiceMock_generateTokenReturn);
+            const tokenReturnJwtInfo = jwtServiceFakes.validateJwtToken(token);
+            testHaveProperties(tokenReturnJwtInfo, [
+                "email",
+                "role",
+                "id",
+                "iat",
+                "exp",
+            ]);
         });
 
-        // create new user profile holder
-        //it("userService.create should return generate new jwt token and return it", async () => {
-        //    let generatedJwtToken = await userService.create({
-        //        email: "dummyUserEmail",
-        //        password: "dummyUserPassword",
-        //    });
-        //});
+        it("Should call profileRepository.save with user_id parameter", async () => {
+            await userService.create(newUserCreateInfo);
+            expect(mockRepo_SaveProfile).toHaveBeenCalled();
+            const repo_saveProfileCall = getMockCalls(mockRepo_SaveProfile);
+            testHaveProperties(repo_saveProfileCall, ["user_id"]);
+            expect(repo_saveProfileCall.user_id).toBe(
+                mockCreateUserReturnVal.getId(),
+            );
+        });
     });
     describe("delete()", () => {
         const email = "dummyEmail";
         const id = "dummyId";
         const role = "dummyRole";
+
+        let mockRepo_DeleteUser: jest.Mock =
+            userRepositoryMock.delete as jest.Mock;
+        let mockRepo_DeleteProfile: jest.Mock =
+            profileRepositoryMock.delete as jest.Mock;
         const deleteUserDto = createDeleteUserDto({
             email: email,
             id: id,
@@ -170,6 +178,7 @@ describe("UserService unit test suite", () => {
         });
         beforeAll(() => {
             mockRepo_DeleteUser.mockResolvedValue(null);
+            mockRepo_DeleteProfile.mockResolvedValue(null);
         });
         it("Should call userRepository.delete with the correct data", async () => {
             await userService.delete(deleteUserDto);
@@ -180,12 +189,13 @@ describe("UserService unit test suite", () => {
             expect(repo_deleteCalls.user_id).toBe(id);
         });
 
-        //delete user profile holder
-
-        //it("userService.delete calls userRepository.deleteUser", async () => {
-        //  await userService.delete(createDeleteUserDto({email:"dummyEmail",id:"dummyId",role:"dummyRole"}));
-        //  expect(mockRepo_DeleteUser).toHaveBeenCalled();
-        //})
+        it("Should call profileRepository.delete with correct data", async () => {
+            await userService.delete(deleteUserDto);
+            expect(mockRepo_DeleteProfile).toHaveBeenCalled();
+            const repo_deleteProfileCalls = getMockCalls(mockRepo_DeleteProfile);
+            testHaveProperties(repo_deleteProfileCalls,["user_id"])
+            expect(repo_deleteProfileCalls.user_id).toBe(deleteUserDto.token.id);
+        });
     });
     describe("findUser()", () => {
         const dummyEmailToFind = "dummyEmailToFind";
@@ -228,49 +238,71 @@ describe("UserService unit test suite", () => {
 
     describe("compare()", () => {
         const userLoginInfo = {
-            email: "dummyEmail",
-            password: "dummyPassword",
+            email: "dummyUserEmail",
+            password: "dummyUserPassword",
         };
-        const repo_getByEmailReturnValue = createNewUserEntity();
+        const userLoginInfoWrongPassword = {
+            email: "dummyEmail",
+            password: "wrong password",
+        };
+        let hashedPassword: string;
+
+        let repo_getByEmailReturnValue: UserEntity;
         let mockRepo_getUserByEmail: jest.Mock =
             userRepositoryMock.getByEmail as jest.Mock;
 
-        beforeAll(() => {
+        beforeAll(async () => {
+            hashedPassword = await bcryptServiceFakes.hashPassword(
+                userLoginInfo.password,
+            );
+
+            repo_getByEmailReturnValue = new UserEntity({
+                user_id: "dummyUser",
+                email: "dummyUserEmail",
+                password: hashedPassword,
+                created_at: new Date(),
+                updated_at: new Date(),
+                role: "GUEST",
+            });
+
             mockRepo_getUserByEmail.mockResolvedValue(
                 repo_getByEmailReturnValue,
             );
-           (bcryptServiceMock.comparePassword as jest.Mock).mockResolvedValue(true);
         });
 
         afterAll(() => {
             mockRepo_getUserByEmail.mockReset();
-           (bcryptServiceMock.comparePassword as jest.Mock).mockReset();
         });
 
-        it("userService.compare calls userRepository get User by email with the correct data", async () => {
+        it("Should calls userRepository get User by email with the correct data", async () => {
             await userService.compare(userLoginInfo);
             const repo_getByEmailCalls = getMockCalls(mockRepo_getUserByEmail);
             expect(mockRepo_getUserByEmail).toHaveBeenCalled();
-            testHaveProperties(repo_getByEmailCalls,["email"])
+            testHaveProperties(repo_getByEmailCalls, ["email"]);
         });
 
-        it("userService.compare should use bcryptService compare method", async () => {
-           await userService.compare(userLoginInfo);
-           expect(bcryptServiceMock.comparePassword).toHaveBeenCalled();
+        it("Should use bcryptService compare method and returns on sucess", async () => {
+            let user = await userService.compare(userLoginInfo);
+            expect(user).not.toBeNull();
+            expect(user).not.toBeUndefined();
         });
 
-        it("userService.compare should throw clientError when brcrypt comapare return false", async () => {
-           (bcryptServiceMock.comparePassword as jest.Mock).mockReset();
-           (bcryptServiceMock.comparePassword as jest.Mock).mockResolvedValue(false);
-           await expect(userService.compare(userLoginInfo)).rejects.toThrow(ClientError);
-           (bcryptServiceMock.comparePassword as jest.Mock).mockReset();
-           (bcryptServiceMock.comparePassword as jest.Mock).mockResolvedValue(true);
+        it("Should throw clientError when brcrypt compare fails", async () => {
+            await expect(
+                userService.compare(userLoginInfoWrongPassword),
+            ).rejects.toThrow(ClientError);
         });
 
-        it("userService.compare user jwtTokenService to generate token and return it", async () => {
+        it("Should use jwtService to generate token and return it", async () => {
             const token = await userService.compare(userLoginInfo);
-            expect(jwtServiceMock.generateJwtToken).toHaveBeenCalled();
-            expect(token).toBe(jwtServiceMock_generateTokenReturn);
+            const tokenReturnJwtInfo = jwtServiceFakes.validateJwtToken(token);
+            testHaveProperties(tokenReturnJwtInfo, [
+                "email",
+                "role",
+                "id",
+                "iat",
+                "exp",
+            ]);
         });
     });
 });

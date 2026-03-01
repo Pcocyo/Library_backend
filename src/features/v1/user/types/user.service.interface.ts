@@ -1,4 +1,5 @@
 import { IBcryptService, IJwtService } from "../../../../core/security/interfaces";
+import { IProfileRepository } from "../../profile/types";
 import {
     UpdateUserDto,
     DeleteUserDto,
@@ -20,5 +21,6 @@ export interface IUserService {
 export interface IUserServiceConstructor{
    jwtService:IJwtService,
    bcryptService:IBcryptService,
-   userRepository:IUserRepository
+   userRepository:IUserRepository,
+   profileRepository: IProfileRepository,
 }
