@@ -21,3 +21,7 @@ export function testHaveProperties(mockCalls:any,properties:string[]):void{
       expect(mockCalls).toHaveProperty(properties[index]);
    }
 }
+
+export async function getMockResolvedValue(mock:jest.Mock){
+   return await mock.mock.results[0].value;
+}

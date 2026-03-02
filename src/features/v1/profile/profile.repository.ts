@@ -46,7 +46,6 @@ export class ProfileRepository implements IProfileRepository {
                     updated_at: new Date(),
                 },
             });
-
             return new ProfileEntity({
                 user_name: profile.user_name,
                 first_name: profile.first_name,
@@ -82,7 +81,6 @@ export class ProfileRepository implements IProfileRepository {
             throw ErrorMapperGroup.getInstance().mapError(error);
         }
     }
-
 
     async delete(parameter: ProfileRepoDeleteDto): Promise<void> {
         try {

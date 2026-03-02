@@ -1,5 +1,4 @@
 import z from "zod";
-import { ProfileStatus } from "./types";
 export const ProfileUpdateRequestSchema = z.object({
     user_name: z
         .string()
@@ -25,10 +24,7 @@ export const ProfileUpdateRequestSchema = z.object({
         .max(15, "contact information too long (max 15 characther)")
         .regex(/^[0-9]+$/, "contact information contain non-numeric characther")
         .nullable(),
-    address: z
-        .string()
-        .min(1, "address information cannot be empty")
-        .nullable(),
+    address: z.string().min(1, "address information cannot be empty").nullable(),
 });
 
 export const LibrarianUpdateProfileRequestSchema = z.object({

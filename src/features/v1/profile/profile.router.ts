@@ -1,13 +1,8 @@
 import { BaseRouter } from "../../../core/base/base.router";
-import {
-    LibrarianUpdateProfileRequestSchema,
-    ProfileUpdateRequestSchema,
-} from "./profile.schema";
-import {
-    IAuthMiddleware,
-    IValidationMiddleware,
-} from "../../../core/middleware/types";
+import { LibrarianUpdateProfileRequestSchema, ProfileUpdateRequestSchema } from "./profile.schema";
+import { IAuthMiddleware, IValidationMiddleware } from "../../../core/middleware/types";
 import { IProfileController } from "./types";
+
 export class ProfileRouter extends BaseRouter {
     private readonly authMiddleware: IAuthMiddleware;
     private readonly validationMiddleware: IValidationMiddleware;
@@ -16,7 +11,7 @@ export class ProfileRouter extends BaseRouter {
     public constructor(
         authMiddleware: IAuthMiddleware,
         validationMiddleware: IValidationMiddleware,
-        profileController:IProfileController
+        profileController: IProfileController,
     ) {
         super();
         this.authMiddleware = authMiddleware;
@@ -29,21 +24,21 @@ export class ProfileRouter extends BaseRouter {
         this.router.get(
             "/get",
             this.authMiddleware.CreateValidateTokenMiddleware(undefined),
-            this.profileController.getProfile
+            this.profileController.getProfile,
         );
 
         this.router.patch(
             "/update",
             this.authMiddleware.CreateValidateTokenMiddleware(undefined),
             this.validationMiddleware.validate(ProfileUpdateRequestSchema),
-            this.profileController.updateUserProfile
+            this.profileController.updateUserProfile,
         );
 
-        this.router.patch(
-            "/subscribe",
-            this.authMiddleware.CreateValidateTokenMiddleware(undefined),
-            this.profileController.subscribe
-        );
+        //        this.router.patch(
+        //            "/subscribe",
+        //            this.authMiddleware.CreateValidateTokenMiddleware(undefined),
+        //            this.profileController.subscribe
+        //        );
 
         this.router.patch(
             "/librarian/update",
@@ -51,7 +46,7 @@ export class ProfileRouter extends BaseRouter {
                 option: { required_role: "LIBRARIAN" },
             }),
             this.validationMiddleware.validate(LibrarianUpdateProfileRequestSchema),
-            this.profileController.librarianUpdateUserProfile
+            this.profileController.librarianUpdateUserProfile,
         );
     }
 }

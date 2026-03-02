@@ -133,27 +133,27 @@ export class ProfileController implements IProfileController {
         }
     }
 
-    public async subscribe(req: Request, res: Response, next: NextFunction) {
-        try {
-            const payload: SubscribeDto = SubscribeDto.fromRequest(req);
-            if (payload.token.role !== "GUEST")
-                throw ClientErrorFactory.createInvalidClientRequestError({
-                    context: payload,
-                    message: "User status is not a guest",
-                });
-            const user: UserService = await UserService.getUserByEmail({
-                email: payload.token.email,
-            });
-            const profile: ProfileService = await ProfileService.GetByUserId({
-                user_id: payload.token.id,
-            });
-            user.setRole("MEMBER");
-            profile.set_memberDate(new Date());
-            res.status(200).send({
-                message: `User ${payload.token.email} successfully subscribed`,
-            });
-        } catch (error: any) {
-            next(error);
-        }
-    }
+//    public async subscribe(req: Request, res: Response, next: NextFunction) {
+//        try {
+//            const payload: SubscribeDto = SubscribeDto.fromRequest(req);
+//            if (payload.token.role !== "GUEST")
+//                throw ClientErrorFactory.createInvalidClientRequestError({
+//                    context: payload,
+//                    message: "User status is not a guest",
+//                });
+//            const user: UserService = await UserService.getUserByEmail({
+//                email: payload.token.email,
+//            });
+//            const profile: ProfileService = await ProfileService.GetByUserId({
+//                user_id: payload.token.id,
+//            });
+//            user.setRole("MEMBER");
+//            profile.set_memberDate(new Date());
+//            res.status(200).send({
+//                message: `User ${payload.token.email} successfully subscribed`,
+//            });
+//        } catch (error: any) {
+//            next(error);
+//        }
+//    }
 }
