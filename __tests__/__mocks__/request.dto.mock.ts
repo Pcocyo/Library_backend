@@ -9,7 +9,7 @@ import {
     ProfileUpdateDto,
 } from "../../src/features/v1/profile/dto";
 import { Request } from "express";
-import { createDefaultProfileData } from "./prisma.mock";
+import { createDefaultProfileData } from "./prisma.test-utils";
 
 type createGetByUserDtoParameter = {
     email: string;

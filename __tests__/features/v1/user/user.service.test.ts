@@ -1,7 +1,7 @@
 import { createJwtServiceFakes } from "../../../__mocks__/jwtService.mock";
-import { createBcryptServiceFakes } from "../../../__mocks__/bcryptService.mock";
-import { createUserRepositoryMock } from "../../../__mocks__/userRepository.mock";
-import { createProfileRepositoryMock } from "../../../__mocks__/profileRepository.mock";
+import { createBcryptServiceFakes } from "../../../__mocks__/bcryptService.test-utils";
+import { createUserRepositoryMock } from "../../../__mocks__/userRepository.test-utils";
+import { createProfileRepositoryMock } from "../../../__mocks__/profileRepository.test-utils";
 import {
     createUpdateUserDto,
     createGetByUserDto,

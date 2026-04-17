@@ -7,7 +7,7 @@ import {
 import {
     createMockPrisma,
     createDefaultUserDb,
-} from "../../../__mocks__/prisma.mock";
+} from "../../../__mocks__/prisma.test-utils";
 import { Request } from "express";
 import { ErrorMapperGroup } from "../../../../src/core/error/mappers/ErrorMapperGroup";
 import { IUserEntity } from "../../../../src/features/v1/user/types";

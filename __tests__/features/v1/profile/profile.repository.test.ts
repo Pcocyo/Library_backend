@@ -7,7 +7,7 @@ import { IProfileRepository } from "../../../../src/features/v1/profile/types";
 import {
     createMockPrisma,
     createDefaultProfileData,
-} from "../../../__mocks__/prisma.mock";
+} from "../../../__mocks__/prisma.test-utils";
 import { PrismaClient } from "@prisma/client/extension";
 
 jest.mock("../../../../src/core/error/mappers/ErrorMapperGroup", () => ({

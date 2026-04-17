@@ -1,6 +1,6 @@
-import { createProfileRepositoryFakes } from "../../../__mocks__/profileRepository.mock";
-import { createUserRepositoryFakes } from "../../../__mocks__/userRepository.mock";
-import { createDefaultProfileData, createMockPrisma, createDefaultUserDb } from "../../../__mocks__/prisma.mock";
+import { createProfileRepositoryFakes } from "../../../__mocks__/profileRepository.test-utils";
+import { createUserRepositoryFakes } from "../../../__mocks__/userRepository.test-utils";
+import { createDefaultProfileData, createMockPrisma, createDefaultUserDb } from "../../../__mocks__/prisma.test-utils";
 import { ProfileService } from "../../../../src/features/v1/profile";
 import { IProfileService } from "../../../../src/features/v1/profile/types";
 import {

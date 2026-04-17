@@ -1,7 +1,7 @@
 import { IUserRepository } from "../../src/features/v1/user/types";
 import { UserRepository } from "../../src/features/v1/user";
 import { PrismaClient } from "@prisma/client/extension";
-import { createMockPrisma } from "./prisma.mock";
+import { createMockPrisma } from "./prisma.test-utils";
 
 export function createUserRepositoryMock(): IUserRepository {
     let userRepository = new UserRepository({} as PrismaClient);
