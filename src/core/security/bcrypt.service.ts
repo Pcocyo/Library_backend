@@ -8,17 +8,11 @@ export default class BcryptService implements IBcryptService {
         this.securityConfig = securityConfig;
     }
     async hashPassword(plainPassword: string): Promise<string> {
-        const hashedString = await bcrypt.hash(
-            plainPassword,
-            this.securityConfig.BCRYPT_SALT,
-        );
+        const hashedString = await bcrypt.hash(plainPassword, this.securityConfig.BCRYPT_SALT);
         return hashedString;
     }
-    async comparePassword(
-        hashPassword: string,
-        plainPassword: string,
-    ): Promise<boolean> {
-        const isValid = await bcrypt.compare(hashPassword, plainPassword);
+    async comparePassword(plainPassword: string, hashPassword: string): Promise<boolean> {
+        const isValid = await bcrypt.compare(plainPassword, hashPassword);
         return isValid;
     }
 }

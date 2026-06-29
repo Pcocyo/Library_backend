@@ -54,14 +54,12 @@ export function createUpdateUserDto(haveNull: boolean): UpdateUserDto {
     let request: Partial<Request> = { headers: {}, body: {} };
     if (haveNull) {
         request.body = {
+            email: null,
+            password:null,
             authorizedUser: {
-                email: null,
-                password: null,
-                authorizedUser: {
-                    email: "dummyEmail",
-                    role: "dummyRole",
-                    id: "dummyId",
-                },
+                email: "dummyEmail",
+                role: "dummyRole",
+                id: "dummyId",
             },
         };
     } else {
