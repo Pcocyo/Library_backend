@@ -8,6 +8,10 @@ import JwtService from "../core/security/jwt.service";
 import UserModule from "../features/user.module";
 import BcryptService from "../core/security/bcrypt.service";
 import ValidationMiddleware from "../core/middleware/validation.middleware";
+import prisma from "../prismaClient";
+import { UserRepository } from "../features/v1/user";
+import { ProfileRepository } from "../features/v1/profile";
+
 
 export default class Server {
     private app: Application;
@@ -15,11 +19,7 @@ export default class Server {
     private profileModule: ProfileModule;
     private appConfig: IAppConfig;
 
-    private constructor(
-        userModule: UserModule,
-        profileModule: ProfileModule,
-        appConfig: IAppConfig,
-    ) {
+    private constructor(userModule: UserModule, profileModule: ProfileModule, appConfig: IAppConfig) {
         this.app = DevApp.getInstance().getApp();
         this.userModule = userModule;
         this.profileModule = profileModule;
@@ -35,34 +35,41 @@ export default class Server {
 
     public start(): void {
         this.app.listen(this.appConfig.ServerConfig.PORT, () => {
-            console.log(
-                `listening on port ${this.appConfig.getServerConfig().PORT}`,
-            );
+            console.log(`listening on port ${this.appConfig.getServerConfig().PORT}`);
         });
     }
 
     public static create(application_configuration: IAppConfig): Server {
         const serviceDict = {
-            jwtService: new JwtService(
-                application_configuration.getSecurityConfig(),
-            ),
-            bcryptService: new BcryptService(
-                application_configuration.getSecurityConfig(),
-            ),
+            jwtService: new JwtService(application_configuration.getSecurityConfig()),
+            bcryptService: new BcryptService(application_configuration.getSecurityConfig()),
+        };
+
+        const repositories = {
+            userRepository: new UserRepository(prisma),
+            profileRepository: new ProfileRepository(prisma),
         };
         const middlewareDict = {
             authMiddleware: new AuthMiddleware(serviceDict.jwtService),
-            validationMiddleware: new ValidationMiddleware()
+            validationMiddleware: new ValidationMiddleware(),
         };
 
         return new Server(
-            new UserModule(
-                middlewareDict.authMiddleware,
-                middlewareDict.validationMiddleware,
-                serviceDict.jwtService,
-                serviceDict.bcryptService,
-            ),
-            new ProfileModule(middlewareDict.authMiddleware,middlewareDict.validationMiddleware),
+            new UserModule({
+                profileRepository: repositories.profileRepository,
+                userRepository: repositories.userRepository,
+                authMiddleware: middlewareDict.authMiddleware,
+                validationMiddleware: middlewareDict.validationMiddleware,
+                jwtService: serviceDict.jwtService,
+                bcryptService: serviceDict.bcryptService,
+            }),
+
+            new ProfileModule({
+                authMiddleware: middlewareDict.authMiddleware,
+                validationMiddleware: middlewareDict.validationMiddleware,
+                profileRepository: repositories.profileRepository,
+                userRepository: repositories.userRepository,
+            }),
             application_configuration,
         );
     }

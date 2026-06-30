@@ -46,7 +46,9 @@ export class ProfileRepository implements IProfileRepository {
                     updated_at: new Date(),
                 },
             });
+
             return new ProfileEntity({
+                user_id:profile.user_id,
                 user_name: profile.user_name,
                 first_name: profile.first_name,
                 last_name: profile.last_name,
@@ -67,6 +69,7 @@ export class ProfileRepository implements IProfileRepository {
                 where: { user_id: parameter.user_id },
             });
             return new ProfileEntity({
+                user_id: profile.user_id,
                 user_name: profile.user_name,
                 first_name: profile.first_name,
                 last_name: profile.last_name,

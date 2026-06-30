@@ -1,4 +1,5 @@
 import { Request, Response,NextFunction } from "express";
+import { UserRole } from "../../../features/v1/user/types";
 
 export type ValidateTokenOption = {
     option: {

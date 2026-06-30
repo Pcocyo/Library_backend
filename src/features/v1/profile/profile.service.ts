@@ -7,9 +7,9 @@ export class ProfileService implements IProfileService {
     private readonly profileRepository: IProfileRepository;
     private readonly userRepository: IUserRepository;
 
-    public constructor(param: { profileRepository: IProfileRepository; userRepository: IUserRepository }) {
-        this.profileRepository = param.profileRepository;
-        this.userRepository = param.userRepository;
+    public constructor(constructor: { profileRepository: IProfileRepository; userRepository: IUserRepository }) {
+        this.profileRepository = constructor.profileRepository;
+        this.userRepository = constructor.userRepository;
     }
 
     public async findById(dto: GetProfileDto): Promise<IProfileEntity> {

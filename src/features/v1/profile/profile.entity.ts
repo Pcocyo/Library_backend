@@ -1,10 +1,7 @@
-import {
-    ProfileStatus,
-    IProfileEntityConstructor,
-    IProfileEntity,
-} from "./types";
+import { ProfileStatus, IProfileEntityConstructor, IProfileEntity } from "./types";
 
 export class ProfileEntity implements IProfileEntity {
+    private user_id: string;
     private user_name: string | null;
     private first_name: string | null;
     private last_name: string | null;
@@ -16,6 +13,7 @@ export class ProfileEntity implements IProfileEntity {
     private updated_at: Date | null;
 
     constructor(parameter: IProfileEntityConstructor) {
+        this.user_id = parameter.user_id;
         this.user_name = parameter.user_name;
         this.first_name = parameter.first_name;
         this.last_name = parameter.last_name;
@@ -29,6 +27,9 @@ export class ProfileEntity implements IProfileEntity {
 
     public get_user_name(): string | null {
         return this.user_name;
+    }
+    public get_user_id(): string {
+        return this.user_id;
     }
     public get_first_name(): string | null {
         return this.first_name;
