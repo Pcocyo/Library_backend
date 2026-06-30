@@ -63,11 +63,12 @@ export class UserService implements IUserService{
     }
 
     async delete(dto: DeleteUserDto): Promise<void> {
+      await this.profileRepository.delete({user_id:dto.token.id});
+
         await this.userRepository.delete({
             email: dto.token.email,
             user_id: dto.token.id,
         });
-        await this.profileRepository.delete({user_id:dto.token.id});
     }
 
     async findUser(dto: GetUserDto): Promise<IUserEntity> {

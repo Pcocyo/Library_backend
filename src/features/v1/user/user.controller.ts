@@ -97,7 +97,7 @@ export class UserController implements IUserController {
     ): Promise<void> {
         try {
             const payload = DeleteUserDto.fromRequest(req);
-            this.userService.delete(payload);
+            await this.userService.delete(payload);
             res.send({
                 message: `User ${payload.token.id} deleted`,
             });
