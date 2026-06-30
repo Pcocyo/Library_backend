@@ -1,4 +1,4 @@
-import { UserRepository, UserRouter, UserService } from "./v1/user/";
+import { UserRouter, UserService } from "./v1/user/";
 import { IAuthMiddleware, IValidationMiddleware } from "../core/middleware/types";
 import { IBcryptService, IJwtService } from "../core/security/interfaces";
 import { IUserController, IUserRepository, IUserService } from "./v1/user/types";
