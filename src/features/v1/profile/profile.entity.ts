@@ -1,4 +1,5 @@
 import { ProfileStatus, IProfileEntityConstructor, IProfileEntity } from "./types";
+import { Prisma } from "@prisma/client";
 
 export class ProfileEntity implements IProfileEntity {
     private user_id: string;
@@ -9,7 +10,7 @@ export class ProfileEntity implements IProfileEntity {
     private address: string | null;
     private membership_date: Date | null;
     private status: ProfileStatus;
-    private total_fines: number;
+    private total_fines: Prisma.Decimal;
     private updated_at: Date | null;
 
     constructor(parameter: IProfileEntityConstructor) {
@@ -50,7 +51,7 @@ export class ProfileEntity implements IProfileEntity {
         return this.status;
     }
     public get_total_fines(): number {
-        return this.total_fines;
+        return this.total_fines.toNumber();
     }
     public get_updated_at(): Date | null {
         return this.updated_at;

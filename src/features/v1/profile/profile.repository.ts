@@ -48,7 +48,7 @@ export class ProfileRepository implements IProfileRepository {
             });
 
             return new ProfileEntity({
-                user_id:profile.user_id,
+                user_id: profile.user_id,
                 user_name: profile.user_name,
                 first_name: profile.first_name,
                 last_name: profile.last_name,
@@ -56,7 +56,7 @@ export class ProfileRepository implements IProfileRepository {
                 address: profile.address,
                 membership_date: profile.membership_date,
                 status: profile.status as ProfileStatus,
-                total_fines: profile.total_fines.toNumber(),
+                total_fines: profile.total_fines,
                 updated_at: profile.updated_at,
             });
         } catch (error: unknown) {
@@ -77,7 +77,7 @@ export class ProfileRepository implements IProfileRepository {
                 address: profile.address,
                 membership_date: profile.membership_date,
                 status: profile.status as ProfileStatus,
-                total_fines: profile.total_fines.toNumber(),
+                total_fines: profile.total_fines,
                 updated_at: profile.updated_at,
             });
         } catch (error: unknown) {

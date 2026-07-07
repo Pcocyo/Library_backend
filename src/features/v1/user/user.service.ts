@@ -49,7 +49,7 @@ export class UserService implements IUserService{
     }
 
     async create(dto: CreateUserDto): Promise<string> {
-        dto.password = await this.bcryptService.hashPassword(dto.password);
+      dto.password = await this.bcryptService.hashPassword(dto.password);
         let user: IUserEntity = await this.userRepository.create({
             email: dto.email,
             password: dto.password,

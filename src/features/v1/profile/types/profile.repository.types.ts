@@ -1,4 +1,5 @@
 import { ProfileStatus } from ".";
+import { Decimal } from "@prisma/client/runtime/library";
 
 export type ProfileRepoFindByIdDto = {
    user_id:string;
@@ -17,7 +18,7 @@ export type ProfileRepoSaveDto = {
     address?: string | null;
     membership_date?: Date | null;
     status?: ProfileStatus;
-    total_fines?: number;
+    total_fines?: Decimal;
     updated_at?: Date | null;
 }
 

@@ -1,6 +1,5 @@
 import { IProfileEntity, IProfileRepository, IProfileService } from "./types";
 import { GetProfileDto, LibrarianUpdateProfileDto, ProfileUpdateDto } from "./dto";
-
 import { IUserEntity, IUserRepository } from "../user/types";
 
 export class ProfileService implements IProfileService {
@@ -20,11 +19,11 @@ export class ProfileService implements IProfileService {
     public async updateSelf(dto: ProfileUpdateDto): Promise<IProfileEntity> {
         let profileEntity: IProfileEntity = await this.profileRepository.save({
             user_id: dto.token.id,
-            address: dto.data.address ?? undefined,
-            contact: dto.data.contact ?? undefined,
-            user_name: dto.data.user_name ?? undefined,
-            last_name: dto.data.last_name ?? undefined,
-            first_name: dto.data.first_name ?? undefined,
+            address: dto.data.address,
+            contact: dto.data.contact,
+            user_name: dto.data.user_name,
+            last_name: dto.data.last_name,
+            first_name: dto.data.first_name,
         });
         return profileEntity;
     }
@@ -33,10 +32,10 @@ export class ProfileService implements IProfileService {
         let user: IUserEntity = await this.userRepository.getByEmail({
             email: dto.data.email,
         });
-
+        
         let updateUserProfile: IProfileEntity = await this.profileRepository.save({
             user_id: user.getId(),
-            total_fines: dto.data.total_fines ?? undefined,
+            total_fines: dto.data.total_fines,
             status: dto.data.status ?? undefined,
         });
         return updateUserProfile;
