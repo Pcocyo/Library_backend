@@ -1,21 +1,33 @@
 import { jest } from "@jest/globals";
-import { Decimal } from "@prisma/client/runtime/library";
-import { CreateUserDto } from "../../src/features/v1/user/dto";
-import {mockDeep,DeepMockProxy} from 'jest-mock-extended'
+import { mockDeep, DeepMockProxy } from "jest-mock-extended";
 import { PrismaClient } from "@prisma/client/extension";
-import { getMockCalls, setMockRejectValue } from "../__helper__/mockHelper";
- 
-export interface UserDto{
-   user_id:string,
-   email: string,
-   password: string,
-   role: string,
-   created_at: Date,
-   updated_at: Date,
+import { getMockCalls } from "../__helper__/mockHelper";
+import { ProfileStatus } from "../../src/features/v1/profile/types";
+import { Prisma } from "@prisma/client";
+
+interface UserDto {
+    user_id: string;
+    email: string;
+    password: string;
+    role: string;
+    created_at: Date;
+    updated_at: Date;
 }
 
+interface ProfileDto {
+    user_id: string;
+    user_name: string | null;
+    first_name: string | null;
+    last_name: string | null;
+    contact: string | null;
+    address: string | null;
+    membership_date: Date | null;
+    status: ProfileStatus;
+    total_fines: any;
+    updated_at: Date | null;
+}
 
-export function createDefaultUserDb(): UserDto{
+export function createDefaultUserDb(): UserDto {
     return {
         user_id: "123",
         email: "test@test.com",
@@ -26,7 +38,22 @@ export function createDefaultUserDb(): UserDto{
     };
 }
 
-export function createNewCustomUserDb(email:string, password:string):UserDto {
+export function createDefaultProfileDb(): ProfileDto {
+    return {
+        user_id: "test_user_id",
+        user_name: "test_user_name",
+        first_name: "test_first_name",
+        last_name: "test_last_name",
+        contact: "test_contact",
+        address: "test_address",
+        membership_date: null,
+        status: "ACTIVE",
+        total_fines: Prisma.Decimal(10),
+        updated_at: new Date(),
+    };
+}
+
+export function createNewCustomUserDb(email: string, password: string): UserDto {
     return {
         user_id: "123",
         email: email,
@@ -37,24 +64,26 @@ export function createNewCustomUserDb(email:string, password:string):UserDto {
     };
 }
 
-export function createDefaultProfileData(): any {
+export function createCustomProfileDb(id: string): ProfileDto {
     return {
-        user_name: "dummy_user_name",
-        first_name: "dummy_first_name",
-        last_name: "dummy_last_name",
-        contact: "dummy_contact",
-        address: "dummy_address",
-        membership_date: new Date("2024-01-01"),
+        user_id: id,
+        user_name: "test_user_name",
+        first_name: "test_first_name",
+        last_name: "test_last_name",
+        contact: "test_contact",
+        address: "test_address",
+        membership_date: null,
         status: "ACTIVE",
-        total_fines: Decimal(0.0),
-        updated_at: new Date("2024-01-01"),
+        total_fines: Prisma.Decimal(10),
+        updated_at: new Date(),
     };
 }
 
-function userMockHelper(fn: jest.Mock<any>) {
-    const __defaultResolvedValue: UserDto = createDefaultUserDb();
-    let __customUser: UserDto | null = null;
+function mockHelper<T>(fn: jest.Mock<any>, defaultFn: () => T) {
+    const __defaultResolvedValue: T = defaultFn();
+    let __customUser: T | null = null;
     let __hasRejectValue: boolean = false;
+
     return {
         declareMockResolvedValue: (): void => {
             fn.mockResolvedValue(__defaultResolvedValue);
@@ -69,18 +98,18 @@ function userMockHelper(fn: jest.Mock<any>) {
 
         getCalls: () => getMockCalls(fn),
 
-        getDefaultResolvedValue: (): UserDto => __defaultResolvedValue,
+        getDefaultResolvedValue: (): T => __defaultResolvedValue,
 
-        getCustomResolvedValue: (): UserDto | null => __customUser,
+        getCustomResolvedValue: (): T | null => __customUser,
 
-        getCurrentResolvedValue: (): UserDto => {
+        getCurrentResolvedValue: (): T => {
             const currentResolvedValue = __customUser ? __customUser : __defaultResolvedValue;
             return currentResolvedValue;
         },
 
         getMockfn: (): jest.Mock<any> => fn,
 
-        setCustomResolvedvalue: (o: UserDto) => {
+        setCustomResolvedvalue: (o: T) => {
             __customUser = o;
             fn.mockResolvedValue(__customUser);
         },
@@ -88,36 +117,31 @@ function userMockHelper(fn: jest.Mock<any>) {
         setDeleteCustomResolvedValue: (): void => {
             __customUser = null;
         },
-        setMockResolveError:(errorMessage:string)=>{
+
+        setMockResolveError: (errorMessage: string) => {
             __hasRejectValue = true;
             fn.mockRejectedValue(new Error(errorMessage));
-        }
+        },
     };
 }
 
-export function mk_prismaUserMethod(prisma:PrismaClient){
-   return{
-      update: userMockHelper(prisma.users.update),
-      create: userMockHelper(prisma.users.create),
-      delete: userMockHelper(prisma.users.delete),
-      findUniqueOrThrow: userMockHelper(prisma.users.findUniqueOrThrow),
-   }
-};
+export function mk_prismaUserMethod(prisma: PrismaClient) {
+    return {
+        update: mockHelper<UserDto>(prisma.users.update, createDefaultUserDb),
+        create: mockHelper<UserDto>(prisma.users.create, createDefaultUserDb),
+        delete: mockHelper<UserDto>(prisma.users.delete, createDefaultUserDb),
+        findUniqueOrThrow: mockHelper<UserDto>(prisma.users.findUniqueOrThrow, createDefaultUserDb),
+    };
+}
 
-export function mk_prismaProfileMethod(prisma:PrismaClient) {
-   return{
-      upsert: {
-         declareMockResolvedValue: () =>
-            (prisma.profiles.upsert as jest.Mock<any>).mockResolvedValue(createDefaultProfileData()),
-         executeClearMock: () => (prisma.profiles.upsert as jest.Mock).mockClear(),
-         getCalls: () => getMockCalls(prisma.profiles.upsert),
-      },
-      delete: {
-         executeClearMock: () => (prisma.profiles.delete as jest.Mock).mockClear(),
-         getCalls: () => getMockCalls(prisma.profiles.delete),
-      },
-   }
-};
-export const createMockPrisma = ():DeepMockProxy<PrismaClient> => {
-   return mockDeep<PrismaClient>();
+export function mk_prismaProfileMethod(prisma: PrismaClient) {
+    return {
+        upsert: mockHelper<ProfileDto>(prisma.profiles.upsert, createDefaultProfileDb),
+        delete: mockHelper<ProfileDto>(prisma.profiles.delete, createDefaultProfileDb),
+        findUniqueOrThrow: mockHelper<ProfileDto>(prisma.profiles.findUniqueOrThrow, createDefaultProfileDb),
+    };
+}
+
+export const createMockPrisma = (): DeepMockProxy<PrismaClient> => {
+    return mockDeep<PrismaClient>();
 };

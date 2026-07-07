@@ -139,9 +139,9 @@ describe("UserService unit test suite", () => {
 
         it("Should call profileRepository.save with user_id parameter", async () => {
             await userService.create(newUserCreateInfo);
-            expect(mockedPrismaProfileTable.upsert.declareMockResolvedValue()).toHaveBeenCalled();
+            expect(mockedPrismaProfileTable.upsert.getMockfn()).toHaveBeenCalled();
 
-            // test if the profileRepository save is called with the correct id
+            //test if the profileRepository save is called with the correct id
             expect(mockedPrismaUserTable.create.getCurrentResolvedValue().user_id).toBe(
                 (mockedPrismaProfileTable.upsert.getCalls() as any).where.user_id,
             );
