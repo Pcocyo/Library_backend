@@ -1,16 +1,6 @@
-import {
-    UpdateUserDto,
-    LoginUserDto,
-    CreateUserDto,
-    DeleteUserDto,
-    GetUserDto,
-} from "./dto";
+import { GetUserResponseDto, UpdateUserDto, LoginUserDto, CreateUserDto, DeleteUserDto, GetUserDto } from "./dto";
 import { Request, Response, NextFunction } from "express";
-import {
-    IUserController,
-    IUserEntity,
-    IUserService,
-} from "./types";
+import { IUserController, IUserEntity, IUserService } from "./types";
 
 export class UserController implements IUserController {
     private readonly userService: IUserService;
@@ -24,31 +14,21 @@ export class UserController implements IUserController {
         this.getUser = this.getUser.bind(this);
     }
 
-    public async updateUser(
-        req: Request,
-        res: Response,
-        next: NextFunction,
-    ): Promise<void> {
+    public async updateUser(req: Request, res: Response, next: NextFunction): Promise<void> {
         try {
             const payload: UpdateUserDto = UpdateUserDto.fromRequest(req);
-            const newToken = await this.userService.update(
-                payload as UpdateUserDto,
-            );
+            const newToken = await this.userService.update(payload as UpdateUserDto);
             res.send({ token: newToken });
         } catch (error: any) {
             next(error);
         }
     }
 
-    public async createUser(
-        req: Request,
-        res: Response,
-        next: NextFunction,
-    ): Promise<void> {
+    public async createUser(req: Request, res: Response, next: NextFunction): Promise<void> {
         try {
             const payload: CreateUserDto = req.body;
             let token = await this.userService.create(payload);
-            res.json({
+            res.send({
                 token: token,
             });
         } catch (error: any) {
@@ -56,11 +36,7 @@ export class UserController implements IUserController {
         }
     }
 
-    public async login(
-        req: Request,
-        res: Response,
-        next: NextFunction,
-    ): Promise<void> {
+    public async login(req: Request, res: Response, next: NextFunction): Promise<void> {
         try {
             const payload: LoginUserDto = req.body;
             const token = await this.userService.compare(payload);
@@ -72,31 +48,19 @@ export class UserController implements IUserController {
         }
     }
 
-    public async getUser(
-        req: Request,
-        res: Response,
-        next: NextFunction,
-    ): Promise<void> {
+    public async getUser(req: Request, res: Response, next: NextFunction): Promise<void> {
         try {
             const payload: GetUserDto = GetUserDto.fromRequest(req);
-            const user:IUserEntity = await this.userService.findUser(payload);
-            res.send({
-                id: user.getId(),
-                email: user.getEmail(),
-                role: user.getRole(),
-            });
+            const user: IUserEntity = await this.userService.findUser(payload);
+            res.send(GetUserResponseDto.extract(user).toResponse());
         } catch (error: any) {
             next(error);
         }
     }
 
-    public async deleteUser(
-        req: Request,
-        res: Response,
-        next: NextFunction,
-    ): Promise<void> {
+    public async deleteUser(req: Request, res: Response, next: NextFunction): Promise<void> {
         try {
-            const payload = DeleteUserDto.fromRequest(req);
+            const payload = DeleteUserDto.fromRequest(req,);
             await this.userService.delete(payload);
             res.send({
                 message: `User ${payload.token.id} deleted`,
