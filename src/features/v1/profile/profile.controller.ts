@@ -1,7 +1,8 @@
+import { GetUpdateUserProfileResponseDto,GetProfileResponseDto, GetProfileDto, ProfileUpdateDto, LibrarianUpdateProfileDto, SubscribeDto } from "./dto";
 import { Request, Response, NextFunction } from "express";
 import { IProfileController, IProfileEntity } from "./types";
-import { GetProfileDto, ProfileUpdateDto, LibrarianUpdateProfileDto, SubscribeDto } from "./dto";
 import { IProfileService } from "./types";
+import { LibrarianUpdateUserProfileResponse } from "./dto/response/profile.response.dto";
 
 export class ProfileController implements IProfileController {
     private readonly profileService: IProfileService;
@@ -17,20 +18,8 @@ export class ProfileController implements IProfileController {
         const payload: GetProfileDto = GetProfileDto.fromRequest(req);
         try {
             const userProfile: IProfileEntity = await this.profileService.findById(payload);
-            res.status(200).send({
-                user_id: userProfile.get_user_id(),
-                user_name: userProfile.get_user_name(),
-                first_name: userProfile.get_first_name(),
-                last_name: userProfile.get_last_name(),
-                contact: userProfile.get_contact(),
-                address: userProfile.get_address(),
-                membership_date: userProfile.get_membership_date(),
-                status: userProfile.get_status(),
-                total_fines: userProfile.get_total_fines(),
-                updated_at: userProfile.get_updated_at(),
-            });
+            res.status(200).send(GetProfileResponseDto.extract(userProfile).toResponse());
         } catch (error: any) {
-            console.log(error);
             next(error);
         }
     }
@@ -41,18 +30,7 @@ export class ProfileController implements IProfileController {
 
             const userProfile: IProfileEntity = await this.profileService.updateSelf(payload);
 
-            res.status(200).send({
-                user_id: userProfile.get_user_id(),
-                user_name: userProfile.get_user_name(),
-                first_name: userProfile.get_first_name(),
-                last_name: userProfile.get_last_name(),
-                contact: userProfile.get_contact(),
-                address: userProfile.get_address(),
-                membership_date: userProfile.get_membership_date(),
-                status: userProfile.get_status(),
-                total_fines: userProfile.get_total_fines(),
-                updated_at: userProfile.get_updated_at(),
-            });
+            res.status(200).send(GetUpdateUserProfileResponseDto.extract(userProfile).toResponse());
         } catch (error: any) {
             next(error);
         }
@@ -62,7 +40,7 @@ export class ProfileController implements IProfileController {
         const payload: LibrarianUpdateProfileDto = LibrarianUpdateProfileDto.fromRequest(req);
         const userProfile: IProfileEntity = await this.profileService.administrativeUpdate(payload);
         try {
-            res.status(200).json({ message: "success" });
+            res.status(200).json({ message: "success", ...LibrarianUpdateUserProfileResponse.extract(userProfile).toResponse()});
         } catch (error: any) {
             next(error);
         }
