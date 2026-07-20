@@ -1,14 +1,6 @@
-import {
-    GetUserDto,
-    DeleteUserDto,
-    UpdateUserDto,
-} from "../../src/features/v1/user/dto";
+import { GetUserDto, DeleteUserDto, UpdateUserDto, ActivateMembershipDto } from "../../src/features/v1/user/dto";
 
-import {
-    GetProfileDto,
-    LibrarianUpdateProfileDto,
-    ProfileUpdateDto,
-} from "../../src/features/v1/profile/dto";
+import { GetProfileDto, LibrarianUpdateProfileDto, ProfileUpdateDto } from "../../src/features/v1/profile/dto";
 
 import { Request } from "express";
 
@@ -20,9 +12,7 @@ type createGetByUserDtoParameter = {
         role: string;
     };
 };
-export function createGetByUserDto(
-    parameter: createGetByUserDtoParameter,
-): GetUserDto {
+export function createGetByUserDto(parameter: createGetByUserDtoParameter): GetUserDto {
     let request: Partial<Request> = { headers: {}, body: {} };
     request.body = {
         email: parameter.email,
@@ -37,9 +27,7 @@ type createDeleteUserDtoParameter = {
     role: string;
 };
 
-export function createDeleteUserDto(
-    parameter: createDeleteUserDtoParameter,
-): DeleteUserDto {
+export function createDeleteUserDto(parameter: createDeleteUserDtoParameter): DeleteUserDto {
     let request: Partial<Request> = { headers: {}, body: {} };
     request.body = {
         authorizedUser: {
@@ -56,7 +44,7 @@ export function createUpdateUserDto(haveNull: boolean): UpdateUserDto {
     if (haveNull) {
         request.body = {
             email: null,
-            password:null,
+            password: null,
             authorizedUser: {
                 email: "dummyEmail",
                 role: "dummyRole",
@@ -77,11 +65,7 @@ export function createUpdateUserDto(haveNull: boolean): UpdateUserDto {
     return UpdateUserDto.fromRequest(request as Request);
 }
 
-export function createGetProfileDto(param: {
-    email: string;
-    role: string;
-    id: string;
-}): GetProfileDto {
+export function createGetProfileDto(param: { email: string; role: string; id: string }): GetProfileDto {
     let request: Partial<Request> = { headers: {}, body: {} };
     request.body = {
         authorizedUser: {
@@ -135,7 +119,6 @@ export function createLibrarianProfileDto(
         role: string;
     },
 ): LibrarianUpdateProfileDto {
-
     const request: Partial<Request> = { headers: {}, body: {} };
     request.body = {
         total_fines: param.total_fines,
@@ -148,4 +131,16 @@ export function createLibrarianProfileDto(
         },
     };
     return LibrarianUpdateProfileDto.fromRequest(request as Request);
+}
+
+export function createActivateMembershipDto(auth: { email: string; id: string; role: string }) {
+    const request: Partial<Request> = {headers:{},body:{}};
+    request.body = {
+        authorizedUser: {
+            email: auth.email,
+            role: auth.role,
+            id: auth.id,
+        },
+    };
+   return ActivateMembershipDto.fromRequest(request as Request);
 }

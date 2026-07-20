@@ -2,7 +2,12 @@ import { createJwtServiceFakes } from "../../../__mocks__/jwtService.mock";
 import { createBcryptServiceFakes } from "../../../__mocks__/bcryptService.test-utils";
 import { createUserRepositoryMock } from "../../../__mocks__/userRepository.test-utils";
 import { createProfileRepositoryMock } from "../../../__mocks__/profileRepository.test-utils";
-import { createUpdateUserDto, createGetByUserDto, createDeleteUserDto } from "../../../__mocks__/request.dto.mock";
+import {
+    createUpdateUserDto,
+    createGetByUserDto,
+    createDeleteUserDto,
+    createActivateMembershipDto,
+} from "../../../__mocks__/request.dto.mock";
 import { testHaveProperties } from "../../../__helper__/mockHelper";
 import { UserService } from "../../../../src/features/v1/user";
 import { UserEntity } from "../../../../src/features/v1/user";
@@ -251,6 +256,38 @@ describe("UserService unit test suite", () => {
             const token = await userService.compare(userLoginInfo);
             const tokenReturnJwtInfo = jwtServiceFakes.validateJwtToken(token);
             testHaveProperties(tokenReturnJwtInfo, ["email", "role", "id", "iat", "exp"]);
+        });
+    });
+
+    describe("activate_membership()", () => {
+        const data = {
+            email: "dummyEmail",
+            id: "dummyId",
+            role: "GUEST",
+        };
+
+        beforeEach(() => {
+            mockedPrismaUserTable.update.declareMockResolvedValue();
+            mockedPrismaProfileTable.upsert.setCustomResolvedvalue({
+                ...mockedPrismaProfileTable.upsert.getDefaultResolvedValue(),
+                membership_date: null,
+            });
+        });
+        afterEach(() => {
+            mockedPrismaUserTable.update.executeClearMock();
+            mockedPrismaProfileTable.upsert.executeClearMock();
+        });
+        it("Should call userRepository.update and update the role to a member", async () => {
+            await userService.activate_membership(createActivateMembershipDto(data));
+            expect(mockedPrismaUserTable.update.getMockfn()).toHaveBeenCalled();
+            expect(mockedPrismaUserTable.update.getCalls().where.user_id).toEqual(data.id);
+            expect(mockedPrismaUserTable.update.getCalls().data.role).toEqual("MEMBER");
+        });
+
+        it("Should call profileRepository.upsert and update the membership_date", async () => {
+            await userService.activate_membership(createActivateMembershipDto(data));
+            expect(mockedPrismaProfileTable.upsert.getMockfn()).toHaveBeenCalled();
+            expect(mockedPrismaProfileTable.upsert.getCalls().update.membership_date).not.toBeUndefined();
         });
     });
 });
