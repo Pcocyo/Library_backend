@@ -6,6 +6,7 @@ import {
     GetUserDto,
     CreateUserDto,
     LoginUserDto,
+    ActivateMembershipDto,
 } from "../dto";
 import { IUserEntity } from "./user.entity.interface";
 import { IUserRepository } from "./user.repository.interface";
@@ -16,6 +17,7 @@ export interface IUserService {
     delete(dto: DeleteUserDto): Promise<void>;
     findUser(dto: GetUserDto): Promise<IUserEntity>;
     compare(dto:LoginUserDto): Promise<string>;
+    activate_membership(dto:ActivateMembershipDto): Promise<string>;
 }
 
 export interface IUserServiceConstructor{

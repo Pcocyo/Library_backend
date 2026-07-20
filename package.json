@@ -13,7 +13,7 @@
     "seed": "ts-node prisma/seed.ts",
     "prismaSync": "npx prisma db pull && npx prisma generate",
     "genGraph:dot": "npx madge --extensions ts src/ --dot | dot -Grankdir=TB -Gnodesep=1.5 -Granksep=2.5 -Gsplines=ortho -Tsvg > deps.svg",
-    "genGraph:png": "npx madge --extensions ts src/ --dot | dot -Grankdir=TB -Gnodesep=1.5 -Granksep=2.5 -Gsplines=ortho -Gnewrank=true -Tpng > deps.png",
+    "genGraph:png": "npx madge --extensions ts src/ --dot | dot -Grankdir=TB -Gnodesep=1.5 -Granksep=2.5 -Gsplines=ortho -Gnewrank=true -Tpng > deps.png"
   },
   "repository": {
     "type": "git",

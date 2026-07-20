@@ -6,7 +6,7 @@ import {
 import { Request } from "express";
 import { z } from "zod";
 import { AccessTokenPayload } from "../../../../../core/security/interfaces";
-
+import { UserRole } from "../../types";
 export type CreateUserDto = z.infer<typeof CreateUserRequestSchema>;
 export type LoginUserDto = z.infer<typeof LoginUserRequestSchema>;
 
@@ -48,4 +48,14 @@ export class UpdateUserDto {
             password: req.body.password,
         });
     }
+}
+
+export class ActivateMembershipDto{
+   public readonly data: { id:string, role: UserRole};
+   private constructor(id:string,role:UserRole){
+      this.data = {id:id,role:role};
+   }
+   public static fromRequest(req:Request){
+      return new ActivateMembershipDto(req.body.authorizedUser.id,req.body.authorizedUser.role as UserRole);
+   } 
 }

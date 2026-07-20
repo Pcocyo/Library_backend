@@ -1,27 +1,16 @@
-import {
-    CreateUserDto,
-    DeleteUserDto,
-    UpdateUserDto,
-    GetUserDto,
-    LoginUserDto,
-} from "./dto";
-import {
-    IUserRepository,
-    IUserService,
-    IUserServiceConstructor,
-} from "./types";
+import { CreateUserDto, DeleteUserDto, UpdateUserDto, GetUserDto, LoginUserDto, ActivateMembershipDto } from "./dto";
+import { IUserRepository, IUserService, IUserServiceConstructor } from "./types";
 import { IBcryptService, IJwtService } from "../../../core/security/interfaces";
 import { IUserEntity } from "./types";
-import {
-    ClientErrorFactory,
-} from "../../../core/error/exceptions";
+import { ClientErrorFactory } from "../../../core/error/exceptions";
 import { IProfileRepository } from "../profile/types";
+import { UserRole } from "./types";
 
-export class UserService implements IUserService{
+export class UserService implements IUserService {
     private readonly bcryptService: IBcryptService;
     private readonly userRepository: IUserRepository;
     private readonly jwtService: IJwtService;
-    private readonly profileRepository:IProfileRepository;
+    private readonly profileRepository: IProfileRepository;
 
     public constructor(constructor: IUserServiceConstructor) {
         this.userRepository = constructor.userRepository;
@@ -49,12 +38,12 @@ export class UserService implements IUserService{
     }
 
     async create(dto: CreateUserDto): Promise<string> {
-      dto.password = await this.bcryptService.hashPassword(dto.password);
+        dto.password = await this.bcryptService.hashPassword(dto.password);
         let user: IUserEntity = await this.userRepository.create({
             email: dto.email,
             password: dto.password,
         });
-        await this.profileRepository.save({user_id:user.getId()});
+        await this.profileRepository.save({ user_id: user.getId() });
         return this.jwtService.generateJwtToken({
             email: user.getEmail(),
             id: user.getId(),
@@ -63,7 +52,7 @@ export class UserService implements IUserService{
     }
 
     async delete(dto: DeleteUserDto): Promise<void> {
-      await this.profileRepository.delete({user_id:dto.token.id});
+        await this.profileRepository.delete({ user_id: dto.token.id });
 
         await this.userRepository.delete({
             email: dto.token.email,
@@ -83,10 +72,7 @@ export class UserService implements IUserService{
             const user = await this.userRepository.getByEmail({
                 email: dto.email,
             });
-            const correctPassword = await this.bcryptService.comparePassword(
-                dto.password,
-                user.getPassword(),
-            );
+            const correctPassword = await this.bcryptService.comparePassword(dto.password, user.getPassword());
 
             if (!correctPassword) {
                 throw ClientErrorFactory.createIncorrectPasswordError({
@@ -101,6 +87,23 @@ export class UserService implements IUserService{
                 role: user.getRole(),
             });
             return token;
+        } catch (error: unknown) {
+            throw error;
+        }
+    }
+
+    async activate_membership(dto: ActivateMembershipDto): Promise<string> {
+        try {
+            const activatedUser: IUserEntity = await this.userRepository.update({
+                user_id: dto.data.id,
+                role: "MEMBER",
+            });
+            this.profileRepository.save({ user_id: activatedUser.getId(), membership_date: activatedUser.getUpdatedAt()});
+            return this.jwtService.generateJwtToken({
+                email: activatedUser.getEmail(),
+                role: activatedUser.getRole(),
+                id: activatedUser.getId(),
+            });
         } catch (error: unknown) {
             throw error;
         }

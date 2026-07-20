@@ -15,4 +15,5 @@ export interface IUserEntity{
      getPassword(): string;
      getRole():UserRole;
      getCreatedAt(): Date;
+     getUpdatedAt():Date;
 }
