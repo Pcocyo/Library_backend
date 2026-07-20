@@ -10,6 +10,7 @@
     "dev": "concurrently \"tsc -w\" \"nodemon dist/index.js\"",
     "build": "tsc -p tsconfig.json && tsc-alias -p tsconfig.json",
     "migrate": "knex migrate:latest",
+    "seed":"ts-node prisma/seed.ts",
     "prismaSync": "npx prisma db pull && npx prisma generate"
   },
   "repository": {
