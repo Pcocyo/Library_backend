@@ -10,8 +10,10 @@
     "dev": "concurrently \"tsc -w\" \"nodemon dist/index.js\"",
     "build": "tsc -p tsconfig.json && tsc-alias -p tsconfig.json",
     "migrate": "knex migrate:latest",
-    "seed":"ts-node prisma/seed.ts",
-    "prismaSync": "npx prisma db pull && npx prisma generate"
+    "seed": "ts-node prisma/seed.ts",
+    "prismaSync": "npx prisma db pull && npx prisma generate",
+    "genGraph:dot": "npx madge --extensions ts src/ --dot | dot -Grankdir=TB -Gnodesep=1.5 -Granksep=2.5 -Gsplines=ortho -Tsvg > deps.svg",
+    "genGraph:png": "npx madge --extensions ts src/ --dot | dot -Grankdir=TB -Gnodesep=1.5 -Granksep=2.5 -Gsplines=ortho -Gnewrank=true -Tpng > deps.png",
   },
   "repository": {
     "type": "git",
@@ -36,6 +38,7 @@
     "cross-env": "^10.0.0",
     "jest": "^30.1.3",
     "jest-mock-extended": "^4.0.0",
+    "madge": "^8.0.0",
     "nodemon": "^3.1.10",
     "supertest": "^7.1.4",
     "ts-jest": "^29.4.2",
