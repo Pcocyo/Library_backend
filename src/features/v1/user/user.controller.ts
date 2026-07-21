@@ -1,4 +1,12 @@
-import { GetUserResponseDto, UpdateUserDto, LoginUserDto, CreateUserDto, DeleteUserDto, GetUserDto } from "./dto";
+import {
+    GetUserResponseDto,
+    UpdateUserDto,
+    LoginUserDto,
+    CreateUserDto,
+    DeleteUserDto,
+    GetUserDto,
+    ActivateMembershipDto,
+} from "./dto";
 import { Request, Response, NextFunction } from "express";
 import { IUserController, IUserEntity, IUserService } from "./types";
 
@@ -60,11 +68,20 @@ export class UserController implements IUserController {
 
     public async deleteUser(req: Request, res: Response, next: NextFunction): Promise<void> {
         try {
-            const payload = DeleteUserDto.fromRequest(req,);
+            const payload = DeleteUserDto.fromRequest(req);
             await this.userService.delete(payload);
             res.send({
                 message: `User ${payload.token.id} deleted`,
             });
+        } catch (error: any) {
+            next(error);
+        }
+    }
+    public async activate_membership(req: Request, res: Response, next: NextFunction): Promise<void> {
+        try {
+            const payload = ActivateMembershipDto.fromRequest(req);
+            const token_memberRole = await this.userService.activate_membership(payload);
+            res.send({ token: token_memberRole });
         } catch (error: any) {
             next(error);
         }
