@@ -18,6 +18,7 @@ export class UserController implements IUserController {
         this.updateUser = this.updateUser.bind(this);
         this.createUser = this.createUser.bind(this);
         this.deleteUser = this.deleteUser.bind(this);
+        this.activate_membership = this.activate_membership.bind(this);
         this.login = this.login.bind(this);
         this.getUser = this.getUser.bind(this);
     }
@@ -77,12 +78,14 @@ export class UserController implements IUserController {
             next(error);
         }
     }
+
     public async activate_membership(req: Request, res: Response, next: NextFunction): Promise<void> {
         try {
             const payload = ActivateMembershipDto.fromRequest(req);
             const token_memberRole = await this.userService.activate_membership(payload);
             res.send({ token: token_memberRole });
         } catch (error: any) {
+            console.log(error);
             next(error);
         }
     }
