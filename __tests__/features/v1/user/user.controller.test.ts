@@ -308,7 +308,7 @@ describe("UserController unit test suite", () => {
             expect(response.email).toEqual(email_find);
         });
     });
-    
+
     describe("deleteUser()", () => {
         let jwtHelper: any;
         let express: {
@@ -367,6 +367,54 @@ describe("UserController unit test suite", () => {
             );
             expect(express.response.send as jest.Mock).toHaveBeenCalled();
             expect(getMockCalls(express.response.send as jest.Mock)).toHaveProperty("message");
+        });
+    });
+
+    describe.only("activate_membership", () => {
+        let jwtHelper:any;
+        let express: {
+         response: Partial<Response>,
+         request: Partial<Request>,
+         next: NextFunction,
+      };
+        let user_id_subscribe = "dummy-id-subscribe";
+        let user_email_subscribe = "dummy-email-subscribe";
+        let user_role_subscribe = "dummy-role-subscribe";
+        beforeAll(() => {
+            jwtHelper = jwtFakesHelper_fn(jwtService, {
+                email: user_email_subscribe,
+                id: user_id_subscribe,
+                role: user_role_subscribe,
+            });
+            express = expressHelper({
+                authorizedUser: jwtHelper.getDefaultJwtData(),
+            }).declareAllExpressPartials();
+        });
+        beforeEach(() => {
+            mockPrismaUserTable.update.declareMockResolvedValue();
+            mockPrismaUserTable.update.setCustomResolvedvalue({
+               ...mockPrismaUserTable.update.getDefaultResolvedValue(),
+               user_id: user_id_subscribe,
+         });
+            mockPrismaProfileTable.upsert.declareMockResolvedValue();
+        });
+
+        afterEach(() => {
+            mockPrismaUserTable.update.executeClearMock();
+            mockPrismaProfileTable.upsert.executeClearMock();
+        });
+
+        it("Should respond with new token on success", async() => {
+            await userController.activate_membership(express.request as Request, express.response as Response, express.next as NextFunction);
+            expect(getMockCalls(express.response.send as jest.Mock)).toHaveProperty("token");
+        });
+        
+        it("Should call userService.activate_membership with correct DTO", async() => {
+            await userController.activate_membership(express.request as Request, express.response as Response, express.next as NextFunction);
+            expect(mockPrismaUserTable.update.getMockfn()).toHaveBeenCalled();
+            expect(mockPrismaProfileTable.upsert.getMockfn()).toHaveBeenCalled();
+            expect(mockPrismaProfileTable.upsert.getCalls().where.user_id).toEqual(user_id_subscribe)
+            expect(mockPrismaUserTable.update.getCalls().where.user_id).toEqual(user_id_subscribe)
         });
     });
 });
