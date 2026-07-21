@@ -58,7 +58,7 @@ export class UserRouter extends BaseRouter {
         );
        this.router.put(
          "/subscribe",
-         this.authMiddleware.CreateValidateTokenMiddleware(undefined),
+         this.authMiddleware.CreateValidateTokenMiddleware({option:{required_role:"GUEST"}}),
          this.userController.activate_membership
       )
     }
