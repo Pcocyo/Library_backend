@@ -56,5 +56,10 @@ export class UserRouter extends BaseRouter {
             this.validationMiddleware.validate(UpdateUserRequestSchema),
             this.userController.updateUser,
         );
+       this.router.put(
+         "/subscribe",
+         this.authMiddleware.CreateValidateTokenMiddleware(undefined),
+         this.userController.activate_membership
+      )
     }
 }
