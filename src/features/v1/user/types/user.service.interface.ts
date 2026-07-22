@@ -7,6 +7,7 @@ import {
     CreateUserDto,
     LoginUserDto,
     ActivateMembershipDto,
+    AssignLibrarianDto,
 } from "../dto";
 import { IUserEntity } from "./user.entity.interface";
 import { IUserRepository } from "./user.repository.interface";
@@ -18,6 +19,7 @@ export interface IUserService {
     findUser(dto: GetUserDto): Promise<IUserEntity>;
     compare(dto:LoginUserDto): Promise<string>;
     activate_membership(dto:ActivateMembershipDto): Promise<string>;
+    assign_librarian(dto:AssignLibrarianDto):Promise<void>;
 }
 
 export interface IUserServiceConstructor{

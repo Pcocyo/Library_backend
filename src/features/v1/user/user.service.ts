@@ -1,10 +1,17 @@
-import { CreateUserDto, DeleteUserDto, UpdateUserDto, GetUserDto, LoginUserDto, ActivateMembershipDto } from "./dto";
+import {
+    CreateUserDto,
+    DeleteUserDto,
+    UpdateUserDto,
+    GetUserDto,
+    LoginUserDto,
+    ActivateMembershipDto,
+    AssignLibrarianDto,
+} from "./dto";
 import { IUserRepository, IUserService, IUserServiceConstructor } from "./types";
 import { IBcryptService, IJwtService } from "../../../core/security/interfaces";
 import { IUserEntity } from "./types";
 import { ClientErrorFactory } from "../../../core/error/exceptions";
 import { IProfileRepository } from "../profile/types";
-import { UserRole } from "./types";
 
 export class UserService implements IUserService {
     private readonly bcryptService: IBcryptService;
@@ -98,12 +105,27 @@ export class UserService implements IUserService {
                 user_id: dto.data.id,
                 role: "MEMBER",
             });
-            this.profileRepository.save({ user_id: activatedUser.getId(), membership_date: activatedUser.getUpdatedAt()});
+            this.profileRepository.save({
+                user_id: activatedUser.getId(),
+                membership_date: activatedUser.getUpdatedAt(),
+            });
             return this.jwtService.generateJwtToken({
                 email: activatedUser.getEmail(),
                 role: activatedUser.getRole(),
                 id: activatedUser.getId(),
             });
+        } catch (error: unknown) {
+            throw error;
+        }
+    }
+
+    async assign_librarian(dto: AssignLibrarianDto): Promise<void> {
+        try {
+            await this.userRepository.save({
+                email: dto.data.email,
+                role: "LIBRARIAN",
+            });
+            return;
         } catch (error: unknown) {
             throw error;
         }
