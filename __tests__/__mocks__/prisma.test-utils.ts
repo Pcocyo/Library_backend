@@ -131,6 +131,7 @@ export function mk_prismaUserMethod(prisma: PrismaClient) {
         create: mockHelper<UserDto>(prisma.users.create, createDefaultUserDb),
         delete: mockHelper<UserDto>(prisma.users.delete, createDefaultUserDb),
         findUniqueOrThrow: mockHelper<UserDto>(prisma.users.findUniqueOrThrow, createDefaultUserDb),
+        upsert: mockHelper<UserDto>(prisma.users.upsert, createDefaultUserDb),
     };
 }
 

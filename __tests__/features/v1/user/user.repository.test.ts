@@ -3,6 +3,7 @@ import { createMockPrisma, mk_prismaUserMethod } from "../../../__mocks__/prisma
 import { Request } from "express";
 import { ErrorMapperGroup } from "../../../../src/core/error/mappers/ErrorMapperGroup";
 import { getMockCalls, testHaveProperties } from "../../../__helper__/mockHelper";
+import { UserRole } from "../../../../src/features/v1/user/types";
 
 jest.mock("../../../../src/core/error/mappers/ErrorMapperGroup", () => ({
     ErrorMapperGroup: {
@@ -186,9 +187,9 @@ describe("User Repository Unit Test Suite", () => {
         it("repository.updateUser should call prisma.users.update with the correct data", async () => {
             repoInstanceUpdate(false);
             expect(mockedPrismaUserTable.update.getMockfn()).toHaveBeenCalled();
-            testHaveProperties(mockedPrismaUserTable.update.getCalls(),["where","data"]);
-            testHaveProperties(mockedPrismaUserTable.update.getCalls().where,["user_id"]);
-            testHaveProperties(mockedPrismaUserTable.update.getCalls().data, ["email","password","role"])
+            testHaveProperties(mockedPrismaUserTable.update.getCalls(), ["where", "data"]);
+            testHaveProperties(mockedPrismaUserTable.update.getCalls().where, ["user_id"]);
+            testHaveProperties(mockedPrismaUserTable.update.getCalls().data, ["email", "password", "role"]);
             expect(mockedPrismaUserTable.update.getCalls().data.email).toBe(defaultEmailHolder);
             expect(mockedPrismaUserTable.update.getCalls().data.password).toBe(defaultPasswordHolder);
             expect(mockedPrismaUserTable.update.getCalls().data.role).toBe(defaultRoleHolder);
@@ -204,6 +205,67 @@ describe("User Repository Unit Test Suite", () => {
             await expect(repoInstanceUpdate(false)).rejects.toThrow();
             expect(mockedMapError).toHaveBeenCalled();
             expect(getMockCalls(mockedMapError).message).toBe("prisma error");
+        });
+    });
+
+    describe("save()", () => {
+        const data = {
+            email: "dummyEmail",
+            role: "MEMBER",
+            updatedAt: new Date("2022-02-01"),
+            password: "test",
+        };
+        beforeEach(() => {
+            mockedPrismaUserTable.upsert.declareMockResolvedValue();
+        });
+
+        afterEach(() => {
+            mockedPrismaUserTable.upsert.executeClearMock();
+        });
+
+        it("repository.save should call prisma.users.upsert with the correct data", async () => {
+            await repoInstance.save({
+                email: data.email,
+                role: data.role as UserRole,
+                updatedAt: data.updatedAt,
+                password: data.password,
+            });
+            expect(mockedPrismaUserTable.upsert.getMockfn()).toHaveBeenCalled();
+            expect(mockedPrismaUserTable.upsert.getMockfn()).toHaveBeenCalled();
+            testHaveProperties(mockedPrismaUserTable.upsert.getCalls(), ["where", "update", "create"]);
+            testHaveProperties(mockedPrismaUserTable.upsert.getCalls().where, ["email"]);
+            testHaveProperties(mockedPrismaUserTable.upsert.getCalls().update, ["role", "updated_at", "password"]);
+            testHaveProperties(mockedPrismaUserTable.upsert.getCalls().create, [
+                "email",
+                "role",
+                "updated_at",
+                "password",
+            ]);
+
+            expect(mockedPrismaUserTable.upsert.getCalls().where.email).toEqual(data.email);
+
+            expect(mockedPrismaUserTable.upsert.getCalls().update.role).toEqual(data.role);
+            expect(mockedPrismaUserTable.upsert.getCalls().update.updated_at).toEqual(data.updatedAt);
+            expect(mockedPrismaUserTable.upsert.getCalls().update.password).toEqual(data.password);
+
+            expect(mockedPrismaUserTable.upsert.getCalls().create.role).toEqual(data.role);
+            expect(mockedPrismaUserTable.upsert.getCalls().create.updated_at).toEqual(data.updatedAt);
+            expect(mockedPrismaUserTable.upsert.getCalls().create.password).toEqual(data.password);
+            expect(mockedPrismaUserTable.upsert.getCalls().create.email).toEqual(data.email);
+        });
+
+        it("repository.save should call prisma.users.upsert with the correct data", async () => {
+            mockedPrismaUserTable.upsert.setMockResolveError("error");
+            await expect(
+               repoInstance.save({
+                    email: data.email,
+                    role: data.role as UserRole,
+                    updatedAt: data.updatedAt,
+                    password: data.password,
+                }),
+            ).rejects.toThrow();
+            expect(mockedMapError).toHaveBeenCalled();
+            expect(getMockCalls(mockedMapError).message).toBe("error");
         });
     });
 });
