@@ -7,6 +7,7 @@ import {
     createGetByUserDto,
     createDeleteUserDto,
     createActivateMembershipDto,
+    createAssignLibrarianDto,
 } from "../../../__mocks__/request.dto.mock";
 import { testHaveProperties } from "../../../__helper__/mockHelper";
 import { UserService } from "../../../../src/features/v1/user";
@@ -288,6 +289,31 @@ describe("UserService unit test suite", () => {
             await userService.activate_membership(createActivateMembershipDto(data));
             expect(mockedPrismaProfileTable.upsert.getMockfn()).toHaveBeenCalled();
             expect(mockedPrismaProfileTable.upsert.getCalls().update.membership_date).not.toBeUndefined();
+        });
+    });
+
+    describe("assign_librarian()", () => {
+        const data = {
+            email: "dummyEmail",
+        };
+        const auth = {
+            email: "adminEmail",
+            id: "adminId",
+            role: "LIBRARIAN",
+        };
+        beforeEach(() => {
+            mockedPrismaUserTable.upsert.declareMockResolvedValue();
+        });
+
+        afterEach(() => {
+            mockedPrismaUserTable.upsert.executeClearMock();
+        });
+
+        it("Should call userRepository.save with the correct data and update the role to a librarian", async () => {
+            await userService.assign_librarian(createAssignLibrarianDto(auth,data));
+            expect(mockedPrismaUserTable.upsert.getMockfn()).toHaveBeenCalled();
+            expect(mockedPrismaUserTable.upsert.getCalls().where.email).toEqual(data.email);
+            expect(mockedPrismaUserTable.upsert.getCalls().update.role).toEqual("LIBRARIAN");
         });
     });
 });

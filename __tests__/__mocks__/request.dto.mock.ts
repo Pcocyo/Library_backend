@@ -1,4 +1,4 @@
-import { GetUserDto, DeleteUserDto, UpdateUserDto, ActivateMembershipDto } from "../../src/features/v1/user/dto";
+import { GetUserDto, DeleteUserDto, UpdateUserDto, ActivateMembershipDto, AssignLibrarianDto } from "../../src/features/v1/user/dto";
 
 import { GetProfileDto, LibrarianUpdateProfileDto, ProfileUpdateDto } from "../../src/features/v1/profile/dto";
 
@@ -134,7 +134,7 @@ export function createLibrarianProfileDto(
 }
 
 export function createActivateMembershipDto(auth: { email: string; id: string; role: string }) {
-    const request: Partial<Request> = {headers:{},body:{}};
+    const request: Partial<Request> = { headers: {}, body: {} };
     request.body = {
         authorizedUser: {
             email: auth.email,
@@ -142,5 +142,18 @@ export function createActivateMembershipDto(auth: { email: string; id: string; r
             id: auth.id,
         },
     };
-   return ActivateMembershipDto.fromRequest(request as Request);
+    return ActivateMembershipDto.fromRequest(request as Request);
+}
+
+export function createAssignLibrarianDto(auth: { email: string; id: string; role: string }, data: { email: string }) {
+    const request: Partial<Request> = { headers: {}, body: {} };
+    request.body = {
+        authorizedUser: {
+            email: auth.email,
+            role: auth.role,
+            id: auth.id,
+        },
+        email:data.email
+    };
+    return AssignLibrarianDto.fromRequest(request as Request);
 }
