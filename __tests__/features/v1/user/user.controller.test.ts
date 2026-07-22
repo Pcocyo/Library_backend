@@ -370,13 +370,13 @@ describe("UserController unit test suite", () => {
         });
     });
 
-    describe.only("activate_membership", () => {
-        let jwtHelper:any;
+    describe("activate_membership", () => {
+        let jwtHelper: any;
         let express: {
-         response: Partial<Response>,
-         request: Partial<Request>,
-         next: NextFunction,
-      };
+            response: Partial<Response>;
+            request: Partial<Request>;
+            next: NextFunction;
+        };
         let user_id_subscribe = "dummy-id-subscribe";
         let user_email_subscribe = "dummy-email-subscribe";
         let user_role_subscribe = "dummy-role-subscribe";
@@ -393,9 +393,9 @@ describe("UserController unit test suite", () => {
         beforeEach(() => {
             mockPrismaUserTable.update.declareMockResolvedValue();
             mockPrismaUserTable.update.setCustomResolvedvalue({
-               ...mockPrismaUserTable.update.getDefaultResolvedValue(),
-               user_id: user_id_subscribe,
-         });
+                ...mockPrismaUserTable.update.getDefaultResolvedValue(),
+                user_id: user_id_subscribe,
+            });
             mockPrismaProfileTable.upsert.declareMockResolvedValue();
         });
 
@@ -404,17 +404,73 @@ describe("UserController unit test suite", () => {
             mockPrismaProfileTable.upsert.executeClearMock();
         });
 
-        it("Should respond with new token on success", async() => {
-            await userController.activate_membership(express.request as Request, express.response as Response, express.next as NextFunction);
+        it("Should respond with new token on success", async () => {
+            await userController.activate_membership(
+                express.request as Request,
+                express.response as Response,
+                express.next as NextFunction,
+            );
             expect(getMockCalls(express.response.send as jest.Mock)).toHaveProperty("token");
         });
-        
-        it("Should call userService.activate_membership with correct DTO", async() => {
-            await userController.activate_membership(express.request as Request, express.response as Response, express.next as NextFunction);
+
+        it("Should call userService.activate_membership with correct DTO", async () => {
+            await userController.activate_membership(
+                express.request as Request,
+                express.response as Response,
+                express.next as NextFunction,
+            );
             expect(mockPrismaUserTable.update.getMockfn()).toHaveBeenCalled();
             expect(mockPrismaProfileTable.upsert.getMockfn()).toHaveBeenCalled();
-            expect(mockPrismaProfileTable.upsert.getCalls().where.user_id).toEqual(user_id_subscribe)
-            expect(mockPrismaUserTable.update.getCalls().where.user_id).toEqual(user_id_subscribe)
+            expect(mockPrismaProfileTable.upsert.getCalls().where.user_id).toEqual(user_id_subscribe);
+            expect(mockPrismaUserTable.update.getCalls().where.user_id).toEqual(user_id_subscribe);
+        });
+    });
+
+    describe("assign_librarian()", () => {
+        const email = "dummyEmail";
+        let jwtHelper: any;
+        let express: {
+            request: Partial<Request>;
+            response: Partial<Response>;
+            next: NextFunction;
+        };
+        beforeAll(() => {
+            jwtHelper = jwtFakesHelper_fn(jwtService, {
+                email: "adminEmail",
+                id: "adminId",
+                role: "LIBRARIAN",
+            });
+            express = expressHelper({
+                authorizedUser: jwtHelper.getDefaultJwtData(),
+                email: email,
+            }).declareAllExpressPartials();
+        });
+        beforeEach(() => {
+            mockPrismaUserTable.upsert.declareMockResolvedValue();
+        });
+
+        afterEach(() => {
+            mockPrismaUserTable.upsert.executeClearMock();
+        });
+
+        it("Should call userService.assign_librarian with the correct data", async () => {
+            await userController.assign_librarian(
+                express.request as Request,
+                express.response as Response,
+                express.next as NextFunction,
+            );
+            expect(mockPrismaUserTable.upsert.getMockfn()).toHaveBeenCalled();
+            expect(mockPrismaUserTable.upsert.getCalls().where.email).toEqual(email);
+        });
+
+        it("Should respond with success message", async () => {
+            await userController.assign_librarian(
+                express.request as Request,
+                express.response as Response,
+                express.next as NextFunction,
+            );
+            expect(getMockCalls(express.response.send as jest.Mock)).toHaveProperty("message");
+            expect(getMockCalls(express.response.send as jest.Mock).message).toEqual("success");
         });
     });
 });
