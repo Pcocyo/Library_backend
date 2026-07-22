@@ -9,6 +9,7 @@ import {
 } from "./types";
 import { UserEntity } from "./user.entity";
 import { ErrorMapperGroup } from "../../../core/error/mappers";
+import { UserRepoSaveDto } from "./types/user.repository.types";
 
 export class UserRepository implements IUserRepository {
     public readonly prisma: PrismaClient;
@@ -36,9 +37,7 @@ export class UserRepository implements IUserRepository {
             throw ErrorMapperGroup.getInstance().mapError(error);
         }
     }
-    public async getByEmail(
-        parameter: UserRepoGetByEmailDto,
-    ): Promise<IUserEntity> {
+    public async getByEmail(parameter: UserRepoGetByEmailDto): Promise<IUserEntity> {
         try {
             let user = await this.prisma.users.findUniqueOrThrow({
                 where: {
@@ -93,6 +92,29 @@ export class UserRepository implements IUserRepository {
                 role: user.role,
                 created_at: user.created_at as Date,
                 updated_at: user.updated_at as Date,
+            });
+        } catch (error: unknown) {
+            throw ErrorMapperGroup.getInstance().mapError(error);
+        }
+    }
+
+    public async save(parameter: UserRepoSaveDto): Promise<void> {
+        try {
+            await this.prisma.users.upsert({
+                where: {
+                    email: parameter.email,
+                },
+                update: {
+                    role: parameter.role as string,
+                    password: parameter.password as string,
+                    updated_at: parameter.updatedAt,
+                },
+                create: {
+                    email: parameter.email,
+                    role: parameter.role as string,
+                    password: parameter.password as string,
+                    updated_at: parameter.updatedAt,
+                },
             });
         } catch (error: unknown) {
             throw ErrorMapperGroup.getInstance().mapError(error);

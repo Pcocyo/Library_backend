@@ -1,3 +1,5 @@
+import { UserRole } from "./user.entity.types";
+
 export type UserRepoCreateDto = {
     email: string;
     password: string;
@@ -16,5 +18,12 @@ export type UserRepoUpdateDto = {
     user_id: string;
     email?: string;
     password?: string;
-    role?: string;
+    role?: UserRole;
 };
+
+export type UserRepoSaveDto = {
+   email:string;
+   password?:string | null;
+   role?:UserRole | null;
+   updatedAt?:Date | null;
+}
