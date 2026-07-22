@@ -7,4 +7,5 @@ export interface IUserController{
   getUser(req:Request,res:Response,next:NextFunction): Promise<void>;
   deleteUser(req:Request,res:Response,next:NextFunction): Promise<void>;
   activate_membership(req:Request,res:Response,next:NextFunction): Promise<void>;
+  assign_librarian(req:Request,res:Response,next:NextFunction): Promise<void>;
 }
