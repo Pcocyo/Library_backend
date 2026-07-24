@@ -56,10 +56,17 @@ export class UserRouter extends BaseRouter {
             this.validationMiddleware.validate(UpdateUserRequestSchema),
             this.userController.updateUser,
         );
+
        this.router.put(
          "/subscribe",
          this.authMiddleware.CreateValidateTokenMiddleware({option:{required_role:"GUEST"}}),
          this.userController.activate_membership
+      )
+
+      this.router.put(
+         "/assignLibrarian",
+         this.authMiddleware.CreateValidateTokenMiddleware({option:{required_role:"LIBRARIAN"}}),
+         this.userController.assign_librarian
       )
     }
 }
