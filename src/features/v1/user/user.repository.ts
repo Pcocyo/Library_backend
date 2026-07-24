@@ -112,8 +112,8 @@ export class UserRepository implements IUserRepository {
                 create: {
                     email: parameter.email,
                     role: parameter.role as string,
-                    password: parameter.password as string,
-                    updated_at: parameter.updatedAt,
+                    password: parameter.password || "Temp" as string,
+                    updated_at: new Date(),
                 },
             });
         } catch (error: unknown) {
