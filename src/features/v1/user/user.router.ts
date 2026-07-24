@@ -1,5 +1,6 @@
 import { BaseRouter } from "../../../core/base/base.router";
 import {
+    AssignLibrarianRequestSchema,
     CreateUserRequestSchema,
     GetUserRequestSchema,
     LoginUserRequestSchema,
@@ -66,6 +67,7 @@ export class UserRouter extends BaseRouter {
       this.router.put(
          "/assignLibrarian",
          this.authMiddleware.CreateValidateTokenMiddleware({option:{required_role:"LIBRARIAN"}}),
+         this.validationMiddleware.validate(AssignLibrarianRequestSchema),
          this.userController.assign_librarian
       )
     }

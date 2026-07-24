@@ -48,3 +48,10 @@ export const UpdateUserRequestSchema = z.object({
         )
         .nullable(),
 });
+
+
+export const AssignLibrarianRequestSchema = z.object({
+    email: z
+        .string("Invalid email input format")
+        .email("Invalid email input format"),
+});
